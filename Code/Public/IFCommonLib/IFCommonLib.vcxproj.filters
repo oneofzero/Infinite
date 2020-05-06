@@ -1,0 +1,759 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="FileSystem">
+      <UniqueIdentifier>{073fc34c-2ce9-49b2-8117-8adabf757710}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net">
+      <UniqueIdentifier>{50a11721-0913-469c-aee2-c1e3fcd26a71}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Logger">
+      <UniqueIdentifier>{7f33f8d7-d5fe-4608-9641-015ab9dac4f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\NamedPipe">
+      <UniqueIdentifier>{49ce7557-cfe0-4adf-8b79-f09f06c332e7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encrypt">
+      <UniqueIdentifier>{7df8b74b-3e3a-4630-b54e-9ff0a6cd4a76}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math">
+      <UniqueIdentifier>{6d5f15e7-71a4-418d-830b-a78d2ef6d3aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileSystem\Package">
+      <UniqueIdentifier>{5d317280-05dd-469d-a3ca-be56c8e53a75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Attribute">
+      <UniqueIdentifier>{ae6aff9b-65d6-45ef-ae5a-fcbb21695252}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="RefObject">
+      <UniqueIdentifier>{f7fa0d6c-4273-4336-859c-4cbe4e05a559}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="System">
+      <UniqueIdentifier>{78cc961c-e7f5-436c-a73f-198c3e704f43}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\ServerFrame">
+      <UniqueIdentifier>{cb052306-0c74-4fd4-9c81-a1d864aa5fe8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FSM">
+      <UniqueIdentifier>{84e0ef95-fa64-4922-a62d-49b0d15696d3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Navigation">
+      <UniqueIdentifier>{b20a4ebe-d36d-4bc6-a246-6640f559629f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encrypt\RSA">
+      <UniqueIdentifier>{496f3818-4c69-47fc-a2b4-c5c82879948d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\Win32">
+      <UniqueIdentifier>{27d3d2ef-9ea7-4a51-b1d9-3fbc8e1a08a1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\AllPlatform">
+      <UniqueIdentifier>{cd29ca0e-c983-4512-a577-3ae0ff7515bf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\LINUX">
+      <UniqueIdentifier>{154eab6a-3d1f-49d4-878a-cf7dfff21e75}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Encrypt\AES">
+      <UniqueIdentifier>{f0e8cfed-a9bb-499f-b563-7a972dba47b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib">
+      <UniqueIdentifier>{526ecf1a-342f-4a2e-9d4c-32d6e2406fca}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="zlib\minzip">
+      <UniqueIdentifier>{ed12a661-f36b-44b3-ae40-bc65d3d9dfc4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="android">
+      <UniqueIdentifier>{e01eb175-ffb7-4483-a948-f3ff084dbcf3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Math\Memory">
+      <UniqueIdentifier>{6ac94f5d-6602-4e0a-9352-aada9e57d544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Net\RedisClient">
+      <UniqueIdentifier>{66a222d3-440d-41ac-9e52-f6ecbd2bda97}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFArray.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFCommonLib.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFunctor.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFImageCodecMgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFList.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMap.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFProfile.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRBTree.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFSet.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFStackDumper.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFString.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFTypes.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFUtility.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFileStream.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFileSystem.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMemStream.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFStream.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFWeakPtr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetConnection.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetCore.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="IFGlobalObject.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFIFOStream.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFilePackage.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFThread.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFPipeCore.cpp">
+      <Filter>Net\NamedPipe</Filter>
+    </ClCompile>
+    <ClCompile Include="IFPipe.cpp">
+      <Filter>Net\NamedPipe</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMD5.cpp">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMath.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAttributeSet.cpp">
+      <Filter>Attribute</Filter>
+    </ClCompile>
+    <ClCompile Include="IFSuperAttrMgr.cpp">
+      <Filter>Attribute</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMemPool.cpp">
+      <Filter>Math\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAlloc.cpp">
+      <Filter>Math\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRefObj.cpp">
+      <Filter>RefObject</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRefPtr.cpp">
+      <Filter>RefObject</Filter>
+    </ClCompile>
+    <ClCompile Include="IFObjectFactory.cpp">
+      <Filter>RefObject</Filter>
+    </ClCompile>
+    <ClCompile Include="IFObj.cpp">
+      <Filter>Math\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAttributeMgr.cpp">
+      <Filter>Attribute</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAttribute.cpp">
+      <Filter>Attribute</Filter>
+    </ClCompile>
+    <ClCompile Include="IFSystemAPI.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFileInfo.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFTimer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFServerFrame.cpp">
+      <Filter>Net\ServerFrame</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetMsgFactory.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="androidwcs.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFileProvider.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFIDAllocator.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFStateMgr.cpp">
+      <Filter>FSM</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNaviCell.cpp">
+      <Filter>Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNavigation.cpp">
+      <Filter>Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNaviPath.cpp">
+      <Filter>Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\desc.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\digit.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\md2c.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\md5c.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\nn.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\prime.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_dh.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_encode.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_enhanc.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_keygen.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_random.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\r_stdlib.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="rsa\rsa.c">
+      <Filter>Encrypt\RSA</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRSA.cpp">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAnyBasic.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAsyncTaskMgr.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetIOData.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetCoreIOCP.cpp">
+      <Filter>Net\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetCoreSelect.cpp">
+      <Filter>Net\AllPlatform</Filter>
+    </ClCompile>
+    <ClCompile Include="CrashDump.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFHttpDownloader.cpp">
+      <Filter>Net</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetCoreEPOLL.cpp">
+      <Filter>Net\LINUX</Filter>
+    </ClCompile>
+    <ClCompile Include="IFGUID.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFDateTime.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="aes\crypt_aes.c">
+      <Filter>Encrypt\AES</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAES.cpp">
+      <Filter>Encrypt</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFixNumber.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRandom.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFJSON.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\adler32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\compress.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\crc32.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\deflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\infback.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inffast.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inflate.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\inftrees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\trees.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\uncompr.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zutil.c">
+      <Filter>zlib</Filter>
+    </ClCompile>
+    <ClCompile Include="IFCompress.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\unzip.c">
+      <Filter>zlib\minzip</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\zip.c">
+      <Filter>zlib\minzip</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\mztools.c">
+      <Filter>zlib\minzip</Filter>
+    </ClCompile>
+    <ClCompile Include="zlib\ioapi.c">
+      <Filter>zlib\minzip</Filter>
+    </ClCompile>
+    <ClCompile Include="IFCoroutine.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRedis.cpp">
+      <Filter>Net\RedisClient</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAPKFileProvider.cpp">
+      <Filter>android</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAStar.cpp">
+      <Filter>Navigation</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMobileDevice.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFFT.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFThreadSyncObj.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFZipFileProvider.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFSHA.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFComPort.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNumParse.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFRemoteLogStream.cpp">
+      <Filter>Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="IFLogSystem.cpp">
+      <Filter>Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNumArray.cpp">
+      <Filter>Math</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="IFArray.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCommonLib_API.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCSLockHelper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFunctor.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFImageCodecMgr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFLerp.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFProfile.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRBTree.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRect.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRTTI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ifsingleton.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSort.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFStackDumper.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFString.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFUtility.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileStream.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileSystem.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMemStream.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFStream.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFWeakPtr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetConnection.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetCore.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetGlobalDefine.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFEventSlot.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFBaseTypeDefine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="iftypes.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFIFOStream.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFilePackage.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFThread.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFPipeCore.h">
+      <Filter>Net\NamedPipe</Filter>
+    </ClInclude>
+    <ClInclude Include="IFPipe.h">
+      <Filter>Net\NamedPipe</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMD5.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMath.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileMappingList.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAttributeSet.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSuperAttrMgr.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCommonLib.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMemPool.h">
+      <Filter>Math\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAlloc.h">
+      <Filter>Math\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRefObj.h">
+      <Filter>RefObject</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRefPtr.h">
+      <Filter>RefObject</Filter>
+    </ClInclude>
+    <ClInclude Include="IFObjectFactory.h">
+      <Filter>RefObject</Filter>
+    </ClInclude>
+    <ClInclude Include="ifobj.h">
+      <Filter>Math\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAttributeMgr.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAttribute.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSystemAPI.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileInfo.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFTimer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFServerFrame.h">
+      <Filter>Net\ServerFrame</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetMsgFactory.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFParamsMacro.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFEventSlotSpec.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="androidwcs.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileProvider.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFIDAllocator.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFStateMgr.h">
+      <Filter>FSM</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNaviCell.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNavigation.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNaviPath.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRSA.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAnyBasic.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAsyncTaskMgr.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetIOData.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetCoreIOCP.h">
+      <Filter>Net\Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetCoreSelect.h">
+      <Filter>Net\AllPlatform</Filter>
+    </ClInclude>
+    <ClInclude Include="CrashDump.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFQueue.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAtomicOperation.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFPlatformDefine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFHttpDownloader.h">
+      <Filter>Net</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetCoreEPOLL.h">
+      <Filter>Net\LINUX</Filter>
+    </ClInclude>
+    <ClInclude Include="IFGUID.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFDateTime.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="aes\crypt_aes.h">
+      <Filter>Encrypt\AES</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAES.h">
+      <Filter>Encrypt</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFixNumber.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRandom.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFJSON.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFContainerSerialize.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCompress.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\unzip.h">
+      <Filter>zlib\minzip</Filter>
+    </ClInclude>
+    <ClInclude Include="zlib\zip.h">
+      <Filter>zlib\minzip</Filter>
+    </ClInclude>
+    <ClInclude Include="IFHashSet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCoroutine.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRedis.h">
+      <Filter>Net\RedisClient</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAPKFileProvider.h">
+      <Filter>android</Filter>
+    </ClInclude>
+    <ClInclude Include="IFTFunction.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAStar.h">
+      <Filter>Navigation</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSerialize.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFunctorDefaultParamSpec.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFunctorDefaultParamImp.h">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMobileDevice.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFFT.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFunExistTask.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMakeJSONNode.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNodeObj.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFThreadSyncObj.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFZipFileProvider.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFBinSearch.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFHashMap.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSHA.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFComPort.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFRemoteLogStream.h">
+      <Filter>Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="IFLogSystem.h">
+      <Filter>Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNumArray.h">
+      <Filter>Math</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ReadMe.txt" />
+    <None Include="IFCoroutineWaitEvent.inl">
+      <Filter>头文件</Filter>
+    </None>
+  </ItemGroup>
+</Project>

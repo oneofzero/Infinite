@@ -1,0 +1,25 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "13c22eeb-1e88-1047-bd94-7dc00a207926++3519",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+    "13c22eeb-1e88-1047-bd94-7dc00a207926++3519" : {
+
+    }
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "13c22eeb-1e88-1047-bd94-7dc00a207926++3519" : 9223372036854775807
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "52DAD473-8926-4112-BA9B-28727A56FC1C",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "13c22eeb-1e88-1047-bd94-7dc00a207926++3519" : "Code\/"
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "crypto",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "3rdbuild\/openssl\/crypto\/crypto.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/www.oneofzero.com:18686\/svn\/infinite",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Subversion",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "13c22eeb-1e88-1047-bd94-7dc00a207926++3519"
+    }
+  ]
+}

@@ -1,0 +1,1327 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		07C4A3C01919237100229F4A /* r_encode.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCA1907A83600BC5A3F /* r_encode.c */; };
+		07C4A3C11919237100229F4A /* IFSystemAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAD1907A83600BC5A3F /* IFSystemAPI.cpp */; };
+		07C4A3C21919237100229F4A /* IFTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB11907A83600BC5A3F /* IFTimer.cpp */; };
+		07C4A3C31919237100229F4A /* IFHttpDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5A1907A83600BC5A3F /* IFHttpDownloader.cpp */; };
+		07C4A3C41919237100229F4A /* IFFileInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F461907A83600BC5A3F /* IFFileInfo.cpp */; };
+		07C4A3C51919237100229F4A /* desc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBC1907A83600BC5A3F /* desc.c */; };
+		07C4A3C61919237100229F4A /* IFGUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F581907A83600BC5A3F /* IFGUID.cpp */; };
+		07C4A3C71919237100229F4A /* IFRefObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F941907A83600BC5A3F /* IFRefObj.cpp */; };
+		07C4A3C81919237100229F4A /* digit.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBD1907A83600BC5A3F /* digit.c */; };
+		07C4A3C91919237100229F4A /* IFGlobalObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F571907A83600BC5A3F /* IFGlobalObject.cpp */; };
+		07C4A3CA1919237100229F4A /* IFFilePackage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F491907A83600BC5A3F /* IFFilePackage.cpp */; };
+		07C4A3CB1919237100229F4A /* IFDateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F401907A83600BC5A3F /* IFDateTime.cpp */; };
+		07C4A3CC1919237100229F4A /* IFString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA91907A83600BC5A3F /* IFString.cpp */; };
+		07C4A3CD1919237100229F4A /* prime.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC71907A83600BC5A3F /* prime.c */; };
+		07C4A3CE1919237100229F4A /* r_stdlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCF1907A83600BC5A3F /* r_stdlib.c */; };
+		07C4A3CF1919237100229F4A /* IFMemStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6D1907A83600BC5A3F /* IFMemStream.cpp */; };
+		07C4A3D01919237100229F4A /* IFWeakPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB71907A83600BC5A3F /* IFWeakPtr.cpp */; };
+		07C4A3D11919237100229F4A /* IFImageCodecMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5E1907A83600BC5A3F /* IFImageCodecMgr.cpp */; };
+		07C4A3D21919237100229F4A /* IFSuperAttrMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAB1907A83600BC5A3F /* IFSuperAttrMgr.cpp */; };
+		07C4A3D31919237100229F4A /* IFRBTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F911907A83600BC5A3F /* IFRBTree.cpp */; };
+		07C4A3D41919237100229F4A /* r_enhanc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCB1907A83600BC5A3F /* r_enhanc.c */; };
+		07C4A3D51919237100229F4A /* IFMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F651907A83600BC5A3F /* IFMap.cpp */; };
+		07C4A3D61919237100229F4A /* IFProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F8E1907A83600BC5A3F /* IFProfile.cpp */; };
+		07C4A3D71919237100229F4A /* rijndael-alg-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1A1907A83600BC5A3F /* rijndael-alg-fst.c */; };
+		07C4A3D81919237100229F4A /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD31907A83600BC5A3F /* stdafx.cpp */; };
+		07C4A3D91919237100229F4A /* md2c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC21907A83600BC5A3F /* md2c.c */; };
+		07C4A3DA1919237100229F4A /* rsa.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD01907A83600BC5A3F /* rsa.c */; };
+		07C4A3DB1919237100229F4A /* IFAttributeMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F321907A83600BC5A3F /* IFAttributeMgr.cpp */; };
+		07C4A3DC1919237100229F4A /* IFFunctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F511907A83600BC5A3F /* IFFunctor.cpp */; };
+		07C4A3DD1919237100229F4A /* IFFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4D1907A83600BC5A3F /* IFFileStream.cpp */; };
+		07C4A3DE1919237100229F4A /* IFRefPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F961907A83600BC5A3F /* IFRefPtr.cpp */; };
+		07C4A3DF1919237100229F4A /* IFFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4B1907A83600BC5A3F /* IFFileProvider.cpp */; };
+		07C4A3E01919237100229F4A /* IFSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9F1907A83600BC5A3F /* IFSet.cpp */; };
+		07C4A3E11919237100229F4A /* IFAES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F251907A83600BC5A3F /* IFAES.cpp */; };
+		07C4A3E21919237100229F4A /* IFList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F611907A83600BC5A3F /* IFList.cpp */; };
+		07C4A3E31919237100229F4A /* IFArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2B1907A83600BC5A3F /* IFArray.cpp */; };
+		07C4A3E41919237100229F4A /* IFObjectFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F861907A83600BC5A3F /* IFObjectFactory.cpp */; };
+		07C4A3E51919237100229F4A /* IFStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA71907A83600BC5A3F /* IFStream.cpp */; };
+		07C4A3E61919237100229F4A /* IFLogSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F631907A83600BC5A3F /* IFLogSystem.cpp */; };
+		07C4A3E71919237100229F4A /* IFFileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4F1907A83600BC5A3F /* IFFileSystem.cpp */; };
+		07C4A3E81919237100229F4A /* IFNavigation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F711907A83600BC5A3F /* IFNavigation.cpp */; };
+		07C4A3E91919237100229F4A /* IFPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F891907A83600BC5A3F /* IFPipe.cpp */; };
+		07C4A3EA1919237100229F4A /* IFRSA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9A1907A83600BC5A3F /* IFRSA.cpp */; };
+		07C4A3EB1919237100229F4A /* IFAnyBasic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F291907A83600BC5A3F /* IFAnyBasic.cpp */; };
+		07C4A3EC1919237100229F4A /* IFThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAF1907A83600BC5A3F /* IFThread.cpp */; };
+		07C4A3ED1919237100229F4A /* IFNetCoreSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F7D1907A83600BC5A3F /* IFNetCoreSelect.cpp */; };
+		07C4A3EE1919237100229F4A /* IFNaviPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F731907A83600BC5A3F /* IFNaviPath.cpp */; };
+		07C4A3EF1919237100229F4A /* IFMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F671907A83600BC5A3F /* IFMath.cpp */; };
+		07C4A3F01919237100229F4A /* IFTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB31907A83600BC5A3F /* IFTypes.cpp */; };
+		07C4A3F11919237100229F4A /* rijndael-api-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1C1907A83600BC5A3F /* rijndael-api-fst.c */; };
+		07C4A3F21919237100229F4A /* IFNetConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F751907A83600BC5A3F /* IFNetConnection.cpp */; };
+		07C4A3F31919237100229F4A /* IFMD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F691907A83600BC5A3F /* IFMD5.cpp */; };
+		07C4A3F41919237100229F4A /* IFNetIOData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F801907A83600BC5A3F /* IFNetIOData.cpp */; };
+		07C4A3F51919237100229F4A /* crypt_aes.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F181907A83600BC5A3F /* crypt_aes.c */; };
+		07C4A3F61919237100229F4A /* md5c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC41907A83600BC5A3F /* md5c.c */; };
+		07C4A3F71919237100229F4A /* IFNetMsgFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F821907A83600BC5A3F /* IFNetMsgFactory.cpp */; };
+		07C4A3F81919237100229F4A /* IFNetCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F771907A83600BC5A3F /* IFNetCore.cpp */; };
+		07C4A3F91919237100229F4A /* IFFIFOStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F441907A83600BC5A3F /* IFFIFOStream.cpp */; };
+		07C4A3FA1919237100229F4A /* r_keygen.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCC1907A83600BC5A3F /* r_keygen.c */; };
+		07C4A3FB1919237100229F4A /* nn.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC51907A83600BC5A3F /* nn.c */; };
+		07C4A3FC1919237100229F4A /* IFAsyncTaskMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2D1907A83600BC5A3F /* IFAsyncTaskMgr.cpp */; };
+		07C4A3FD1919237100229F4A /* androidwcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1E1907A83600BC5A3F /* androidwcs.cpp */; };
+		07C4A3FE1919237100229F4A /* IFIDAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5C1907A83600BC5A3F /* IFIDAllocator.cpp */; };
+		07C4A3FF1919237100229F4A /* IFAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F301907A83600BC5A3F /* IFAttribute.cpp */; };
+		07C4A4001919237100229F4A /* IFStateMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA51907A83600BC5A3F /* IFStateMgr.cpp */; };
+		07C4A4011919237100229F4A /* IFNaviCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6F1907A83600BC5A3F /* IFNaviCell.cpp */; };
+		07C4A4021919237100229F4A /* r_dh.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC91907A83600BC5A3F /* r_dh.c */; };
+		07C4A4031919237100229F4A /* IFUtility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB51907A83600BC5A3F /* IFUtility.cpp */; };
+		07C4A4041919237100229F4A /* IFMemPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6B1907A83600BC5A3F /* IFMemPool.cpp */; };
+		07C4A4051919237100229F4A /* IFServerFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9D1907A83600BC5A3F /* IFServerFrame.cpp */; };
+		07C4A4061919237100229F4A /* IFAttributeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F341907A83600BC5A3F /* IFAttributeSet.cpp */; };
+		07C4A4071919237100229F4A /* IFAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F271907A83600BC5A3F /* IFAlloc.cpp */; };
+		07C4A4081919237100229F4A /* r_random.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCD1907A83600BC5A3F /* r_random.c */; };
+		07C4A4091919237100229F4A /* ifobj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F841907A83600BC5A3F /* ifobj.cpp */; };
+		07C4A40A1919237100229F4A /* IFCommonLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F3A1907A83600BC5A3F /* IFCommonLib.cpp */; };
+		07C4A40C1919237100229F4A /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A49D2EF01907A6C300BC5A3F /* Foundation.framework */; };
+		4F3A13CE1AA9A7300034BCA1 /* IFCoroutine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */; };
+		4F3A13CF1AA9A7300034BCA1 /* IFCoroutine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */; };
+		4F55FADD1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */; };
+		4F55FADE1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */; };
+		78FCAF151B1FEBA10018DDA0 /* IFAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */; };
+		78FCAF161B1FEBA10018DDA0 /* IFAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */; };
+		8A07751523F3E61900CC1FF3 /* IFNumParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */; };
+		8A2F34611937703C00C65AC4 /* IFFixNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */; };
+		8A2F34621937703C00C65AC4 /* IFFixNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */; };
+		8A2F34651937704B00C65AC4 /* IFRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F34631937704B00C65AC4 /* IFRandom.cpp */; };
+		8A2F34661937704B00C65AC4 /* IFRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F34631937704B00C65AC4 /* IFRandom.cpp */; };
+		8A4E924E20D71C3700BD93BF /* IFFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924B20D71C3600BD93BF /* IFFFT.cpp */; };
+		8A4E924F20D71C3700BD93BF /* IFFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924B20D71C3600BD93BF /* IFFFT.cpp */; };
+		8A4E925020D71C3700BD93BF /* IFSHA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924C20D71C3600BD93BF /* IFSHA.cpp */; };
+		8A4E925120D71C3700BD93BF /* IFSHA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924C20D71C3600BD93BF /* IFSHA.cpp */; };
+		8A4E925220D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */; };
+		8A4E925320D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */; };
+		A41EF0A41DE67EA80035BD12 /* IFThreadSyncObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */; };
+		A43BD35B195D272000CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD359195D272000CB8867 /* IFJSON.cpp */; };
+		A43BD35E1965492300CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD35C1965492300CB8867 /* IFJSON.cpp */; };
+		A43BD35F1965492300CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD35C1965492300CB8867 /* IFJSON.cpp */; };
+		A49D2EF11907A6C300BC5A3F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A49D2EF01907A6C300BC5A3F /* Foundation.framework */; };
+		A49D2FD81907A83600BC5A3F /* crypt_aes.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F181907A83600BC5A3F /* crypt_aes.c */; };
+		A49D2FD91907A83600BC5A3F /* rijndael-alg-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1A1907A83600BC5A3F /* rijndael-alg-fst.c */; };
+		A49D2FDA1907A83600BC5A3F /* rijndael-api-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1C1907A83600BC5A3F /* rijndael-api-fst.c */; };
+		A49D2FDB1907A83600BC5A3F /* androidwcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1E1907A83600BC5A3F /* androidwcs.cpp */; };
+		A49D2FDE1907A83600BC5A3F /* IFAES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F251907A83600BC5A3F /* IFAES.cpp */; };
+		A49D2FDF1907A83600BC5A3F /* IFAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F271907A83600BC5A3F /* IFAlloc.cpp */; };
+		A49D2FE01907A83600BC5A3F /* IFAnyBasic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F291907A83600BC5A3F /* IFAnyBasic.cpp */; };
+		A49D2FE11907A83600BC5A3F /* IFArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2B1907A83600BC5A3F /* IFArray.cpp */; };
+		A49D2FE21907A83600BC5A3F /* IFAsyncTaskMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2D1907A83600BC5A3F /* IFAsyncTaskMgr.cpp */; };
+		A49D2FE31907A83600BC5A3F /* IFAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F301907A83600BC5A3F /* IFAttribute.cpp */; };
+		A49D2FE41907A83600BC5A3F /* IFAttributeMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F321907A83600BC5A3F /* IFAttributeMgr.cpp */; };
+		A49D2FE51907A83600BC5A3F /* IFAttributeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F341907A83600BC5A3F /* IFAttributeSet.cpp */; };
+		A49D2FE61907A83600BC5A3F /* IFCommonLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F3A1907A83600BC5A3F /* IFCommonLib.cpp */; };
+		A49D2FE71907A83600BC5A3F /* IFDateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F401907A83600BC5A3F /* IFDateTime.cpp */; };
+		A49D2FE81907A83600BC5A3F /* IFFIFOStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F441907A83600BC5A3F /* IFFIFOStream.cpp */; };
+		A49D2FE91907A83600BC5A3F /* IFFileInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F461907A83600BC5A3F /* IFFileInfo.cpp */; };
+		A49D2FEA1907A83600BC5A3F /* IFFilePackage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F491907A83600BC5A3F /* IFFilePackage.cpp */; };
+		A49D2FEB1907A83600BC5A3F /* IFFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4B1907A83600BC5A3F /* IFFileProvider.cpp */; };
+		A49D2FEC1907A83600BC5A3F /* IFFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4D1907A83600BC5A3F /* IFFileStream.cpp */; };
+		A49D2FED1907A83600BC5A3F /* IFFileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4F1907A83600BC5A3F /* IFFileSystem.cpp */; };
+		A49D2FEE1907A83600BC5A3F /* IFFunctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F511907A83600BC5A3F /* IFFunctor.cpp */; };
+		A49D2FEF1907A83600BC5A3F /* IFGlobalObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F571907A83600BC5A3F /* IFGlobalObject.cpp */; };
+		A49D2FF01907A83600BC5A3F /* IFGUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F581907A83600BC5A3F /* IFGUID.cpp */; };
+		A49D2FF11907A83600BC5A3F /* IFHttpDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5A1907A83600BC5A3F /* IFHttpDownloader.cpp */; };
+		A49D2FF21907A83600BC5A3F /* IFIDAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5C1907A83600BC5A3F /* IFIDAllocator.cpp */; };
+		A49D2FF31907A83600BC5A3F /* IFImageCodecMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5E1907A83600BC5A3F /* IFImageCodecMgr.cpp */; };
+		A49D2FF41907A83600BC5A3F /* IFList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F611907A83600BC5A3F /* IFList.cpp */; };
+		A49D2FF51907A83600BC5A3F /* IFLogSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F631907A83600BC5A3F /* IFLogSystem.cpp */; };
+		A49D2FF61907A83600BC5A3F /* IFMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F651907A83600BC5A3F /* IFMap.cpp */; };
+		A49D2FF71907A83600BC5A3F /* IFMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F671907A83600BC5A3F /* IFMath.cpp */; };
+		A49D2FF81907A83600BC5A3F /* IFMD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F691907A83600BC5A3F /* IFMD5.cpp */; };
+		A49D2FF91907A83600BC5A3F /* IFMemPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6B1907A83600BC5A3F /* IFMemPool.cpp */; };
+		A49D2FFA1907A83600BC5A3F /* IFMemStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6D1907A83600BC5A3F /* IFMemStream.cpp */; };
+		A49D2FFB1907A83600BC5A3F /* IFNaviCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6F1907A83600BC5A3F /* IFNaviCell.cpp */; };
+		A49D2FFC1907A83600BC5A3F /* IFNavigation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F711907A83600BC5A3F /* IFNavigation.cpp */; };
+		A49D2FFD1907A83600BC5A3F /* IFNaviPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F731907A83600BC5A3F /* IFNaviPath.cpp */; };
+		A49D2FFE1907A83600BC5A3F /* IFNetConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F751907A83600BC5A3F /* IFNetConnection.cpp */; };
+		A49D2FFF1907A83600BC5A3F /* IFNetCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F771907A83600BC5A3F /* IFNetCore.cpp */; };
+		A49D30021907A83600BC5A3F /* IFNetCoreSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F7D1907A83600BC5A3F /* IFNetCoreSelect.cpp */; };
+		A49D30031907A83600BC5A3F /* IFNetIOData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F801907A83600BC5A3F /* IFNetIOData.cpp */; };
+		A49D30041907A83600BC5A3F /* IFNetMsgFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F821907A83600BC5A3F /* IFNetMsgFactory.cpp */; };
+		A49D30051907A83600BC5A3F /* ifobj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F841907A83600BC5A3F /* ifobj.cpp */; };
+		A49D30061907A83600BC5A3F /* IFObjectFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F861907A83600BC5A3F /* IFObjectFactory.cpp */; };
+		A49D30071907A83600BC5A3F /* IFPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F891907A83600BC5A3F /* IFPipe.cpp */; };
+		A49D30091907A83600BC5A3F /* IFProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F8E1907A83600BC5A3F /* IFProfile.cpp */; };
+		A49D300A1907A83600BC5A3F /* IFRBTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F911907A83600BC5A3F /* IFRBTree.cpp */; };
+		A49D300B1907A83600BC5A3F /* IFRefObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F941907A83600BC5A3F /* IFRefObj.cpp */; };
+		A49D300C1907A83600BC5A3F /* IFRefPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F961907A83600BC5A3F /* IFRefPtr.cpp */; };
+		A49D300D1907A83600BC5A3F /* IFRSA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9A1907A83600BC5A3F /* IFRSA.cpp */; };
+		A49D300E1907A83600BC5A3F /* IFServerFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9D1907A83600BC5A3F /* IFServerFrame.cpp */; };
+		A49D300F1907A83600BC5A3F /* IFSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9F1907A83600BC5A3F /* IFSet.cpp */; };
+		A49D30111907A83600BC5A3F /* IFStateMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA51907A83600BC5A3F /* IFStateMgr.cpp */; };
+		A49D30121907A83600BC5A3F /* IFStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA71907A83600BC5A3F /* IFStream.cpp */; };
+		A49D30131907A83600BC5A3F /* IFString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA91907A83600BC5A3F /* IFString.cpp */; };
+		A49D30141907A83600BC5A3F /* IFSuperAttrMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAB1907A83600BC5A3F /* IFSuperAttrMgr.cpp */; };
+		A49D30151907A83600BC5A3F /* IFSystemAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAD1907A83600BC5A3F /* IFSystemAPI.cpp */; };
+		A49D30161907A83600BC5A3F /* IFThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAF1907A83600BC5A3F /* IFThread.cpp */; };
+		A49D30171907A83600BC5A3F /* IFTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB11907A83600BC5A3F /* IFTimer.cpp */; };
+		A49D30181907A83600BC5A3F /* IFTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB31907A83600BC5A3F /* IFTypes.cpp */; };
+		A49D30191907A83600BC5A3F /* IFUtility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB51907A83600BC5A3F /* IFUtility.cpp */; };
+		A49D301A1907A83600BC5A3F /* IFWeakPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB71907A83600BC5A3F /* IFWeakPtr.cpp */; };
+		A49D301B1907A83600BC5A3F /* desc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBC1907A83600BC5A3F /* desc.c */; };
+		A49D301C1907A83600BC5A3F /* digit.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBD1907A83600BC5A3F /* digit.c */; };
+		A49D301E1907A83600BC5A3F /* md2c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC21907A83600BC5A3F /* md2c.c */; };
+		A49D301F1907A83600BC5A3F /* md5c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC41907A83600BC5A3F /* md5c.c */; };
+		A49D30201907A83600BC5A3F /* nn.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC51907A83600BC5A3F /* nn.c */; };
+		A49D30211907A83600BC5A3F /* prime.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC71907A83600BC5A3F /* prime.c */; };
+		A49D30221907A83600BC5A3F /* r_dh.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC91907A83600BC5A3F /* r_dh.c */; };
+		A49D30231907A83600BC5A3F /* r_encode.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCA1907A83600BC5A3F /* r_encode.c */; };
+		A49D30241907A83600BC5A3F /* r_enhanc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCB1907A83600BC5A3F /* r_enhanc.c */; };
+		A49D30251907A83600BC5A3F /* r_keygen.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCC1907A83600BC5A3F /* r_keygen.c */; };
+		A49D30261907A83600BC5A3F /* r_random.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCD1907A83600BC5A3F /* r_random.c */; };
+		A49D30271907A83600BC5A3F /* r_stdlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCF1907A83600BC5A3F /* r_stdlib.c */; };
+		A49D30281907A83600BC5A3F /* rsa.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD01907A83600BC5A3F /* rsa.c */; };
+		A49D30291907A83600BC5A3F /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD31907A83600BC5A3F /* stdafx.cpp */; };
+		A4BF699F1A19D8F50001C966 /* IFCompress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4BF699D1A19D8F50001C966 /* IFCompress.cpp */; };
+		A4BF69A01A19D8FE0001C966 /* IFCompress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4BF699D1A19D8F50001C966 /* IFCompress.cpp */; };
+		A4C7EE791A3163F100237415 /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE681A3163F100237415 /* adler32.c */; };
+		A4C7EE7A1A3163F100237415 /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE681A3163F100237415 /* adler32.c */; };
+		A4C7EE7B1A3163F100237415 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE691A3163F100237415 /* compress.c */; };
+		A4C7EE7C1A3163F100237415 /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE691A3163F100237415 /* compress.c */; };
+		A4C7EE7D1A3163F100237415 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6A1A3163F100237415 /* crc32.c */; };
+		A4C7EE7E1A3163F100237415 /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6A1A3163F100237415 /* crc32.c */; };
+		A4C7EE7F1A3163F100237415 /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6B1A3163F100237415 /* deflate.c */; };
+		A4C7EE801A3163F100237415 /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6B1A3163F100237415 /* deflate.c */; };
+		A4C7EE831A3163F100237415 /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6D1A3163F100237415 /* infback.c */; };
+		A4C7EE841A3163F100237415 /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6D1A3163F100237415 /* infback.c */; };
+		A4C7EE851A3163F100237415 /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6E1A3163F100237415 /* inffast.c */; };
+		A4C7EE861A3163F100237415 /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6E1A3163F100237415 /* inffast.c */; };
+		A4C7EE871A3163F100237415 /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6F1A3163F100237415 /* inflate.c */; };
+		A4C7EE881A3163F100237415 /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6F1A3163F100237415 /* inflate.c */; };
+		A4C7EE891A3163F100237415 /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE701A3163F100237415 /* inftrees.c */; };
+		A4C7EE8A1A3163F100237415 /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE701A3163F100237415 /* inftrees.c */; };
+		A4C7EE8D1A3163F100237415 /* minigzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE721A3163F100237415 /* minigzip.c */; };
+		A4C7EE8E1A3163F100237415 /* minigzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE721A3163F100237415 /* minigzip.c */; };
+		A4C7EE8F1A3163F100237415 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE731A3163F100237415 /* mztools.c */; };
+		A4C7EE901A3163F100237415 /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE731A3163F100237415 /* mztools.c */; };
+		A4C7EE911A3163F100237415 /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE741A3163F100237415 /* trees.c */; };
+		A4C7EE921A3163F100237415 /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE741A3163F100237415 /* trees.c */; };
+		A4C7EE931A3163F100237415 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE751A3163F100237415 /* uncompr.c */; };
+		A4C7EE941A3163F100237415 /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE751A3163F100237415 /* uncompr.c */; };
+		A4C7EE951A3163F100237415 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE761A3163F100237415 /* unzip.c */; };
+		A4C7EE961A3163F100237415 /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE761A3163F100237415 /* unzip.c */; };
+		A4C7EE971A3163F100237415 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE771A3163F100237415 /* zip.c */; };
+		A4C7EE981A3163F100237415 /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE771A3163F100237415 /* zip.c */; };
+		A4C7EE991A3163F100237415 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE781A3163F100237415 /* zutil.c */; };
+		A4C7EE9A1A3163F100237415 /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE781A3163F100237415 /* zutil.c */; };
+		A4C7EE9C1A3165EA00237415 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE9B1A3165EA00237415 /* ioapi.c */; };
+		A4C7EE9D1A3165EA00237415 /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE9B1A3165EA00237415 /* ioapi.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		07C4A40D1919237100229F4A /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A49D2EEB1907A6C300BC5A3F /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "include/$(PRODUCT_NAME)";
+			dstSubfolderSpec = 16;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		07C4A4111919237100229F4A /* libIFCommonLib-mac.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libIFCommonLib-mac.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFCoroutine.cpp; sourceTree = SOURCE_ROOT; };
+		4F3A13CC1AA9A7300034BCA1 /* IFCoroutine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFCoroutine.h; sourceTree = SOURCE_ROOT; };
+		4F3A13CD1AA9A7300034BCA1 /* IFCoroutineWaitEvent.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = IFCoroutineWaitEvent.inl; sourceTree = SOURCE_ROOT; };
+		4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRedis.cpp; sourceTree = SOURCE_ROOT; };
+		4F55FADC1ABFF3A200AA44F4 /* IFRedis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRedis.h; sourceTree = SOURCE_ROOT; };
+		78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAStar.cpp; sourceTree = "<group>"; };
+		78FCAF141B1FEBA10018DDA0 /* IFAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAStar.h; sourceTree = "<group>"; };
+		8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFNumParse.cpp; path = ../IFCommonLib/IFNumParse.cpp; sourceTree = "<group>"; };
+		8A2F345E1937703C00C65AC4 /* IFCommonLib_2005.vcproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib_2005.vcproj; sourceTree = SOURCE_ROOT; };
+		8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFixNumber.cpp; sourceTree = SOURCE_ROOT; };
+		8A2F34601937703C00C65AC4 /* IFFixNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFixNumber.h; sourceTree = SOURCE_ROOT; };
+		8A2F34631937704B00C65AC4 /* IFRandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRandom.cpp; sourceTree = SOURCE_ROOT; };
+		8A2F34641937704B00C65AC4 /* IFRandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRandom.h; sourceTree = SOURCE_ROOT; };
+		8A4E924B20D71C3600BD93BF /* IFFFT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFFFT.cpp; path = ../IFCommonLib/IFFFT.cpp; sourceTree = "<group>"; };
+		8A4E924C20D71C3600BD93BF /* IFSHA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFSHA.cpp; path = ../IFCommonLib/IFSHA.cpp; sourceTree = "<group>"; };
+		8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFZipFileProvider.cpp; path = ../IFCommonLib/IFZipFileProvider.cpp; sourceTree = "<group>"; };
+		A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFThreadSyncObj.cpp; path = ../IFCommonLib/IFThreadSyncObj.cpp; sourceTree = "<group>"; };
+		A43BD359195D272000CB8867 /* IFJSON.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFJSON.cpp; sourceTree = SOURCE_ROOT; };
+		A43BD35A195D272000CB8867 /* IFJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFJSON.h; sourceTree = SOURCE_ROOT; };
+		A43BD35C1965492300CB8867 /* IFJSON.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFJSON.cpp; sourceTree = SOURCE_ROOT; };
+		A43BD35D1965492300CB8867 /* IFJSON.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFJSON.h; sourceTree = SOURCE_ROOT; };
+		A49D2EED1907A6C300BC5A3F /* libIFCommonLib-ios.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libIFCommonLib-ios.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A49D2EF01907A6C300BC5A3F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		A49D2F171907A83600BC5A3F /* aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = aes.c; sourceTree = "<group>"; };
+		A49D2F181907A83600BC5A3F /* crypt_aes.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = crypt_aes.c; sourceTree = "<group>"; };
+		A49D2F191907A83600BC5A3F /* crypt_aes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = crypt_aes.h; sourceTree = "<group>"; };
+		A49D2F1A1907A83600BC5A3F /* rijndael-alg-fst.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "rijndael-alg-fst.c"; sourceTree = "<group>"; };
+		A49D2F1B1907A83600BC5A3F /* rijndael-alg-fst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "rijndael-alg-fst.h"; sourceTree = "<group>"; };
+		A49D2F1C1907A83600BC5A3F /* rijndael-api-fst.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = "rijndael-api-fst.c"; sourceTree = "<group>"; };
+		A49D2F1D1907A83600BC5A3F /* rijndael-api-fst.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "rijndael-api-fst.h"; sourceTree = "<group>"; };
+		A49D2F1E1907A83600BC5A3F /* androidwcs.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = androidwcs.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F1F1907A83600BC5A3F /* androidwcs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = androidwcs.h; sourceTree = SOURCE_ROOT; };
+		A49D2F201907A83600BC5A3F /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		A49D2F211907A83600BC5A3F /* Common_old.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Common_old.h; sourceTree = SOURCE_ROOT; };
+		A49D2F221907A83600BC5A3F /* CrashDump.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = CrashDump.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F231907A83600BC5A3F /* CrashDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CrashDump.h; sourceTree = SOURCE_ROOT; };
+		A49D2F241907A83600BC5A3F /* dllmain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = dllmain.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F251907A83600BC5A3F /* IFAES.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAES.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F261907A83600BC5A3F /* IFAES.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAES.h; sourceTree = SOURCE_ROOT; };
+		A49D2F271907A83600BC5A3F /* IFAlloc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAlloc.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F281907A83600BC5A3F /* IFAlloc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAlloc.h; sourceTree = SOURCE_ROOT; };
+		A49D2F291907A83600BC5A3F /* IFAnyBasic.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAnyBasic.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F2A1907A83600BC5A3F /* IFAnyBasic.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAnyBasic.h; sourceTree = SOURCE_ROOT; };
+		A49D2F2B1907A83600BC5A3F /* IFArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFArray.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F2C1907A83600BC5A3F /* IFArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFArray.h; sourceTree = SOURCE_ROOT; };
+		A49D2F2D1907A83600BC5A3F /* IFAsyncTaskMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAsyncTaskMgr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F2E1907A83600BC5A3F /* IFAsyncTaskMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAsyncTaskMgr.h; sourceTree = SOURCE_ROOT; };
+		A49D2F2F1907A83600BC5A3F /* IFAtomicOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAtomicOperation.h; sourceTree = SOURCE_ROOT; };
+		A49D2F301907A83600BC5A3F /* IFAttribute.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAttribute.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F311907A83600BC5A3F /* IFAttribute.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAttribute.h; sourceTree = SOURCE_ROOT; };
+		A49D2F321907A83600BC5A3F /* IFAttributeMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAttributeMgr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F331907A83600BC5A3F /* IFAttributeMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAttributeMgr.h; sourceTree = SOURCE_ROOT; };
+		A49D2F341907A83600BC5A3F /* IFAttributeSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAttributeSet.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F351907A83600BC5A3F /* IFAttributeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAttributeSet.h; sourceTree = SOURCE_ROOT; };
+		A49D2F361907A83600BC5A3F /* IFBaseTypeDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFBaseTypeDefine.h; sourceTree = SOURCE_ROOT; };
+		A49D2F371907A83600BC5A3F /* IFCommonLib_2005.vcproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib_2005.vcproj; sourceTree = SOURCE_ROOT; };
+		A49D2F381907A83600BC5A3F /* IFCommonLib_API.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFCommonLib_API.h; sourceTree = SOURCE_ROOT; };
+		A49D2F391907A83600BC5A3F /* IFCommonLib.cbp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib.cbp; sourceTree = SOURCE_ROOT; };
+		A49D2F3A1907A83600BC5A3F /* IFCommonLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFCommonLib.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F3B1907A83600BC5A3F /* IFCommonLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFCommonLib.h; sourceTree = SOURCE_ROOT; };
+		A49D2F3C1907A83600BC5A3F /* IFCommonLib.vcproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib.vcproj; sourceTree = SOURCE_ROOT; };
+		A49D2F3D1907A83600BC5A3F /* IFCommonLib.vcxproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib.vcxproj; sourceTree = SOURCE_ROOT; };
+		A49D2F3E1907A83600BC5A3F /* IFCommonLib.vcxproj.filters */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib.vcxproj.filters; sourceTree = SOURCE_ROOT; };
+		A49D2F3F1907A83600BC5A3F /* IFCSLockHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFCSLockHelper.h; sourceTree = SOURCE_ROOT; };
+		A49D2F401907A83600BC5A3F /* IFDateTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFDateTime.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F411907A83600BC5A3F /* IFDateTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFDateTime.h; sourceTree = SOURCE_ROOT; };
+		A49D2F421907A83600BC5A3F /* IFEventSlot.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFEventSlot.h; sourceTree = SOURCE_ROOT; };
+		A49D2F431907A83600BC5A3F /* IFEventSlotSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFEventSlotSpec.h; sourceTree = SOURCE_ROOT; };
+		A49D2F441907A83600BC5A3F /* IFFIFOStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFIFOStream.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F451907A83600BC5A3F /* IFFIFOStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFIFOStream.h; sourceTree = SOURCE_ROOT; };
+		A49D2F461907A83600BC5A3F /* IFFileInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFileInfo.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F471907A83600BC5A3F /* IFFileInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFileInfo.h; sourceTree = SOURCE_ROOT; };
+		A49D2F481907A83600BC5A3F /* IFFileMappingList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFileMappingList.h; sourceTree = SOURCE_ROOT; };
+		A49D2F491907A83600BC5A3F /* IFFilePackage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFilePackage.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F4A1907A83600BC5A3F /* IFFilePackage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFilePackage.h; sourceTree = SOURCE_ROOT; };
+		A49D2F4B1907A83600BC5A3F /* IFFileProvider.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFileProvider.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F4C1907A83600BC5A3F /* IFFileProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFileProvider.h; sourceTree = SOURCE_ROOT; };
+		A49D2F4D1907A83600BC5A3F /* IFFileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFileStream.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F4E1907A83600BC5A3F /* IFFileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFileStream.h; sourceTree = SOURCE_ROOT; };
+		A49D2F4F1907A83600BC5A3F /* IFFileSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFileSystem.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F501907A83600BC5A3F /* IFFileSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFileSystem.h; sourceTree = SOURCE_ROOT; };
+		A49D2F511907A83600BC5A3F /* IFFunctor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFunctor.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F521907A83600BC5A3F /* IFFunctor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFunctor.h; sourceTree = SOURCE_ROOT; };
+		A49D2F531907A83600BC5A3F /* IFFunctorDefaultParam.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFunctorDefaultParam.h; sourceTree = SOURCE_ROOT; };
+		A49D2F541907A83600BC5A3F /* IFFunctorDefaultParamImp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFunctorDefaultParamImp.h; sourceTree = SOURCE_ROOT; };
+		A49D2F551907A83600BC5A3F /* IFFunctorDefaultParamSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFunctorDefaultParamSpec.h; sourceTree = SOURCE_ROOT; };
+		A49D2F561907A83600BC5A3F /* IFFunctorSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFunctorSpec.h; sourceTree = SOURCE_ROOT; };
+		A49D2F571907A83600BC5A3F /* IFGlobalObject.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFGlobalObject.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F581907A83600BC5A3F /* IFGUID.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFGUID.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F591907A83600BC5A3F /* IFGUID.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFGUID.h; sourceTree = SOURCE_ROOT; };
+		A49D2F5A1907A83600BC5A3F /* IFHttpDownloader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFHttpDownloader.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F5B1907A83600BC5A3F /* IFHttpDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFHttpDownloader.h; sourceTree = SOURCE_ROOT; };
+		A49D2F5C1907A83600BC5A3F /* IFIDAllocator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFIDAllocator.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F5D1907A83600BC5A3F /* IFIDAllocator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFIDAllocator.h; sourceTree = SOURCE_ROOT; };
+		A49D2F5E1907A83600BC5A3F /* IFImageCodecMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFImageCodecMgr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F5F1907A83600BC5A3F /* IFImageCodecMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFImageCodecMgr.h; sourceTree = SOURCE_ROOT; };
+		A49D2F601907A83600BC5A3F /* IFLerp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFLerp.h; sourceTree = SOURCE_ROOT; };
+		A49D2F611907A83600BC5A3F /* IFList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFList.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F621907A83600BC5A3F /* IFList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFList.h; sourceTree = SOURCE_ROOT; };
+		A49D2F631907A83600BC5A3F /* IFLogSystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFLogSystem.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F641907A83600BC5A3F /* IFLogSystem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFLogSystem.h; sourceTree = SOURCE_ROOT; };
+		A49D2F651907A83600BC5A3F /* IFMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFMap.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F661907A83600BC5A3F /* IFMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFMap.h; sourceTree = SOURCE_ROOT; };
+		A49D2F671907A83600BC5A3F /* IFMath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFMath.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F681907A83600BC5A3F /* IFMath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFMath.h; sourceTree = SOURCE_ROOT; };
+		A49D2F691907A83600BC5A3F /* IFMD5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFMD5.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F6A1907A83600BC5A3F /* IFMD5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFMD5.h; sourceTree = SOURCE_ROOT; };
+		A49D2F6B1907A83600BC5A3F /* IFMemPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFMemPool.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F6C1907A83600BC5A3F /* IFMemPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFMemPool.h; sourceTree = SOURCE_ROOT; };
+		A49D2F6D1907A83600BC5A3F /* IFMemStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFMemStream.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F6E1907A83600BC5A3F /* IFMemStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFMemStream.h; sourceTree = SOURCE_ROOT; };
+		A49D2F6F1907A83600BC5A3F /* IFNaviCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNaviCell.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F701907A83600BC5A3F /* IFNaviCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNaviCell.h; sourceTree = SOURCE_ROOT; };
+		A49D2F711907A83600BC5A3F /* IFNavigation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNavigation.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F721907A83600BC5A3F /* IFNavigation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNavigation.h; sourceTree = SOURCE_ROOT; };
+		A49D2F731907A83600BC5A3F /* IFNaviPath.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNaviPath.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F741907A83600BC5A3F /* IFNaviPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNaviPath.h; sourceTree = SOURCE_ROOT; };
+		A49D2F751907A83600BC5A3F /* IFNetConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetConnection.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F761907A83600BC5A3F /* IFNetConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetConnection.h; sourceTree = SOURCE_ROOT; };
+		A49D2F771907A83600BC5A3F /* IFNetCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetCore.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F781907A83600BC5A3F /* IFNetCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetCore.h; sourceTree = SOURCE_ROOT; };
+		A49D2F791907A83600BC5A3F /* IFNetCoreEPOLL.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetCoreEPOLL.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F7A1907A83600BC5A3F /* IFNetCoreEPOLL.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetCoreEPOLL.h; sourceTree = SOURCE_ROOT; };
+		A49D2F7B1907A83600BC5A3F /* IFNetCoreIOCP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetCoreIOCP.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F7C1907A83600BC5A3F /* IFNetCoreIOCP.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetCoreIOCP.h; sourceTree = SOURCE_ROOT; };
+		A49D2F7D1907A83600BC5A3F /* IFNetCoreSelect.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetCoreSelect.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F7E1907A83600BC5A3F /* IFNetCoreSelect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetCoreSelect.h; sourceTree = SOURCE_ROOT; };
+		A49D2F7F1907A83600BC5A3F /* IFNetGlobalDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetGlobalDefine.h; sourceTree = SOURCE_ROOT; };
+		A49D2F801907A83600BC5A3F /* IFNetIOData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetIOData.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F811907A83600BC5A3F /* IFNetIOData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetIOData.h; sourceTree = SOURCE_ROOT; };
+		A49D2F821907A83600BC5A3F /* IFNetMsgFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNetMsgFactory.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F831907A83600BC5A3F /* IFNetMsgFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFNetMsgFactory.h; sourceTree = SOURCE_ROOT; };
+		A49D2F841907A83600BC5A3F /* ifobj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ifobj.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F851907A83600BC5A3F /* ifobj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ifobj.h; sourceTree = SOURCE_ROOT; };
+		A49D2F861907A83600BC5A3F /* IFObjectFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFObjectFactory.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F871907A83600BC5A3F /* IFObjectFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFObjectFactory.h; sourceTree = SOURCE_ROOT; };
+		A49D2F881907A83600BC5A3F /* IFParamsMacro.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFParamsMacro.h; sourceTree = SOURCE_ROOT; };
+		A49D2F891907A83600BC5A3F /* IFPipe.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFPipe.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F8A1907A83600BC5A3F /* IFPipe.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFPipe.h; sourceTree = SOURCE_ROOT; };
+		A49D2F8B1907A83600BC5A3F /* IFPipeCore.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFPipeCore.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F8C1907A83600BC5A3F /* IFPipeCore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFPipeCore.h; sourceTree = SOURCE_ROOT; };
+		A49D2F8D1907A83600BC5A3F /* IFPlatformDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFPlatformDefine.h; sourceTree = SOURCE_ROOT; };
+		A49D2F8E1907A83600BC5A3F /* IFProfile.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFProfile.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F8F1907A83600BC5A3F /* IFProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFProfile.h; sourceTree = SOURCE_ROOT; };
+		A49D2F901907A83600BC5A3F /* IFQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFQueue.h; sourceTree = SOURCE_ROOT; };
+		A49D2F911907A83600BC5A3F /* IFRBTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRBTree.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F921907A83600BC5A3F /* IFRBTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRBTree.h; sourceTree = SOURCE_ROOT; };
+		A49D2F931907A83600BC5A3F /* IFRect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRect.h; sourceTree = SOURCE_ROOT; };
+		A49D2F941907A83600BC5A3F /* IFRefObj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRefObj.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F951907A83600BC5A3F /* IFRefObj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRefObj.h; sourceTree = SOURCE_ROOT; };
+		A49D2F961907A83600BC5A3F /* IFRefPtr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRefPtr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F971907A83600BC5A3F /* IFRefPtr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRefPtr.h; sourceTree = SOURCE_ROOT; };
+		A49D2F981907A83600BC5A3F /* IFRepeatInclude.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRepeatInclude.h; sourceTree = SOURCE_ROOT; };
+		A49D2F991907A83600BC5A3F /* IFRepeatIncludeEmpty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRepeatIncludeEmpty.h; sourceTree = SOURCE_ROOT; };
+		A49D2F9A1907A83600BC5A3F /* IFRSA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRSA.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F9B1907A83600BC5A3F /* IFRSA.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRSA.h; sourceTree = SOURCE_ROOT; };
+		A49D2F9C1907A83600BC5A3F /* IFRTTI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRTTI.h; sourceTree = SOURCE_ROOT; };
+		A49D2F9D1907A83600BC5A3F /* IFServerFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFServerFrame.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2F9E1907A83600BC5A3F /* IFServerFrame.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFServerFrame.h; sourceTree = SOURCE_ROOT; };
+		A49D2F9F1907A83600BC5A3F /* IFSet.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFSet.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FA01907A83600BC5A3F /* IFSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFSet.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA11907A83600BC5A3F /* ifsingleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ifsingleton.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA21907A83600BC5A3F /* IFSort.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFSort.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA31907A83600BC5A3F /* IFStackDumper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFStackDumper.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FA41907A83600BC5A3F /* IFStackDumper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFStackDumper.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA51907A83600BC5A3F /* IFStateMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFStateMgr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FA61907A83600BC5A3F /* IFStateMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFStateMgr.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA71907A83600BC5A3F /* IFStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFStream.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FA81907A83600BC5A3F /* IFStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFStream.h; sourceTree = SOURCE_ROOT; };
+		A49D2FA91907A83600BC5A3F /* IFString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFString.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FAA1907A83600BC5A3F /* IFString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFString.h; sourceTree = SOURCE_ROOT; };
+		A49D2FAB1907A83600BC5A3F /* IFSuperAttrMgr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFSuperAttrMgr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FAC1907A83600BC5A3F /* IFSuperAttrMgr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFSuperAttrMgr.h; sourceTree = SOURCE_ROOT; };
+		A49D2FAD1907A83600BC5A3F /* IFSystemAPI.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFSystemAPI.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FAE1907A83600BC5A3F /* IFSystemAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFSystemAPI.h; sourceTree = SOURCE_ROOT; };
+		A49D2FAF1907A83600BC5A3F /* IFThread.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFThread.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FB01907A83600BC5A3F /* IFThread.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFThread.h; sourceTree = SOURCE_ROOT; };
+		A49D2FB11907A83600BC5A3F /* IFTimer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFTimer.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FB21907A83600BC5A3F /* IFTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFTimer.h; sourceTree = SOURCE_ROOT; };
+		A49D2FB31907A83600BC5A3F /* IFTypes.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFTypes.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FB41907A83600BC5A3F /* iftypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = iftypes.h; sourceTree = SOURCE_ROOT; };
+		A49D2FB51907A83600BC5A3F /* IFUtility.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFUtility.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FB61907A83600BC5A3F /* IFUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFUtility.h; sourceTree = SOURCE_ROOT; };
+		A49D2FB71907A83600BC5A3F /* IFWeakPtr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFWeakPtr.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FB81907A83600BC5A3F /* IFWeakPtr.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFWeakPtr.h; sourceTree = SOURCE_ROOT; };
+		A49D2FB91907A83600BC5A3F /* ReadMe.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ReadMe.txt; sourceTree = SOURCE_ROOT; };
+		A49D2FBB1907A83600BC5A3F /* des.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = des.h; sourceTree = "<group>"; };
+		A49D2FBC1907A83600BC5A3F /* desc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = desc.c; sourceTree = "<group>"; };
+		A49D2FBD1907A83600BC5A3F /* digit.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = digit.c; sourceTree = "<group>"; };
+		A49D2FBE1907A83600BC5A3F /* digit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = digit.h; sourceTree = "<group>"; };
+		A49D2FBF1907A83600BC5A3F /* global.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = global.h; sourceTree = "<group>"; };
+		A49D2FC01907A83600BC5A3F /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		A49D2FC11907A83600BC5A3F /* md2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md2.h; sourceTree = "<group>"; };
+		A49D2FC21907A83600BC5A3F /* md2c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md2c.c; sourceTree = "<group>"; };
+		A49D2FC31907A83600BC5A3F /* md5.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = md5.h; sourceTree = "<group>"; };
+		A49D2FC41907A83600BC5A3F /* md5c.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = md5c.c; sourceTree = "<group>"; };
+		A49D2FC51907A83600BC5A3F /* nn.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = nn.c; sourceTree = "<group>"; };
+		A49D2FC61907A83600BC5A3F /* nn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = nn.h; sourceTree = "<group>"; };
+		A49D2FC71907A83600BC5A3F /* prime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = prime.c; sourceTree = "<group>"; };
+		A49D2FC81907A83600BC5A3F /* prime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = prime.h; sourceTree = "<group>"; };
+		A49D2FC91907A83600BC5A3F /* r_dh.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_dh.c; sourceTree = "<group>"; };
+		A49D2FCA1907A83600BC5A3F /* r_encode.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_encode.c; sourceTree = "<group>"; };
+		A49D2FCB1907A83600BC5A3F /* r_enhanc.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_enhanc.c; sourceTree = "<group>"; };
+		A49D2FCC1907A83600BC5A3F /* r_keygen.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_keygen.c; sourceTree = "<group>"; };
+		A49D2FCD1907A83600BC5A3F /* r_random.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_random.c; sourceTree = "<group>"; };
+		A49D2FCE1907A83600BC5A3F /* r_random.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = r_random.h; sourceTree = "<group>"; };
+		A49D2FCF1907A83600BC5A3F /* r_stdlib.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = r_stdlib.c; sourceTree = "<group>"; };
+		A49D2FD01907A83600BC5A3F /* rsa.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = rsa.c; sourceTree = "<group>"; };
+		A49D2FD11907A83600BC5A3F /* rsa.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rsa.h; sourceTree = "<group>"; };
+		A49D2FD21907A83600BC5A3F /* rsaref.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = rsaref.h; sourceTree = "<group>"; };
+		A49D2FD31907A83600BC5A3F /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stdafx.cpp; sourceTree = SOURCE_ROOT; };
+		A49D2FD41907A83600BC5A3F /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = SOURCE_ROOT; };
+		A49D2FD51907A83600BC5A3F /* targetver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = targetver.h; sourceTree = SOURCE_ROOT; };
+		A49D2FD61907A83600BC5A3F /* utf8wchar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = utf8wchar.cpp; sourceTree = SOURCE_ROOT; };
+		A4BF699D1A19D8F50001C966 /* IFCompress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFCompress.cpp; sourceTree = SOURCE_ROOT; };
+		A4BF699E1A19D8F50001C966 /* IFCompress.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFCompress.h; sourceTree = SOURCE_ROOT; };
+		A4C7EE681A3163F100237415 /* adler32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = adler32.c; path = zlib/adler32.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE691A3163F100237415 /* compress.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = compress.c; path = zlib/compress.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE6A1A3163F100237415 /* crc32.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = crc32.c; path = zlib/crc32.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE6B1A3163F100237415 /* deflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = deflate.c; path = zlib/deflate.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE6D1A3163F100237415 /* infback.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = infback.c; path = zlib/infback.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE6E1A3163F100237415 /* inffast.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inffast.c; path = zlib/inffast.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE6F1A3163F100237415 /* inflate.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inflate.c; path = zlib/inflate.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE701A3163F100237415 /* inftrees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = inftrees.c; path = zlib/inftrees.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE721A3163F100237415 /* minigzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = minigzip.c; path = zlib/minigzip.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE731A3163F100237415 /* mztools.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = mztools.c; path = zlib/mztools.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE741A3163F100237415 /* trees.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = trees.c; path = zlib/trees.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE751A3163F100237415 /* uncompr.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = uncompr.c; path = zlib/uncompr.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE761A3163F100237415 /* unzip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = unzip.c; path = zlib/unzip.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE771A3163F100237415 /* zip.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zip.c; path = zlib/zip.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE781A3163F100237415 /* zutil.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = zutil.c; path = zlib/zutil.c; sourceTree = SOURCE_ROOT; };
+		A4C7EE9B1A3165EA00237415 /* ioapi.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = ioapi.c; path = zlib/ioapi.c; sourceTree = SOURCE_ROOT; };
+		A4FD134619372AAE00467634 /* IFFixNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFixNumber.cpp; sourceTree = SOURCE_ROOT; };
+		A4FD134719372AAE00467634 /* IFFixNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFixNumber.h; sourceTree = SOURCE_ROOT; };
+		A4FD134A19372AC000467634 /* IFRandom.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRandom.cpp; sourceTree = SOURCE_ROOT; };
+		A4FD134B19372AC000467634 /* IFRandom.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRandom.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		07C4A40B1919237100229F4A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				07C4A40C1919237100229F4A /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A49D2EEA1907A6C300BC5A3F /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A49D2EF11907A6C300BC5A3F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A49D2EE41907A6C300BC5A3F = {
+			isa = PBXGroup;
+			children = (
+				8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */,
+				8A4E924B20D71C3600BD93BF /* IFFFT.cpp */,
+				8A4E924C20D71C3600BD93BF /* IFSHA.cpp */,
+				8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */,
+				A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */,
+				78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */,
+				78FCAF141B1FEBA10018DDA0 /* IFAStar.h */,
+				A49D2EF21907A6C300BC5A3F /* IFCommonLib */,
+				A49D2EEF1907A6C300BC5A3F /* Frameworks */,
+				A49D2EEE1907A6C300BC5A3F /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A49D2EEE1907A6C300BC5A3F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A49D2EED1907A6C300BC5A3F /* libIFCommonLib-ios.a */,
+				07C4A4111919237100229F4A /* libIFCommonLib-mac.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A49D2EEF1907A6C300BC5A3F /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				A49D2EF01907A6C300BC5A3F /* Foundation.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A49D2EF21907A6C300BC5A3F /* IFCommonLib */ = {
+			isa = PBXGroup;
+			children = (
+				4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */,
+				4F55FADC1ABFF3A200AA44F4 /* IFRedis.h */,
+				4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */,
+				4F3A13CC1AA9A7300034BCA1 /* IFCoroutine.h */,
+				4F3A13CD1AA9A7300034BCA1 /* IFCoroutineWaitEvent.inl */,
+				A4C7EE671A31636D00237415 /* zlib */,
+				A4BF699D1A19D8F50001C966 /* IFCompress.cpp */,
+				A4BF699E1A19D8F50001C966 /* IFCompress.h */,
+				A43BD359195D272000CB8867 /* IFJSON.cpp */,
+				A43BD35A195D272000CB8867 /* IFJSON.h */,
+				A4FD134A19372AC000467634 /* IFRandom.cpp */,
+				A4FD134B19372AC000467634 /* IFRandom.h */,
+				A4FD134619372AAE00467634 /* IFFixNumber.cpp */,
+				A4FD134719372AAE00467634 /* IFFixNumber.h */,
+				A49D2F161907A83600BC5A3F /* aes */,
+				A49D2F1E1907A83600BC5A3F /* androidwcs.cpp */,
+				A49D2F1F1907A83600BC5A3F /* androidwcs.h */,
+				A43BD35C1965492300CB8867 /* IFJSON.cpp */,
+				A43BD35D1965492300CB8867 /* IFJSON.h */,
+				A49D2F201907A83600BC5A3F /* CMakeLists.txt */,
+				A49D2F211907A83600BC5A3F /* Common_old.h */,
+				A49D2F221907A83600BC5A3F /* CrashDump.cpp */,
+				A49D2F231907A83600BC5A3F /* CrashDump.h */,
+				A49D2F241907A83600BC5A3F /* dllmain.cpp */,
+				A49D2F251907A83600BC5A3F /* IFAES.cpp */,
+				A49D2F261907A83600BC5A3F /* IFAES.h */,
+				A49D2F271907A83600BC5A3F /* IFAlloc.cpp */,
+				A49D2F281907A83600BC5A3F /* IFAlloc.h */,
+				A49D2F291907A83600BC5A3F /* IFAnyBasic.cpp */,
+				A49D2F2A1907A83600BC5A3F /* IFAnyBasic.h */,
+				A49D2F2B1907A83600BC5A3F /* IFArray.cpp */,
+				A49D2F2C1907A83600BC5A3F /* IFArray.h */,
+				A49D2F2D1907A83600BC5A3F /* IFAsyncTaskMgr.cpp */,
+				A49D2F2E1907A83600BC5A3F /* IFAsyncTaskMgr.h */,
+				A49D2F2F1907A83600BC5A3F /* IFAtomicOperation.h */,
+				A49D2F301907A83600BC5A3F /* IFAttribute.cpp */,
+				A49D2F311907A83600BC5A3F /* IFAttribute.h */,
+				A49D2F321907A83600BC5A3F /* IFAttributeMgr.cpp */,
+				A49D2F331907A83600BC5A3F /* IFAttributeMgr.h */,
+				A49D2F341907A83600BC5A3F /* IFAttributeSet.cpp */,
+				A49D2F351907A83600BC5A3F /* IFAttributeSet.h */,
+				A49D2F361907A83600BC5A3F /* IFBaseTypeDefine.h */,
+				A49D2F371907A83600BC5A3F /* IFCommonLib_2005.vcproj */,
+				A49D2F381907A83600BC5A3F /* IFCommonLib_API.h */,
+				A49D2F391907A83600BC5A3F /* IFCommonLib.cbp */,
+				A49D2F3A1907A83600BC5A3F /* IFCommonLib.cpp */,
+				A49D2F3B1907A83600BC5A3F /* IFCommonLib.h */,
+				A49D2F3C1907A83600BC5A3F /* IFCommonLib.vcproj */,
+				8A2F345E1937703C00C65AC4 /* IFCommonLib_2005.vcproj */,
+				8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */,
+				8A2F34631937704B00C65AC4 /* IFRandom.cpp */,
+				8A2F34641937704B00C65AC4 /* IFRandom.h */,
+				8A2F34601937703C00C65AC4 /* IFFixNumber.h */,
+				A49D2F3D1907A83600BC5A3F /* IFCommonLib.vcxproj */,
+				A49D2F3E1907A83600BC5A3F /* IFCommonLib.vcxproj.filters */,
+				A49D2F3F1907A83600BC5A3F /* IFCSLockHelper.h */,
+				A49D2F401907A83600BC5A3F /* IFDateTime.cpp */,
+				A49D2F411907A83600BC5A3F /* IFDateTime.h */,
+				A49D2F421907A83600BC5A3F /* IFEventSlot.h */,
+				A49D2F431907A83600BC5A3F /* IFEventSlotSpec.h */,
+				A49D2F441907A83600BC5A3F /* IFFIFOStream.cpp */,
+				A49D2F451907A83600BC5A3F /* IFFIFOStream.h */,
+				A49D2F461907A83600BC5A3F /* IFFileInfo.cpp */,
+				A49D2F471907A83600BC5A3F /* IFFileInfo.h */,
+				A49D2F481907A83600BC5A3F /* IFFileMappingList.h */,
+				A49D2F491907A83600BC5A3F /* IFFilePackage.cpp */,
+				A49D2F4A1907A83600BC5A3F /* IFFilePackage.h */,
+				A49D2F4B1907A83600BC5A3F /* IFFileProvider.cpp */,
+				A49D2F4C1907A83600BC5A3F /* IFFileProvider.h */,
+				A49D2F4D1907A83600BC5A3F /* IFFileStream.cpp */,
+				A49D2F4E1907A83600BC5A3F /* IFFileStream.h */,
+				A49D2F4F1907A83600BC5A3F /* IFFileSystem.cpp */,
+				A49D2F501907A83600BC5A3F /* IFFileSystem.h */,
+				A49D2F511907A83600BC5A3F /* IFFunctor.cpp */,
+				A49D2F521907A83600BC5A3F /* IFFunctor.h */,
+				A49D2F531907A83600BC5A3F /* IFFunctorDefaultParam.h */,
+				A49D2F541907A83600BC5A3F /* IFFunctorDefaultParamImp.h */,
+				A49D2F551907A83600BC5A3F /* IFFunctorDefaultParamSpec.h */,
+				A49D2F561907A83600BC5A3F /* IFFunctorSpec.h */,
+				A49D2F571907A83600BC5A3F /* IFGlobalObject.cpp */,
+				A49D2F581907A83600BC5A3F /* IFGUID.cpp */,
+				A49D2F591907A83600BC5A3F /* IFGUID.h */,
+				A49D2F5A1907A83600BC5A3F /* IFHttpDownloader.cpp */,
+				A49D2F5B1907A83600BC5A3F /* IFHttpDownloader.h */,
+				A49D2F5C1907A83600BC5A3F /* IFIDAllocator.cpp */,
+				A49D2F5D1907A83600BC5A3F /* IFIDAllocator.h */,
+				A49D2F5E1907A83600BC5A3F /* IFImageCodecMgr.cpp */,
+				A49D2F5F1907A83600BC5A3F /* IFImageCodecMgr.h */,
+				A49D2F601907A83600BC5A3F /* IFLerp.h */,
+				A49D2F611907A83600BC5A3F /* IFList.cpp */,
+				A49D2F621907A83600BC5A3F /* IFList.h */,
+				A49D2F631907A83600BC5A3F /* IFLogSystem.cpp */,
+				A49D2F641907A83600BC5A3F /* IFLogSystem.h */,
+				A49D2F651907A83600BC5A3F /* IFMap.cpp */,
+				A49D2F661907A83600BC5A3F /* IFMap.h */,
+				A49D2F671907A83600BC5A3F /* IFMath.cpp */,
+				A49D2F681907A83600BC5A3F /* IFMath.h */,
+				A49D2F691907A83600BC5A3F /* IFMD5.cpp */,
+				A49D2F6A1907A83600BC5A3F /* IFMD5.h */,
+				A49D2F6B1907A83600BC5A3F /* IFMemPool.cpp */,
+				A49D2F6C1907A83600BC5A3F /* IFMemPool.h */,
+				A49D2F6D1907A83600BC5A3F /* IFMemStream.cpp */,
+				A49D2F6E1907A83600BC5A3F /* IFMemStream.h */,
+				A49D2F6F1907A83600BC5A3F /* IFNaviCell.cpp */,
+				A49D2F701907A83600BC5A3F /* IFNaviCell.h */,
+				A49D2F711907A83600BC5A3F /* IFNavigation.cpp */,
+				A49D2F721907A83600BC5A3F /* IFNavigation.h */,
+				A49D2F731907A83600BC5A3F /* IFNaviPath.cpp */,
+				A49D2F741907A83600BC5A3F /* IFNaviPath.h */,
+				A49D2F751907A83600BC5A3F /* IFNetConnection.cpp */,
+				A49D2F761907A83600BC5A3F /* IFNetConnection.h */,
+				A49D2F771907A83600BC5A3F /* IFNetCore.cpp */,
+				A49D2F781907A83600BC5A3F /* IFNetCore.h */,
+				A49D2F791907A83600BC5A3F /* IFNetCoreEPOLL.cpp */,
+				A49D2F7A1907A83600BC5A3F /* IFNetCoreEPOLL.h */,
+				A49D2F7B1907A83600BC5A3F /* IFNetCoreIOCP.cpp */,
+				A49D2F7C1907A83600BC5A3F /* IFNetCoreIOCP.h */,
+				A49D2F7D1907A83600BC5A3F /* IFNetCoreSelect.cpp */,
+				A49D2F7E1907A83600BC5A3F /* IFNetCoreSelect.h */,
+				A49D2F7F1907A83600BC5A3F /* IFNetGlobalDefine.h */,
+				A49D2F801907A83600BC5A3F /* IFNetIOData.cpp */,
+				A49D2F811907A83600BC5A3F /* IFNetIOData.h */,
+				A49D2F821907A83600BC5A3F /* IFNetMsgFactory.cpp */,
+				A49D2F831907A83600BC5A3F /* IFNetMsgFactory.h */,
+				A49D2F841907A83600BC5A3F /* ifobj.cpp */,
+				A49D2F851907A83600BC5A3F /* ifobj.h */,
+				A49D2F861907A83600BC5A3F /* IFObjectFactory.cpp */,
+				A49D2F871907A83600BC5A3F /* IFObjectFactory.h */,
+				A49D2F881907A83600BC5A3F /* IFParamsMacro.h */,
+				A49D2F891907A83600BC5A3F /* IFPipe.cpp */,
+				A49D2F8A1907A83600BC5A3F /* IFPipe.h */,
+				A49D2F8B1907A83600BC5A3F /* IFPipeCore.cpp */,
+				A49D2F8C1907A83600BC5A3F /* IFPipeCore.h */,
+				A49D2F8D1907A83600BC5A3F /* IFPlatformDefine.h */,
+				A49D2F8E1907A83600BC5A3F /* IFProfile.cpp */,
+				A49D2F8F1907A83600BC5A3F /* IFProfile.h */,
+				A49D2F901907A83600BC5A3F /* IFQueue.h */,
+				A49D2F911907A83600BC5A3F /* IFRBTree.cpp */,
+				A49D2F921907A83600BC5A3F /* IFRBTree.h */,
+				A49D2F931907A83600BC5A3F /* IFRect.h */,
+				A49D2F941907A83600BC5A3F /* IFRefObj.cpp */,
+				A49D2F951907A83600BC5A3F /* IFRefObj.h */,
+				A49D2F961907A83600BC5A3F /* IFRefPtr.cpp */,
+				A49D2F971907A83600BC5A3F /* IFRefPtr.h */,
+				A49D2F981907A83600BC5A3F /* IFRepeatInclude.h */,
+				A49D2F991907A83600BC5A3F /* IFRepeatIncludeEmpty.h */,
+				A49D2F9A1907A83600BC5A3F /* IFRSA.cpp */,
+				A49D2F9B1907A83600BC5A3F /* IFRSA.h */,
+				A49D2F9C1907A83600BC5A3F /* IFRTTI.h */,
+				A49D2F9D1907A83600BC5A3F /* IFServerFrame.cpp */,
+				A49D2F9E1907A83600BC5A3F /* IFServerFrame.h */,
+				A49D2F9F1907A83600BC5A3F /* IFSet.cpp */,
+				A49D2FA01907A83600BC5A3F /* IFSet.h */,
+				A49D2FA11907A83600BC5A3F /* ifsingleton.h */,
+				A49D2FA21907A83600BC5A3F /* IFSort.h */,
+				A49D2FA31907A83600BC5A3F /* IFStackDumper.cpp */,
+				A49D2FA41907A83600BC5A3F /* IFStackDumper.h */,
+				A49D2FA51907A83600BC5A3F /* IFStateMgr.cpp */,
+				A49D2FA61907A83600BC5A3F /* IFStateMgr.h */,
+				A49D2FA71907A83600BC5A3F /* IFStream.cpp */,
+				A49D2FA81907A83600BC5A3F /* IFStream.h */,
+				A49D2FA91907A83600BC5A3F /* IFString.cpp */,
+				A49D2FAA1907A83600BC5A3F /* IFString.h */,
+				A49D2FAB1907A83600BC5A3F /* IFSuperAttrMgr.cpp */,
+				A49D2FAC1907A83600BC5A3F /* IFSuperAttrMgr.h */,
+				A49D2FAD1907A83600BC5A3F /* IFSystemAPI.cpp */,
+				A49D2FAE1907A83600BC5A3F /* IFSystemAPI.h */,
+				A49D2FAF1907A83600BC5A3F /* IFThread.cpp */,
+				A49D2FB01907A83600BC5A3F /* IFThread.h */,
+				A49D2FB11907A83600BC5A3F /* IFTimer.cpp */,
+				A49D2FB21907A83600BC5A3F /* IFTimer.h */,
+				A49D2FB31907A83600BC5A3F /* IFTypes.cpp */,
+				A49D2FB41907A83600BC5A3F /* iftypes.h */,
+				A49D2FB51907A83600BC5A3F /* IFUtility.cpp */,
+				A49D2FB61907A83600BC5A3F /* IFUtility.h */,
+				A49D2FB71907A83600BC5A3F /* IFWeakPtr.cpp */,
+				A49D2FB81907A83600BC5A3F /* IFWeakPtr.h */,
+				A49D2FB91907A83600BC5A3F /* ReadMe.txt */,
+				A49D2FBA1907A83600BC5A3F /* rsa */,
+				A49D2FD31907A83600BC5A3F /* stdafx.cpp */,
+				A49D2FD41907A83600BC5A3F /* stdafx.h */,
+				A49D2FD51907A83600BC5A3F /* targetver.h */,
+				A49D2FD61907A83600BC5A3F /* utf8wchar.cpp */,
+				A49D2EF31907A6C300BC5A3F /* Supporting Files */,
+			);
+			path = IFCommonLib;
+			sourceTree = "<group>";
+		};
+		A49D2EF31907A6C300BC5A3F /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		A49D2F161907A83600BC5A3F /* aes */ = {
+			isa = PBXGroup;
+			children = (
+				A49D2F171907A83600BC5A3F /* aes.c */,
+				A49D2F181907A83600BC5A3F /* crypt_aes.c */,
+				A49D2F191907A83600BC5A3F /* crypt_aes.h */,
+				A49D2F1A1907A83600BC5A3F /* rijndael-alg-fst.c */,
+				A49D2F1B1907A83600BC5A3F /* rijndael-alg-fst.h */,
+				A49D2F1C1907A83600BC5A3F /* rijndael-api-fst.c */,
+				A49D2F1D1907A83600BC5A3F /* rijndael-api-fst.h */,
+			);
+			path = aes;
+			sourceTree = SOURCE_ROOT;
+		};
+		A49D2FBA1907A83600BC5A3F /* rsa */ = {
+			isa = PBXGroup;
+			children = (
+				A49D2FBB1907A83600BC5A3F /* des.h */,
+				A49D2FBC1907A83600BC5A3F /* desc.c */,
+				A49D2FBD1907A83600BC5A3F /* digit.c */,
+				A49D2FBE1907A83600BC5A3F /* digit.h */,
+				A49D2FBF1907A83600BC5A3F /* global.h */,
+				A49D2FC01907A83600BC5A3F /* main.cpp */,
+				A49D2FC11907A83600BC5A3F /* md2.h */,
+				A49D2FC21907A83600BC5A3F /* md2c.c */,
+				A49D2FC31907A83600BC5A3F /* md5.h */,
+				A49D2FC41907A83600BC5A3F /* md5c.c */,
+				A49D2FC51907A83600BC5A3F /* nn.c */,
+				A49D2FC61907A83600BC5A3F /* nn.h */,
+				A49D2FC71907A83600BC5A3F /* prime.c */,
+				A49D2FC81907A83600BC5A3F /* prime.h */,
+				A49D2FC91907A83600BC5A3F /* r_dh.c */,
+				A49D2FCA1907A83600BC5A3F /* r_encode.c */,
+				A49D2FCB1907A83600BC5A3F /* r_enhanc.c */,
+				A49D2FCC1907A83600BC5A3F /* r_keygen.c */,
+				A49D2FCD1907A83600BC5A3F /* r_random.c */,
+				A49D2FCE1907A83600BC5A3F /* r_random.h */,
+				A49D2FCF1907A83600BC5A3F /* r_stdlib.c */,
+				A49D2FD01907A83600BC5A3F /* rsa.c */,
+				A49D2FD11907A83600BC5A3F /* rsa.h */,
+				A49D2FD21907A83600BC5A3F /* rsaref.h */,
+			);
+			path = rsa;
+			sourceTree = SOURCE_ROOT;
+		};
+		A4C7EE671A31636D00237415 /* zlib */ = {
+			isa = PBXGroup;
+			children = (
+				A4C7EE9B1A3165EA00237415 /* ioapi.c */,
+				A4C7EE681A3163F100237415 /* adler32.c */,
+				A4C7EE691A3163F100237415 /* compress.c */,
+				A4C7EE6A1A3163F100237415 /* crc32.c */,
+				A4C7EE6B1A3163F100237415 /* deflate.c */,
+				A4C7EE6D1A3163F100237415 /* infback.c */,
+				A4C7EE6E1A3163F100237415 /* inffast.c */,
+				A4C7EE6F1A3163F100237415 /* inflate.c */,
+				A4C7EE701A3163F100237415 /* inftrees.c */,
+				A4C7EE721A3163F100237415 /* minigzip.c */,
+				A4C7EE731A3163F100237415 /* mztools.c */,
+				A4C7EE741A3163F100237415 /* trees.c */,
+				A4C7EE751A3163F100237415 /* uncompr.c */,
+				A4C7EE761A3163F100237415 /* unzip.c */,
+				A4C7EE771A3163F100237415 /* zip.c */,
+				A4C7EE781A3163F100237415 /* zutil.c */,
+			);
+			name = zlib;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		07C4A3BE1919237100229F4A /* IFCommonLib-mac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 07C4A40E1919237100229F4A /* Build configuration list for PBXNativeTarget "IFCommonLib-mac" */;
+			buildPhases = (
+				07C4A3BF1919237100229F4A /* Sources */,
+				07C4A40B1919237100229F4A /* Frameworks */,
+				07C4A40D1919237100229F4A /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "IFCommonLib-mac";
+			productName = IFCommonLib;
+			productReference = 07C4A4111919237100229F4A /* libIFCommonLib-mac.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		A49D2EEC1907A6C300BC5A3F /* IFCommonLib-ios */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A49D2F101907A6C300BC5A3F /* Build configuration list for PBXNativeTarget "IFCommonLib-ios" */;
+			buildPhases = (
+				A49D2EE91907A6C300BC5A3F /* Sources */,
+				A49D2EEA1907A6C300BC5A3F /* Frameworks */,
+				A49D2EEB1907A6C300BC5A3F /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "IFCommonLib-ios";
+			productName = IFCommonLib;
+			productReference = A49D2EED1907A6C300BC5A3F /* libIFCommonLib-ios.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A49D2EE51907A6C300BC5A3F /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0510;
+				ORGANIZATIONNAME = "___FULLUSERNAME___";
+			};
+			buildConfigurationList = A49D2EE81907A6C300BC5A3F /* Build configuration list for PBXProject "IFCommonLib" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				en,
+			);
+			mainGroup = A49D2EE41907A6C300BC5A3F;
+			productRefGroup = A49D2EEE1907A6C300BC5A3F /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A49D2EEC1907A6C300BC5A3F /* IFCommonLib-ios */,
+				07C4A3BE1919237100229F4A /* IFCommonLib-mac */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		07C4A3BF1919237100229F4A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				07C4A3C01919237100229F4A /* r_encode.c in Sources */,
+				07C4A3C11919237100229F4A /* IFSystemAPI.cpp in Sources */,
+				07C4A3C21919237100229F4A /* IFTimer.cpp in Sources */,
+				07C4A3C31919237100229F4A /* IFHttpDownloader.cpp in Sources */,
+				07C4A3C41919237100229F4A /* IFFileInfo.cpp in Sources */,
+				07C4A3C51919237100229F4A /* desc.c in Sources */,
+				78FCAF161B1FEBA10018DDA0 /* IFAStar.cpp in Sources */,
+				07C4A3C61919237100229F4A /* IFGUID.cpp in Sources */,
+				07C4A3C71919237100229F4A /* IFRefObj.cpp in Sources */,
+				07C4A3C81919237100229F4A /* digit.c in Sources */,
+				07C4A3C91919237100229F4A /* IFGlobalObject.cpp in Sources */,
+				07C4A3CA1919237100229F4A /* IFFilePackage.cpp in Sources */,
+				4F55FADE1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */,
+				07C4A3CB1919237100229F4A /* IFDateTime.cpp in Sources */,
+				07C4A3CC1919237100229F4A /* IFString.cpp in Sources */,
+				07C4A3CD1919237100229F4A /* prime.c in Sources */,
+				A4C7EE881A3163F100237415 /* inflate.c in Sources */,
+				8A4E925120D71C3700BD93BF /* IFSHA.cpp in Sources */,
+				07C4A3CE1919237100229F4A /* r_stdlib.c in Sources */,
+				07C4A3CF1919237100229F4A /* IFMemStream.cpp in Sources */,
+				07C4A3D01919237100229F4A /* IFWeakPtr.cpp in Sources */,
+				07C4A3D11919237100229F4A /* IFImageCodecMgr.cpp in Sources */,
+				07C4A3D21919237100229F4A /* IFSuperAttrMgr.cpp in Sources */,
+				8A4E924F20D71C3700BD93BF /* IFFFT.cpp in Sources */,
+				8A2F34621937703C00C65AC4 /* IFFixNumber.cpp in Sources */,
+				07C4A3D31919237100229F4A /* IFRBTree.cpp in Sources */,
+				A4C7EE7E1A3163F100237415 /* crc32.c in Sources */,
+				07C4A3D41919237100229F4A /* r_enhanc.c in Sources */,
+				07C4A3D51919237100229F4A /* IFMap.cpp in Sources */,
+				A4C7EE901A3163F100237415 /* mztools.c in Sources */,
+				07C4A3D61919237100229F4A /* IFProfile.cpp in Sources */,
+				07C4A3D71919237100229F4A /* rijndael-alg-fst.c in Sources */,
+				07C4A3D81919237100229F4A /* stdafx.cpp in Sources */,
+				07C4A3D91919237100229F4A /* md2c.c in Sources */,
+				07C4A3DA1919237100229F4A /* rsa.c in Sources */,
+				A43BD35F1965492300CB8867 /* IFJSON.cpp in Sources */,
+				8A2F34661937704B00C65AC4 /* IFRandom.cpp in Sources */,
+				07C4A3DB1919237100229F4A /* IFAttributeMgr.cpp in Sources */,
+				07C4A3DC1919237100229F4A /* IFFunctor.cpp in Sources */,
+				07C4A3DD1919237100229F4A /* IFFileStream.cpp in Sources */,
+				07C4A3DE1919237100229F4A /* IFRefPtr.cpp in Sources */,
+				07C4A3DF1919237100229F4A /* IFFileProvider.cpp in Sources */,
+				07C4A3E01919237100229F4A /* IFSet.cpp in Sources */,
+				A4C7EE9D1A3165EA00237415 /* ioapi.c in Sources */,
+				07C4A3E11919237100229F4A /* IFAES.cpp in Sources */,
+				07C4A3E21919237100229F4A /* IFList.cpp in Sources */,
+				07C4A3E31919237100229F4A /* IFArray.cpp in Sources */,
+				A4C7EE7A1A3163F100237415 /* adler32.c in Sources */,
+				07C4A3E41919237100229F4A /* IFObjectFactory.cpp in Sources */,
+				07C4A3E51919237100229F4A /* IFStream.cpp in Sources */,
+				07C4A3E61919237100229F4A /* IFLogSystem.cpp in Sources */,
+				07C4A3E71919237100229F4A /* IFFileSystem.cpp in Sources */,
+				8A4E925320D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */,
+				A4C7EE9A1A3163F100237415 /* zutil.c in Sources */,
+				A4C7EE961A3163F100237415 /* unzip.c in Sources */,
+				07C4A3E81919237100229F4A /* IFNavigation.cpp in Sources */,
+				07C4A3E91919237100229F4A /* IFPipe.cpp in Sources */,
+				A4C7EE7C1A3163F100237415 /* compress.c in Sources */,
+				A4C7EE8E1A3163F100237415 /* minigzip.c in Sources */,
+				A4C7EE801A3163F100237415 /* deflate.c in Sources */,
+				07C4A3EA1919237100229F4A /* IFRSA.cpp in Sources */,
+				07C4A3EB1919237100229F4A /* IFAnyBasic.cpp in Sources */,
+				07C4A3EC1919237100229F4A /* IFThread.cpp in Sources */,
+				07C4A3ED1919237100229F4A /* IFNetCoreSelect.cpp in Sources */,
+				07C4A3EE1919237100229F4A /* IFNaviPath.cpp in Sources */,
+				A4C7EE861A3163F100237415 /* inffast.c in Sources */,
+				07C4A3EF1919237100229F4A /* IFMath.cpp in Sources */,
+				07C4A3F01919237100229F4A /* IFTypes.cpp in Sources */,
+				07C4A3F11919237100229F4A /* rijndael-api-fst.c in Sources */,
+				A4C7EE981A3163F100237415 /* zip.c in Sources */,
+				07C4A3F21919237100229F4A /* IFNetConnection.cpp in Sources */,
+				07C4A3F31919237100229F4A /* IFMD5.cpp in Sources */,
+				07C4A3F41919237100229F4A /* IFNetIOData.cpp in Sources */,
+				07C4A3F51919237100229F4A /* crypt_aes.c in Sources */,
+				07C4A3F61919237100229F4A /* md5c.c in Sources */,
+				07C4A3F71919237100229F4A /* IFNetMsgFactory.cpp in Sources */,
+				4F3A13CF1AA9A7300034BCA1 /* IFCoroutine.cpp in Sources */,
+				07C4A3F81919237100229F4A /* IFNetCore.cpp in Sources */,
+				07C4A3F91919237100229F4A /* IFFIFOStream.cpp in Sources */,
+				07C4A3FA1919237100229F4A /* r_keygen.c in Sources */,
+				07C4A3FB1919237100229F4A /* nn.c in Sources */,
+				A4C7EE941A3163F100237415 /* uncompr.c in Sources */,
+				07C4A3FC1919237100229F4A /* IFAsyncTaskMgr.cpp in Sources */,
+				07C4A3FD1919237100229F4A /* androidwcs.cpp in Sources */,
+				07C4A3FE1919237100229F4A /* IFIDAllocator.cpp in Sources */,
+				A4BF69A01A19D8FE0001C966 /* IFCompress.cpp in Sources */,
+				07C4A3FF1919237100229F4A /* IFAttribute.cpp in Sources */,
+				A4C7EE8A1A3163F100237415 /* inftrees.c in Sources */,
+				07C4A4001919237100229F4A /* IFStateMgr.cpp in Sources */,
+				07C4A4011919237100229F4A /* IFNaviCell.cpp in Sources */,
+				07C4A4021919237100229F4A /* r_dh.c in Sources */,
+				07C4A4031919237100229F4A /* IFUtility.cpp in Sources */,
+				07C4A4041919237100229F4A /* IFMemPool.cpp in Sources */,
+				07C4A4051919237100229F4A /* IFServerFrame.cpp in Sources */,
+				07C4A4061919237100229F4A /* IFAttributeSet.cpp in Sources */,
+				07C4A4071919237100229F4A /* IFAlloc.cpp in Sources */,
+				07C4A4081919237100229F4A /* r_random.c in Sources */,
+				07C4A4091919237100229F4A /* ifobj.cpp in Sources */,
+				A4C7EE841A3163F100237415 /* infback.c in Sources */,
+				07C4A40A1919237100229F4A /* IFCommonLib.cpp in Sources */,
+				A4C7EE921A3163F100237415 /* trees.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A49D2EE91907A6C300BC5A3F /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A4C7EE911A3163F100237415 /* trees.c in Sources */,
+				A49D30231907A83600BC5A3F /* r_encode.c in Sources */,
+				A49D30151907A83600BC5A3F /* IFSystemAPI.cpp in Sources */,
+				A49D30171907A83600BC5A3F /* IFTimer.cpp in Sources */,
+				A49D2FF11907A83600BC5A3F /* IFHttpDownloader.cpp in Sources */,
+				A49D2FE91907A83600BC5A3F /* IFFileInfo.cpp in Sources */,
+				A49D301B1907A83600BC5A3F /* desc.c in Sources */,
+				A49D2FF01907A83600BC5A3F /* IFGUID.cpp in Sources */,
+				A49D300B1907A83600BC5A3F /* IFRefObj.cpp in Sources */,
+				A4C7EE971A3163F100237415 /* zip.c in Sources */,
+				A4C7EE7D1A3163F100237415 /* crc32.c in Sources */,
+				A49D301C1907A83600BC5A3F /* digit.c in Sources */,
+				A49D2FEF1907A83600BC5A3F /* IFGlobalObject.cpp in Sources */,
+				A49D2FEA1907A83600BC5A3F /* IFFilePackage.cpp in Sources */,
+				A49D2FE71907A83600BC5A3F /* IFDateTime.cpp in Sources */,
+				A49D30131907A83600BC5A3F /* IFString.cpp in Sources */,
+				A4C7EE8F1A3163F100237415 /* mztools.c in Sources */,
+				A49D30211907A83600BC5A3F /* prime.c in Sources */,
+				A43BD35E1965492300CB8867 /* IFJSON.cpp in Sources */,
+				A49D30271907A83600BC5A3F /* r_stdlib.c in Sources */,
+				A49D2FFA1907A83600BC5A3F /* IFMemStream.cpp in Sources */,
+				A49D301A1907A83600BC5A3F /* IFWeakPtr.cpp in Sources */,
+				A49D2FF31907A83600BC5A3F /* IFImageCodecMgr.cpp in Sources */,
+				A49D30141907A83600BC5A3F /* IFSuperAttrMgr.cpp in Sources */,
+				8A2F34611937703C00C65AC4 /* IFFixNumber.cpp in Sources */,
+				A49D300A1907A83600BC5A3F /* IFRBTree.cpp in Sources */,
+				A49D30241907A83600BC5A3F /* r_enhanc.c in Sources */,
+				A49D2FF61907A83600BC5A3F /* IFMap.cpp in Sources */,
+				A49D30091907A83600BC5A3F /* IFProfile.cpp in Sources */,
+				A49D2FD91907A83600BC5A3F /* rijndael-alg-fst.c in Sources */,
+				A49D30291907A83600BC5A3F /* stdafx.cpp in Sources */,
+				A4C7EE951A3163F100237415 /* unzip.c in Sources */,
+				A49D301E1907A83600BC5A3F /* md2c.c in Sources */,
+				8A07751523F3E61900CC1FF3 /* IFNumParse.cpp in Sources */,
+				A49D30281907A83600BC5A3F /* rsa.c in Sources */,
+				A43BD35B195D272000CB8867 /* IFJSON.cpp in Sources */,
+				8A2F34651937704B00C65AC4 /* IFRandom.cpp in Sources */,
+				A49D2FE41907A83600BC5A3F /* IFAttributeMgr.cpp in Sources */,
+				A49D2FEE1907A83600BC5A3F /* IFFunctor.cpp in Sources */,
+				A49D2FEC1907A83600BC5A3F /* IFFileStream.cpp in Sources */,
+				A49D300C1907A83600BC5A3F /* IFRefPtr.cpp in Sources */,
+				A49D2FEB1907A83600BC5A3F /* IFFileProvider.cpp in Sources */,
+				A49D300F1907A83600BC5A3F /* IFSet.cpp in Sources */,
+				A4C7EE9C1A3165EA00237415 /* ioapi.c in Sources */,
+				A49D2FDE1907A83600BC5A3F /* IFAES.cpp in Sources */,
+				A49D2FF41907A83600BC5A3F /* IFList.cpp in Sources */,
+				A4C7EE991A3163F100237415 /* zutil.c in Sources */,
+				A49D2FE11907A83600BC5A3F /* IFArray.cpp in Sources */,
+				A4C7EE831A3163F100237415 /* infback.c in Sources */,
+				A49D30061907A83600BC5A3F /* IFObjectFactory.cpp in Sources */,
+				A4C7EE8D1A3163F100237415 /* minigzip.c in Sources */,
+				A49D30121907A83600BC5A3F /* IFStream.cpp in Sources */,
+				A49D2FF51907A83600BC5A3F /* IFLogSystem.cpp in Sources */,
+				A49D2FED1907A83600BC5A3F /* IFFileSystem.cpp in Sources */,
+				A49D2FFC1907A83600BC5A3F /* IFNavigation.cpp in Sources */,
+				4F55FADD1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */,
+				A49D30071907A83600BC5A3F /* IFPipe.cpp in Sources */,
+				A49D300D1907A83600BC5A3F /* IFRSA.cpp in Sources */,
+				A4C7EE791A3163F100237415 /* adler32.c in Sources */,
+				A49D2FE01907A83600BC5A3F /* IFAnyBasic.cpp in Sources */,
+				A49D30161907A83600BC5A3F /* IFThread.cpp in Sources */,
+				A49D30021907A83600BC5A3F /* IFNetCoreSelect.cpp in Sources */,
+				A4C7EE891A3163F100237415 /* inftrees.c in Sources */,
+				78FCAF151B1FEBA10018DDA0 /* IFAStar.cpp in Sources */,
+				8A4E924E20D71C3700BD93BF /* IFFFT.cpp in Sources */,
+				A49D2FFD1907A83600BC5A3F /* IFNaviPath.cpp in Sources */,
+				A49D2FF71907A83600BC5A3F /* IFMath.cpp in Sources */,
+				A49D30181907A83600BC5A3F /* IFTypes.cpp in Sources */,
+				8A4E925020D71C3700BD93BF /* IFSHA.cpp in Sources */,
+				A49D2FDA1907A83600BC5A3F /* rijndael-api-fst.c in Sources */,
+				A49D2FFE1907A83600BC5A3F /* IFNetConnection.cpp in Sources */,
+				A49D2FF81907A83600BC5A3F /* IFMD5.cpp in Sources */,
+				A49D30031907A83600BC5A3F /* IFNetIOData.cpp in Sources */,
+				A4C7EE871A3163F100237415 /* inflate.c in Sources */,
+				A49D2FD81907A83600BC5A3F /* crypt_aes.c in Sources */,
+				A49D301F1907A83600BC5A3F /* md5c.c in Sources */,
+				A49D30041907A83600BC5A3F /* IFNetMsgFactory.cpp in Sources */,
+				A49D2FFF1907A83600BC5A3F /* IFNetCore.cpp in Sources */,
+				8A4E925220D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */,
+				A49D2FE81907A83600BC5A3F /* IFFIFOStream.cpp in Sources */,
+				A49D30251907A83600BC5A3F /* r_keygen.c in Sources */,
+				A49D30201907A83600BC5A3F /* nn.c in Sources */,
+				A4C7EE7B1A3163F100237415 /* compress.c in Sources */,
+				A49D2FE21907A83600BC5A3F /* IFAsyncTaskMgr.cpp in Sources */,
+				A49D2FDB1907A83600BC5A3F /* androidwcs.cpp in Sources */,
+				A49D2FF21907A83600BC5A3F /* IFIDAllocator.cpp in Sources */,
+				A4C7EE931A3163F100237415 /* uncompr.c in Sources */,
+				A41EF0A41DE67EA80035BD12 /* IFThreadSyncObj.cpp in Sources */,
+				4F3A13CE1AA9A7300034BCA1 /* IFCoroutine.cpp in Sources */,
+				A49D2FE31907A83600BC5A3F /* IFAttribute.cpp in Sources */,
+				A49D30111907A83600BC5A3F /* IFStateMgr.cpp in Sources */,
+				A4C7EE851A3163F100237415 /* inffast.c in Sources */,
+				A49D2FFB1907A83600BC5A3F /* IFNaviCell.cpp in Sources */,
+				A49D30221907A83600BC5A3F /* r_dh.c in Sources */,
+				A49D30191907A83600BC5A3F /* IFUtility.cpp in Sources */,
+				A49D2FF91907A83600BC5A3F /* IFMemPool.cpp in Sources */,
+				A49D300E1907A83600BC5A3F /* IFServerFrame.cpp in Sources */,
+				A4BF699F1A19D8F50001C966 /* IFCompress.cpp in Sources */,
+				A49D2FE51907A83600BC5A3F /* IFAttributeSet.cpp in Sources */,
+				A4C7EE7F1A3163F100237415 /* deflate.c in Sources */,
+				A49D2FDF1907A83600BC5A3F /* IFAlloc.cpp in Sources */,
+				A49D30261907A83600BC5A3F /* r_random.c in Sources */,
+				A49D30051907A83600BC5A3F /* ifobj.cpp in Sources */,
+				A49D2FE61907A83600BC5A3F /* IFCommonLib.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		07C4A40F1919237100229F4A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				DSTROOT = /tmp/IFCommonLib.dst;
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = stdafx.cpp;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/shiliang/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				OTHER_CFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DMAC",
+					"-DUSEIFMEMPOOLALLOC",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DMAC",
+					"-DUSEIFMEMPOOLALLOC",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "IFCommonLib-mac";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SYMROOT = ../../../Bin;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = x86_64;
+			};
+			name = Debug;
+		};
+		07C4A4101919237100229F4A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = x86_64;
+				DSTROOT = /tmp/IFCommonLib.dst;
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = stdafx.cpp;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/shiliang/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				OTHER_CFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DMAC",
+					"-DUSEIFMEMPOOLALLOC",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"$(OTHER_CFLAGS)",
+					"-DMAC",
+					"-DUSEIFMEMPOOLALLOC",
+				);
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "IFCommonLib-mac";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = macosx;
+				SYMROOT = ../../../Bin;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = x86_64;
+			};
+			name = Release;
+		};
+		A49D2F0E1907A6C300BC5A3F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Debug;
+		};
+		A49D2F0F1907A6C300BC5A3F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+				VALID_ARCHS = "i386 x86_64";
+			};
+			name = Release;
+		};
+		A49D2F111907A6C300BC5A3F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				DSTROOT = /tmp/IFCommonLib.dst;
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = stdafx.cpp;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/shiliang/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				OTHER_CFLAGS = (
+					"-DMAC",
+					"-DIOS_DEVICE",
+					"-fembed-bitcode",
+				);
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS) ";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SYMROOT = ../../../Bin;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s arm64";
+			};
+			name = Debug;
+		};
+		A49D2F121907A6C300BC5A3F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				DSTROOT = /tmp/IFCommonLib.dst;
+				GCC_C_LANGUAGE_STANDARD = c11;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = stdafx.cpp;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Users/shiliang/Downloads/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-DMAC",
+					"-DIOS_DEVICE",
+					"-fembed-bitcode",
+				);
+				OTHER_CPLUSPLUSFLAGS = "$(OTHER_CFLAGS) ";
+				OTHER_LDFLAGS = "-ObjC";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SYMROOT = ../../../Bin;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALID_ARCHS = "armv7 armv7s arm64";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		07C4A40E1919237100229F4A /* Build configuration list for PBXNativeTarget "IFCommonLib-mac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07C4A40F1919237100229F4A /* Debug */,
+				07C4A4101919237100229F4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A49D2EE81907A6C300BC5A3F /* Build configuration list for PBXProject "IFCommonLib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A49D2F0E1907A6C300BC5A3F /* Debug */,
+				A49D2F0F1907A6C300BC5A3F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A49D2F101907A6C300BC5A3F /* Build configuration list for PBXNativeTarget "IFCommonLib-ios" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A49D2F111907A6C300BC5A3F /* Debug */,
+				A49D2F121907A6C300BC5A3F /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A49D2EE51907A6C300BC5A3F /* Project object */;
+}
