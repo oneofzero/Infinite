@@ -179,6 +179,8 @@ DWORD IFThread::run(LPVOID p)
 	pThread->m_bRunning = false;
 	pThread->m_spFunctor = NULL;
 	delete (IFRefPtr<IFThread>*)p;
+	IFAlloc::FreePool();
+
 	return 0;
 }
 #else

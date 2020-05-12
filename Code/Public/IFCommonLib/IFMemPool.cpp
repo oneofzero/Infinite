@@ -97,10 +97,41 @@ IFMemPool::IFMemPool(int nPoolIdx):m_OTFreeList(128),m_pNext(NULL)
 }
 
 
+IFMemPool::~IFMemPool()
+{
+	for (int i = 0; i < IFArraySize(m_Blocks); i++)
+	{		
+		delete m_Blocks[i];
+	}
+
+	IFCSLockHelper lh(memLock);
+	if (m_pFirst == this)
+	{
+		m_pFirst = m_pFirst->m_pNext;
+	}
+	else
+	{
+		auto pCur = m_pFirst;
+		while (pCur)
+		{
+
+			if (pCur->m_pNext == this)
+			{
+				pCur->m_pNext = m_pNext;
+				break;;
+			}
+			pCur = pCur->m_pNext;
+		}
+
+	}
+
+}
+
 void* IFMemPool::Alloc(int nSize)
 {
 #ifdef DEBUG_MEMPOOL_OVERFLOW
 	int nallocsize = nSize;
+	m_nAllocSize += nallocsize;
 #endif
 	if (m_OTFreeList.size())
 	{
@@ -186,8 +217,12 @@ void IFMemPool::Free(void* p)
 	pp -= sizeof(PreAllocInfo);
 	PreAllocInfo* pa = (PreAllocInfo*)pp;
 #endif
+
 	if (pa->nBlock >= IFArraySize(m_Blocks))
 	{
+#ifdef DEBUG_MEMPOOL_OVERFLOW
+		m_nAllocSize -= pa->nAllocSize;
+#endif
 		//m_nAllocSize -= pa->nSize;
 		free(pa);
 		return;
@@ -195,6 +230,9 @@ void IFMemPool::Free(void* p)
 
 	if (pa->nPool == m_nPoolIdx)
 	{
+#ifdef DEBUG_MEMPOOL_OVERFLOW
+		m_nAllocSize -= pa->nAllocSize;
+#endif
 		//m_nAllocSize -= pa->nSize;
 		m_Blocks[pa->nBlock]->Free(pa);
 	}

@@ -29,6 +29,14 @@ THE SOFTWARE.
 #include "IFThread.h"
 #include "IFLogSystem.h"
 
+#ifdef IFPLATFORM_LINUX
+#include <sys/sysinfo.h>
+#endif
+
+#ifdef IFPLATFORM_ANDROID
+#include <sys/sysinfo.h>
+#endif
+
 #ifndef WIN32
 #include <time.h>
 #include <unistd.h>
@@ -430,6 +438,7 @@ public:
 	static void init()
 	{
 		IF_NATIVESYSTEMAPI_MAP(IFLinuxSystemAPI);
+		IF_NATIVESYSTEMAPI_MAP_FUN(IFLinuxSystemAPI, getProcessorCount);
 	}
 	static IFUI32 getTickCount()
 	{
@@ -437,6 +446,11 @@ public:
         clock_gettime (CLOCK_MONOTONIC, &tv);
         return tv.tv_sec * 1000 + tv.tv_nsec/1000000;
 
+	}
+
+	static int getProcessorCount()
+	{
+		return get_nprocs();
 	}
 
 	static IFUI64 getMicrosSec()
@@ -771,6 +785,7 @@ public:
 	{
 		IF_NATIVESYSTEMAPI_MAP(IFAndroidNativeSystemAPI);
 		IF_NATIVESYSTEMAPI_MAP_FUN(IFAndroidNativeSystemAPI, getDeviceIdentifier);
+		IF_NATIVESYSTEMAPI_MAP_FUN(IFAndroidNativeSystemAPI, getProcessorCount);
 
 		//IFLOG(IFLL_TRACE, "IFAndroidNativeSystemAPI Construct\r\n");
 	}
@@ -912,6 +927,38 @@ public:
 		gettimeofday(&tv, NULL);
 		return tv.tv_sec * 1000000LL + tv.tv_usec;
 	}
+
+	static int processorcount;
+	static int getProcessorCount()
+	{
+		if (processorcount > 0)
+		{
+			return processorcount;
+		}
+
+		processorcount = 1;
+
+		FILE* fp = fopen("/sys/devices/system/cpu/present", "rb");
+		if (!fp)
+		{
+			return processorcount;
+		}
+		char buf[128];
+		int nreadlen = fread(buf, 1, 128, fp);
+		buf[nreadlen] = 0;
+		fclose(fp);
+
+		StringList sl;
+		USplitStrings(&sl, buf, "-");
+		if (sl.size() != 2)
+		{
+			return processorcount;
+		}
+		processorcount = sl[1].toInt32() + 1;
+
+		return processorcount;
+	}
+
 	static IFStringW sWriteablePath;
 
 	static IFStringW getWriteableDirectory()
@@ -1013,6 +1060,7 @@ public:
 IFStringW IFAndroidNativeSystemAPI::sWriteablePath;
 IFString IFAndroidNativeSystemAPI::sPackagePath;
 bool IFAndroidNativeSystemAPI::bKeyboardShow = false;
+int IFAndroidNativeSystemAPI::processorcount = 0;
 JNIEnv* IFAndroidNativeSystemAPI::m_JNIEnv = NULL;
 void NativeSystemAPIInit(JNIEnv* jni)
 {

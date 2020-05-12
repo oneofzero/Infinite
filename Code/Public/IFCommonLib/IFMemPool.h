@@ -96,7 +96,7 @@ class IFMemPool
 {
 public:
 	IFMemPool(int nPoolIdx);
-
+	~IFMemPool();
 
 	void* Alloc(int nSize);
 

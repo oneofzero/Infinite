@@ -45,9 +45,9 @@ THE SOFTWARE.
 //#undef USEIFMEMPOOLALLOC
 //#endif
 
-#ifndef IFPLATFORM_IOS
-#define SUPPORT_TLS 1
-#endif
+//#ifndef IFPLATFORM_IOS
+//#define SUPPORT_TLS 1
+//#endif
 
 
 #ifdef SUPPORT_TLS
@@ -55,9 +55,12 @@ thread_local static IFMemPool* g_pool = NULL;
 IFSystemAllocSA<IFMemPool*>* g_mempools = NULL;
 static IFCSLock* g_mempool_lock = NULL;
 thread_local static bool g_isInAllocDebug = false;
+static char lockbuf[sizeof(IFCSLock)];
+
+#else
+IFSystemAllocSA<IFMemPool*>* g_mempools = NULL;
 #endif
 
-static char lockbuf[sizeof(IFCSLock)];
 #if _DEBUG
 IFHashMap<IFStackDumper, int> g_AllocCountInfo;
 IFHashMap<void*, IFHashMap<IFStackDumper, int>::iterator> g_AllocStackInfo;
@@ -223,8 +226,11 @@ IFAllocStatisticsInfo* IFAlloc::GetStatisticsInfo()
 void IFAlloc::FreePool()
 {
 #ifdef SUPPORT_TLS
-	if(g_pool)
+	if (g_pool)
+	{
 		g_pool->setFree(true);
+		//delete g_pool;
+	}
 	g_pool = NULL;
 #endif
 }

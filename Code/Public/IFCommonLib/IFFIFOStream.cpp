@@ -139,6 +139,8 @@ void IFFIFOStream::flush()
 
 IFFIFOFixedBuffer::IFFIFOFixedBuffer(int nCap /*= 1024 * 1024*/)
 	:m_buff(nCap)
+	,m_nReadPos(0)
+	,m_nWritePos(0)
 {
 
 }

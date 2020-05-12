@@ -88,6 +88,7 @@ m_nRecvPackage(0),
 m_nSendBytes(0),
 m_nRecvBytes(0)
 {
+	m_spEventSyncObj = IFNew IFThreadSyncObj();
 	m_spTimer = IFNew IFTimer();
 	m_spMsgFactory = IFNew IFNetMsgFactory;
 	m_spMsgFactory->registerMsg(makeIFFunctor<void(IFNetConnection*, IFNet_Message_EstablishEncryption_Req*)>([=](IFNetConnection* pConnection, IFNet_Message_EstablishEncryption_Req* pMsg)
@@ -230,8 +231,17 @@ void IFNetCore::fireNewConnectionEvent( IFNetConnection* pConnection )
 	}
 }
 
+void IFNetCore::pushEvent(IFNetCoreEvent* e)
+{
+	m_EventList.push(e);
+	m_spEventSyncObj->notify();
+
+}
+
+
 bool IFNetCore::process()
 {
+	const int maxNum = 1000000;
 	int nNum = 1000000;
 	while (nNum)
 	{
@@ -334,7 +344,13 @@ bool IFNetCore::process()
 	}
 	m_spTimer->update();
 
-	return true;
+	return maxNum!=nNum;
+}
+
+bool IFNetCore::waitAndProcess(int ms)
+{
+	m_spEventSyncObj->wait(ms);
+	return process();
 }
 
 bool IFNetCore::startService( int nPort, int nMaxConnection,bool bPackagemode  , bool bSyncEvent )
@@ -344,6 +360,8 @@ bool IFNetCore::startService( int nPort, int nMaxConnection,bool bPackagemode  ,
 	m_bPackageMode = bPackagemode;
 	m_bSyncEvent = bSyncEvent;
 	int processornum = IFNativeSystemAPI::getProcessorCount();
+	if (processornum > 1)
+		processornum /= 2;
 	m_PackSerializeThreads.reserve(processornum);
 	m_SerializeQueue.resize(processornum);
 	for (int i = 0; i < processornum; i++)

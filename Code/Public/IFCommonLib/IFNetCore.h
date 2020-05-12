@@ -37,6 +37,7 @@ THE SOFTWARE.
 
 class IFNet_Message;
 class IFTimer;
+class IFThreadSyncObj;
 
 class IFNetMsgFactory;
 
@@ -149,6 +150,8 @@ public:
 
 	bool startService(int nPort, int nMaxConnection, bool bPackagemode = true , bool bSyncEvent = true);
 	bool process();
+	bool waitAndProcess(int ms);
+
 	bool stopService();
 
 	virtual bool startListen(int nPort, bool enableSSL, bool packagemode=false) { return false; };
@@ -199,11 +202,7 @@ protected:
 	void fireNewConnectionEvent(IFNetConnection* pConnection);
 
 
-	inline void pushEvent( IFNetCoreEvent* e )
-	{
-		m_EventList.push(e);
-	}
-
+	void pushEvent(IFNetCoreEvent* e);
 protected:
 
 	virtual bool onServiceStart() = 0;
@@ -284,4 +283,5 @@ protected:
 	
 	IFMap<IFString, IFRefPtr<IFMemStream>> m_RSAPrivateKeyList;
 	IFRefPtr<IFTimer> m_spTimer;
+	IFRefPtr<IFThreadSyncObj> m_spEventSyncObj;
 };
