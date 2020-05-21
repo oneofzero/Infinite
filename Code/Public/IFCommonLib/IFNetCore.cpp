@@ -2,22 +2,22 @@
 The MIT License (MIT)
 Copyright © 2014 Huang Cong
 
-Permission is hereby granted, free of charge, to any person obtaining a 
-copy of this software and associated documentation files (the “Software”), 
-to deal in the Software without restriction, including without limitation 
-the rights to use, copy, modify, merge, publish, distribute, sublicense, 
-and/or sell copies of the Software, and to permit persons to whom the 
+Permission is hereby granted, free of charge, to any person obtaining a
+copy of this software and associated documentation files (the “Software”),
+to deal in the Software without restriction, including without limitation
+the rights to use, copy, modify, merge, publish, distribute, sublicense,
+and/or sell copies of the Software, and to permit persons to whom the
 Software is furnished to do so, subject to the following conditions:
 
 The above copyright notice and this permission notice shall be included
 in all copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS 
-OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, 
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS
+OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #include "stdafx.h"
@@ -73,79 +73,79 @@ THE SOFTWARE.
 #include <openssl/rand.h>
 #include <openssl/err.h>
 
-SSL_CTX * GetSSLContext();
+SSL_CTX* GetSSLContext();
 #endif
 
 
 
 IF_DEFINERTTI(IFNetCore, IFRefObj);
 IF_DEFINERTTI(IFNetCore::UDPData, IFRefObj);
-IFNetCore::IFNetCore(void):
-m_nMaxConnectionCount(1000),
-//m_nCurConnectionCount(0),
-m_nSendPackage(0),
-m_nRecvPackage(0),
-m_nSendBytes(0),
-m_nRecvBytes(0)
+IFNetCore::IFNetCore(void) :
+	m_nMaxConnectionCount(1000),
+	//m_nCurConnectionCount(0),
+	m_nSendPackage(0),
+	m_nRecvPackage(0),
+	m_nSendBytes(0),
+	m_nRecvBytes(0)
 {
 	m_spEventSyncObj = IFNew IFThreadSyncObj();
 	m_spTimer = IFNew IFTimer();
 	m_spMsgFactory = IFNew IFNetMsgFactory;
 	m_spMsgFactory->registerMsg(makeIFFunctor<void(IFNetConnection*, IFNet_Message_EstablishEncryption_Req*)>([=](IFNetConnection* pConnection, IFNet_Message_EstablishEncryption_Req* pMsg)
-	{
-		auto privatekey = getRSAPrivateKey(pMsg->m_sPublicKeyMD5);
-		IFRefPtr<IFNet_Message_EstablishEncryption_Res> spRet = IFNew IFNet_Message_EstablishEncryption_Res;
-
-		if (!privatekey || !pMsg->m_sEncryptAESKey.size())
 		{
-			pConnection->sendMsg(spRet);
-			return;
-		}
-		IFRefPtr<IFAES> spAES;
+			auto privatekey = getRSAPrivateKey(pMsg->m_sPublicKeyMD5);
+			IFRefPtr<IFNet_Message_EstablishEncryption_Res> spRet = IFNew IFNet_Message_EstablishEncryption_Res;
 
-		{
-			IFRefPtr<IFMemStream> spOut = IFNew IFMemStream;
-			IFRefPtr<IFMemStream> spIn = IFNew IFMemStream(pMsg->m_sEncryptAESKey, pMsg->m_sEncryptAESKey.size());
-
-			privatekey->seek(0, IFStream::ISSF_BEGIN);
-			IFLOG(IFLL_TRACE, "RSA INPUT:%s\r\n", IFString().encodeBase64((const char*)spIn->getBuffer(), spIn->size()).c_str());
-			IFLOG(IFLL_TRACE, "RSA KEY:%s\r\n", IFString().encodeBase64((const char*)privatekey->getBuffer(), privatekey->size()).c_str());
-			if (!IFRSA::decryptPrivate(spOut, spIn, privatekey))
+			if (!privatekey || !pMsg->m_sEncryptAESKey.size())
 			{
 				pConnection->sendMsg(spRet);
 				return;
 			}
-			spAES = IFNew IFAES(IFString((const char*)spOut->getBuffer(), (int)spOut->size()));
-		}
+			IFRefPtr<IFAES> spAES;
 
-		{
-			IFRefPtr<IFMemStream> spOut = IFNew IFMemStream;
-			IFRefPtr<IFMemStream> spIn = IFNew IFMemStream(pMsg->m_sTestDataEncrypt, pMsg->m_sTestDataEncrypt.size());
-			spAES->decrypt(spIn, spOut);
-			spRet->m_sTestData.resize(spOut->size());
-			memcpy(spRet->m_sTestData, spOut->getBuffer(), spOut->size());
-
-
-			pConnection->sendMsg(spRet);
-
-			pConnection->setDecryptFun(makeIFFunctor<IFRefPtr<IFMemStream>(IFStream*)>([=](IFStream* pIn)
 			{
-				IFRefPtr<IFMemStream> spOUT = IFNew IFMemStream;
-				spAES->decrypt(pIn, spOUT);
-				return spOUT;
-			}));
-			pConnection->setDefalutEncryptFun(makeIFFunctor<IFRefPtr<IFMemStream>(IFStream*)>([=](IFStream* pIn)
+				IFRefPtr<IFMemStream> spOut = IFNew IFMemStream;
+				IFRefPtr<IFMemStream> spIn = IFNew IFMemStream(pMsg->m_sEncryptAESKey, pMsg->m_sEncryptAESKey.size());
+
+				privatekey->seek(0, IFStream::ISSF_BEGIN);
+				IFLOG(IFLL_TRACE, "RSA INPUT:%s\r\n", IFString().encodeBase64((const char*)spIn->getBuffer(), spIn->size()).c_str());
+				IFLOG(IFLL_TRACE, "RSA KEY:%s\r\n", IFString().encodeBase64((const char*)privatekey->getBuffer(), privatekey->size()).c_str());
+				if (!IFRSA::decryptPrivate(spOut, spIn, privatekey))
+				{
+					pConnection->sendMsg(spRet);
+					return;
+				}
+				spAES = IFNew IFAES(IFString((const char*)spOut->getBuffer(), (int)spOut->size()));
+			}
+
 			{
-				IFRefPtr<IFMemStream> spOUT = IFNew IFMemStream;
-				spAES->encrypt(pIn, spOUT);
-				return spOUT;
-			}));
-
-			return;
-		}
+				IFRefPtr<IFMemStream> spOut = IFNew IFMemStream;
+				IFRefPtr<IFMemStream> spIn = IFNew IFMemStream(pMsg->m_sTestDataEncrypt, pMsg->m_sTestDataEncrypt.size());
+				spAES->decrypt(spIn, spOut);
+				spRet->m_sTestData.resize(spOut->size());
+				memcpy(spRet->m_sTestData, spOut->getBuffer(), spOut->size());
 
 
-	}));
+				pConnection->sendMsg(spRet);
+
+				pConnection->setDecryptFun(makeIFFunctor<IFRefPtr<IFMemStream>(IFStream*)>([=](IFStream* pIn)
+					{
+						IFRefPtr<IFMemStream> spOUT = IFNew IFMemStream;
+						spAES->decrypt(pIn, spOUT);
+						return spOUT;
+					}));
+				pConnection->setDefalutEncryptFun(makeIFFunctor<IFRefPtr<IFMemStream>(IFStream*)>([=](IFStream* pIn)
+					{
+						IFRefPtr<IFMemStream> spOUT = IFNew IFMemStream;
+						spAES->encrypt(pIn, spOUT);
+						return spOUT;
+					}));
+
+				return;
+			}
+
+
+		}));
 	m_spMsgFactory->registerMsg(makeIFFunctor(&IFNetConnection::ProcEstablishEncryptRes));
 	//m_spMsgFactory->registerMsg(IFNet_Message_Sproto::MsgID, makeIFFunctor(IFNet_Message_Sproto::createMsg));
 
@@ -157,7 +157,7 @@ m_nRecvBytes(0)
 
 IFNetCore::~IFNetCore(void)
 {
-//	DeleteCriticalSection(&m_ConnectionListLock);
+	//	DeleteCriticalSection(&m_ConnectionListLock);
 }
 
 
@@ -202,7 +202,7 @@ int IFNetCore::getMaxConnectionCount()
 
 
 
-void IFNetCore::enumConnections( IFRefPtr<IFFunctor<bool(IFNetConnection*)>> spEnumFun )
+void IFNetCore::enumConnections(IFRefPtr<IFFunctor<bool(IFNetConnection*)>> spEnumFun)
 {
 	IFCSLockHelper lh(m_ConnectionListLock);
 
@@ -218,11 +218,11 @@ void IFNetCore::enumConnections( IFRefPtr<IFFunctor<bool(IFNetConnection*)>> spE
 
 
 
-void IFNetCore::fireNewConnectionEvent( IFNetConnection* pConnection )
+void IFNetCore::fireNewConnectionEvent(IFNetConnection* pConnection)
 {
 	if (m_bSyncEvent)
 	{
-		IFNetCoreEvent* pEvent=IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_NEW_CONNECTION);
+		IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_NEW_CONNECTION);
 		pushEvent(pEvent);
 	}
 	else
@@ -247,14 +247,14 @@ bool IFNetCore::process()
 	{
 		//IFLOG(IFLL_DEBUG, "process event\r\n");
 
-		
+
 		IFNetCoreEvent* pEvent = NULL;
 		if (m_EventList.pop(pEvent))
 		{
 			//IFLOG(IFLL_DEBUG, "pop event\r\n" );
 			pEvent->fireEvent(this);
 			//IFLOG(IFLL_DEBUG, "fire event\r\n");
-			if (pEvent->eventType ==  IFNetCoreEvent::ET_DISCONNECT)
+			if (pEvent->eventType == IFNetCoreEvent::ET_DISCONNECT)
 			{
 				IFLOG(IFLL_DEBUG, "disconnect event fired!%p\r\n", pEvent->spConnection.getPtr());
 				IFCSLockHelper hl(m_ConnectionListLock);
@@ -265,7 +265,7 @@ bool IFNetCore::process()
 						removeAutoKeepAliveConnection(pEvent->spConnection);
 
 					m_Connections.erase(it);
-					
+
 				}
 			}
 			delete pEvent;
@@ -274,9 +274,9 @@ bool IFNetCore::process()
 		{
 			break;
 		}
-	
+
 		nNum--;
-	
+
 	}
 	if (m_AutoKeepAliveList.size())
 	{
@@ -309,13 +309,13 @@ bool IFNetCore::process()
 
 	if (m_OpendUDPProcThreadList.size())
 	{
-		for (auto it = m_OpendUDPProcThreadList.begin(); it!=m_OpendUDPProcThreadList.end(); ++it)
+		for (auto it = m_OpendUDPProcThreadList.begin(); it != m_OpendUDPProcThreadList.end(); ++it)
 		{
 			auto& datas = it->second.second->m_Datas;
 			if (datas.size())
 			{
 				IFCSLockHelper lh(it->second.second->m_DataLock);
-				for (auto d:datas)
+				for (auto d : datas)
 				{
 					event_RecvUDPData(this, d);
 				}
@@ -329,7 +329,7 @@ bool IFNetCore::process()
 	{
 		IFCSLockHelper lh(m_GetHostIPResultQueueLock);
 
-		while(m_GetHostIPResultQueue.size())
+		while (m_GetHostIPResultQueue.size())
 		{
 
 			auto& pr = m_GetHostIPResultQueue.front();
@@ -344,7 +344,7 @@ bool IFNetCore::process()
 	}
 	m_spTimer->update();
 
-	return maxNum!=nNum;
+	return maxNum != nNum;
 }
 
 bool IFNetCore::waitAndProcess(int ms)
@@ -353,7 +353,7 @@ bool IFNetCore::waitAndProcess(int ms)
 	return process();
 }
 
-bool IFNetCore::startService( int nPort, int nMaxConnection,bool bPackagemode  , bool bSyncEvent )
+bool IFNetCore::startService(int nPort, int nMaxConnection, bool bPackagemode, bool bSyncEvent)
 {
 	m_nPort = nPort;
 	m_nMaxConnectionCount = nMaxConnection;
@@ -387,7 +387,7 @@ bool IFNetCore::stopService()
 		m_spGetHostIPThread->waitExit();
 	}
 
-	for (auto pThread:m_PackSerializeThreads)
+	for (auto pThread : m_PackSerializeThreads)
 	{
 		pThread->requestExit();
 	}
@@ -395,7 +395,7 @@ bool IFNetCore::stopService()
 	{
 		pThread->waitExit();
 	}
-	if ( onServiceStop())
+	if (onServiceStop())
 	{
 		process();
 		return true;
@@ -452,12 +452,12 @@ void IFNetCoreEvent::fireEvent(IFNetCore* pNetCore)
 }
 
 
-void IFNetCore::addAutoKeepAliveConnection( IFNetConnection* pConnection )
+void IFNetCore::addAutoKeepAliveConnection(IFNetConnection* pConnection)
 {
 	m_AutoKeepAliveList.insert(pConnection);
 }
 
-void IFNetCore::removeAutoKeepAliveConnection( IFNetConnection* pConnection )
+void IFNetCore::removeAutoKeepAliveConnection(IFNetConnection* pConnection)
 {
 	ConnectionWeakList::iterator it = m_AutoKeepAliveList.find(pConnection);
 	if (it != m_AutoKeepAliveList.end())
@@ -502,44 +502,44 @@ IFRefPtr<IFNetCore> IFNetCore::createNetCore()
 bool IFNetCore::openUDPPort(int nPort)
 {
 	auto it = m_OpendUDPProcThreadList.find(nPort);
-	if (it!=m_OpendUDPProcThreadList.end())
+	if (it != m_OpendUDPProcThreadList.end())
 		return false;
 	//SOCKET m_Socket =  WSASocket( AF_INET, SOCK_DGRAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED );
 
 	IFRefPtr<UDPSocketInfo> pInfo = IFNew UDPSocketInfo;
-	pInfo->m_Socket = socket(AF_INET,SOCK_DGRAM,0);
+	pInfo->m_Socket = socket(AF_INET, SOCK_DGRAM, 0);
 	pInfo->m_nLocalPort = nPort;
 
 
 	sockaddr_in local;
-	local.sin_family=AF_INET;
-	local.sin_port=htons(nPort); ///监听端口
-	local.sin_addr.s_addr = htonl( INADDR_ANY );
-	int so_broadcast=1;  
-	setsockopt(pInfo->m_Socket,SOL_SOCKET,SO_BROADCAST,(char*)&so_broadcast,sizeof(so_broadcast));
+	local.sin_family = AF_INET;
+	local.sin_port = htons(nPort); ///监听端口
+	local.sin_addr.s_addr = htonl(INADDR_ANY);
+	int so_broadcast = 1;
+	setsockopt(pInfo->m_Socket, SOL_SOCKET, SO_BROADCAST, (char*)&so_broadcast, sizeof(so_broadcast));
 	int enable_reuseaddr = 1;
 	if (setsockopt(pInfo->m_Socket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable_reuseaddr, sizeof(enable_reuseaddr)) != 0)
 	{
 		IFLOG(IFLL_ERROR, "set socket addr reuse error:%d\r\n", errno);
 	}
 
-	if (bind(pInfo->m_Socket,(struct sockaddr*)&local,sizeof local)!=0)
+	if (bind(pInfo->m_Socket, (struct sockaddr*) & local, sizeof local) != 0)
 	{
 		return false;
 	}
 
 	pInfo->addRef();
 	IFRefPtr<IFThread> spThread = IFNew IFThread;
-	spThread->start(makeIFDPFunctor(this, &IFNetCore::processUDPReceive, IFFunctorParam<UDPSocketInfo*>(pInfo) ));
+	spThread->start(makeIFDPFunctor(this, &IFNetCore::processUDPReceive, IFFunctorParam<UDPSocketInfo*>(pInfo)));
 	m_OpendUDPProcThreadList[nPort] = makeIFPair(spThread, pInfo);
-	
+
 	return true;
 }
 
 bool IFNetCore::closeUDPPort(int nPort)
 {
 	auto it = m_OpendUDPProcThreadList.find(nPort);
-	if (it==m_OpendUDPProcThreadList.end())
+	if (it == m_OpendUDPProcThreadList.end())
 		return false;
 	closesocket(it->second.second->m_Socket);
 	it->second.second->m_Socket = INVALID_SOCKET;
@@ -554,30 +554,30 @@ bool IFNetCore::closeUDPPort(int nPort)
 bool IFNetCore::sendUDPData(const IFString& address, int nRemotePort, int nLocalPort, const char* pData, int nLen)
 {
 	auto it = m_OpendUDPProcThreadList.find(nLocalPort);
-	if (it==m_OpendUDPProcThreadList.end())
+	if (it == m_OpendUDPProcThreadList.end())
 		return false;
 
 	sockaddr_in server;
-	int len =sizeof(server);
-	server.sin_family=AF_INET;
-	server.sin_port=htons(nRemotePort); ///server的监听端口
-	server.sin_addr.s_addr=inet_addr(address.c_str()); ///server的地址
-	if(server.sin_addr.s_addr == 0xffffffff)
+	int len = sizeof(server);
+	server.sin_family = AF_INET;
+	server.sin_port = htons(nRemotePort); ///server的监听端口
+	server.sin_addr.s_addr = inet_addr(address.c_str()); ///server的地址
+	if (server.sin_addr.s_addr == 0xffffffff)
 	{
 		hostent* pHostent = gethostbyname(address.c_str());
-		if(pHostent)
+		if (pHostent)
 		{
-			IFLOG(IFLL_DEBUG,"reslove host%s sucess\r\n", address.c_str());
+			IFLOG(IFLL_DEBUG, "reslove host%s sucess\r\n", address.c_str());
 
 			server.sin_addr = *((in_addr*)pHostent->h_addr_list[0]);
 		}
 		else
 		{
-			IFLOG(IFLL_ERROR,"cant reslove host%s\r\n", address.c_str());
+			IFLOG(IFLL_ERROR, "cant reslove host%s\r\n", address.c_str());
 		}
 	}
 
-	int nSendBytes = sendto(it->second.second->m_Socket,pData,nLen,0,(struct sockaddr*)&server,len);
+	int nSendBytes = sendto(it->second.second->m_Socket, pData, nLen, 0, (struct sockaddr*) & server, len);
 	return nSendBytes == nLen;
 }
 
@@ -594,16 +594,16 @@ bool IFNetCore::sendUDPDataByAddr(const AddressInfo* address, int nLocalPort, co
 
 void IFNetCore::processUDPReceive(UDPSocketInfo* pSocket)
 {
-	char buf[1024*64];
+	char buf[1024 * 64];
 	while (pSocket->m_Socket != INVALID_SOCKET)
 	{
 		sockaddr_in from;
 #ifdef WIN32
-		int fromlen =sizeof(from);
+		int fromlen = sizeof(from);
 #else
-		socklen_t fromlen =sizeof(from);
+		socklen_t fromlen = sizeof(from);
 #endif	
-		int nrecvLen = recvfrom(pSocket->m_Socket,buf,sizeof(buf),0,(struct sockaddr*)&from,&fromlen);
+		int nrecvLen = recvfrom(pSocket->m_Socket, buf, sizeof(buf), 0, (struct sockaddr*) & from, &fromlen);
 		if (nrecvLen < 0)
 		{
 #ifdef WIN32
@@ -626,7 +626,7 @@ void IFNetCore::processUDPReceive(UDPSocketInfo* pSocket)
 		spUDPData->nLocalPort = pSocket->m_nLocalPort;
 		spUDPData->dataBuf.resize(nrecvLen);
 		memcpy(spUDPData->dataBuf, buf, nrecvLen);
-		
+
 		IFCSLockHelper lh(pSocket->m_DataLock);
 		pSocket->m_Datas.push_back(spUDPData);
 	}
@@ -643,16 +643,16 @@ void IFNetCore::getHostAddressAsync(const IFString& address, int nPort, AsyncGet
 	}
 	else
 	{*/
-		IFCSLockHelper lh(m_GetHostIPQueueLock);
-		GetAddressRequestInfo info;
-		info.add = address;
-		info.port = nPort;
-		m_GetHostIPQueue.push_back(makeIFPair(info, spResult));
-		if (!m_spGetHostIPThread)
-		{
-			m_spGetHostIPThread = IFNew IFThread;
-			m_spGetHostIPThread->start(makeIFDPFunctor(this, &IFNetCore::processGetHostIP, IFFunctorParam<IFThread*>(m_spGetHostIPThread) ));
-		}
+	IFCSLockHelper lh(m_GetHostIPQueueLock);
+	GetAddressRequestInfo info;
+	info.add = address;
+	info.port = nPort;
+	m_GetHostIPQueue.push_back(makeIFPair(info, spResult));
+	if (!m_spGetHostIPThread)
+	{
+		m_spGetHostIPThread = IFNew IFThread;
+		m_spGetHostIPThread->start(makeIFDPFunctor(this, &IFNetCore::processGetHostIP, IFFunctorParam<IFThread*>(m_spGetHostIPThread)));
+	}
 	//}
 }
 
@@ -673,7 +673,7 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 					if (strcmp(ptemp->ifa_name, "en0") == 0)
 					{
 						char ip[128];
-						inet_ntop(AF_INET, &(((struct sockaddr_in *) ptemp->ifa_addr)->sin_addr), ip, sizeof(ip));
+						inet_ntop(AF_INET, &(((struct sockaddr_in*) ptemp->ifa_addr)->sin_addr), ip, sizeof(ip));
 						adinfo->ip = ip;
 						break;
 
@@ -691,7 +691,7 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 		int sockfd;
 		ifconf conf;
 		unsigned char buf[512];
-		ifreq *req;
+		ifreq* req;
 		//初始化ifconf
 		conf.ifc_len = 512;
 		conf.ifc_buf = (char*)buf;
@@ -708,47 +708,47 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 		for (i = (conf.ifc_len / sizeof(req)); i > 0; i--)
 		{
 			// if(ifreq->ifr_flags == AF_INET){ //for ipv4
-			char* ip = inet_ntoa(((struct sockaddr_in*)&(req->ifr_addr))->sin_addr);
+			char* ip = inet_ntoa(((struct sockaddr_in*) & (req->ifr_addr))->sin_addr);
 			//__android_log_print(ANDROID_LOG_INFO, "test", "%s", ip);
 			if (strcmp("127.0.0.1", ip) != 0)
 			{
 				adinfo->ip = ip;
 				break;
 			}
-				
-			IFLOG(IFLL_DEBUG,"ip list:%s %d %d %s\r\n", ip, req->ifr_flags, AF_INET, req->ifr_name)
-			req++;
+
+			IFLOG(IFLL_DEBUG, "ip list:%s %d %d %s\r\n", ip, req->ifr_flags, AF_INET, req->ifr_name)
+				req++;
 		}
 		closesocket(sockfd);
 		return true;
 #endif
-    }
+	}
 
 	addrinfo* adi;
 	addrinfo hadi;
 	ZeroMemory(&hadi, sizeof(hadi));
 	hadi.ai_family = AF_INET;
-    hadi.ai_flags = AI_CANONNAME;
-    	
+	hadi.ai_flags = AI_CANONNAME;
+
 
 	int r = getaddrinfo(address.c_str(), NULL, &hadi, &adi);
 	if (r != 0)
-    {
-        IFLOG(IFLL_ERROR,"getaddrinfo error:%s\r\n", gai_strerror(r));
-         return false;
-    }
-	const struct sockaddr *sa = adi->ai_addr;
-	char ip[128] = {0};
+	{
+		IFLOG(IFLL_ERROR, "getaddrinfo error:%s\r\n", gai_strerror(r));
+		return false;
+	}
+	const struct sockaddr* sa = adi->ai_addr;
+	char ip[128] = { 0 };
 	if (sa->sa_family == AF_INET)
 	{
-		inet_ntop(AF_INET, &(((struct sockaddr_in *)sa)->sin_addr), ip, sizeof(ip));
+		inet_ntop(AF_INET, &(((struct sockaddr_in*)sa)->sin_addr), ip, sizeof(ip));
 
 		sockaddr_in* ipv4 = (sockaddr_in*)sa;
 		ipv4->sin_port = htons(nPort);
 	}
 	else if (sa->sa_family == AF_INET6)
 	{
-		inet_ntop(AF_INET6, &(((struct sockaddr_in6 *)sa)->sin6_addr), ip, sizeof(ip));
+		inet_ntop(AF_INET6, &(((struct sockaddr_in6*)sa)->sin6_addr), ip, sizeof(ip));
 
 		sockaddr_in6* ipv6 = (sockaddr_in6*)sa;
 		ipv6->sin6_port = htons(nPort);
@@ -760,9 +760,9 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 	adinfo->family = adi->ai_family;
 	memcpy(adinfo->addr, sa, adi->ai_addrlen);
 	adinfo->addrlen = adi->ai_addrlen;
-
+	freeaddrinfo(adi);
 	return true;
-	}
+}
 
 void IFNetCore::addRSAPrivateKey(const IFString& sPublickKeyMD5, IFRefPtr<IFMemStream> spPirvateKey)
 {
@@ -780,38 +780,38 @@ IFRefPtr<IFMemStream> IFNetCore::getRSAPrivateKey(const IFString& sPublicKeyMD5)
 bool IFNetCore::loadSSLCA()
 {
 	return loadSSLCA("../ca/ca-cert.pem", "../ca/ca-key.pem");
-//#ifndef DONT_USE_SSL
-//	if (!SSL_CTX_load_verify_locations(GetSSLContext(), "../ca/ca-cert.pem", NULL))
-//	{
-//		IFLOG(IFLL_ERROR, "SSL_CTX_load_verify_locations error!\r\n");
-//		return false;
-//	}
-//	if (SSL_CTX_use_certificate_file(GetSSLContext(), "../ca/ca-cert.pem", SSL_FILETYPE_PEM) <= 0)
-//	{
-//		IFLOG(IFLL_ERROR, "SSL_CTX_use_certificate_file error!\r\n");
-//
-//		return false;
-//	}
-//
-//	if (SSL_CTX_use_PrivateKey_file(GetSSLContext(), "../ca/ca-key.pem", SSL_FILETYPE_PEM) <= 0)
-//	{
-//		IFLOG(IFLL_ERROR, "SSL_CTX_use_PrivateKey_file error!\r\n");
-//
-//		return false;
-//	}
-//	if (!SSL_CTX_check_private_key(GetSSLContext()))
-//	{
-//		IFLOG(IFLL_ERROR, "SSL_CTX_check_private_key error!\r\n");
-//
-//		return false;
-//	}
-//
-//	return true;
-//#else
-//	IFLOG(IFLL_ERROR, "OPENSSL NOT ENABLE!\r\n");
-//	return false;
-//#endif
-//
+	//#ifndef DONT_USE_SSL
+	//	if (!SSL_CTX_load_verify_locations(GetSSLContext(), "../ca/ca-cert.pem", NULL))
+	//	{
+	//		IFLOG(IFLL_ERROR, "SSL_CTX_load_verify_locations error!\r\n");
+	//		return false;
+	//	}
+	//	if (SSL_CTX_use_certificate_file(GetSSLContext(), "../ca/ca-cert.pem", SSL_FILETYPE_PEM) <= 0)
+	//	{
+	//		IFLOG(IFLL_ERROR, "SSL_CTX_use_certificate_file error!\r\n");
+	//
+	//		return false;
+	//	}
+	//
+	//	if (SSL_CTX_use_PrivateKey_file(GetSSLContext(), "../ca/ca-key.pem", SSL_FILETYPE_PEM) <= 0)
+	//	{
+	//		IFLOG(IFLL_ERROR, "SSL_CTX_use_PrivateKey_file error!\r\n");
+	//
+	//		return false;
+	//	}
+	//	if (!SSL_CTX_check_private_key(GetSSLContext()))
+	//	{
+	//		IFLOG(IFLL_ERROR, "SSL_CTX_check_private_key error!\r\n");
+	//
+	//		return false;
+	//	}
+	//
+	//	return true;
+	//#else
+	//	IFLOG(IFLL_ERROR, "OPENSSL NOT ENABLE!\r\n");
+	//	return false;
+	//#endif
+	//
 
 }
 
@@ -872,11 +872,11 @@ void IFNetCore::processGetHostIP(IFThread* pThread)
 
 		IFCSLockHelper lh(m_GetHostIPResultQueueLock);
 		AddressInfo adinfo;
-		if(getHostAddress(pr.first.add, pr.first.port, &adinfo))
+		if (getHostAddress(pr.first.add, pr.first.port, &adinfo))
 		{
 			//in_addr addr = *((in_addr*)pHostent->h_addr_list[0]);
 
-			m_GetHostIPResultQueue.push_back(makeIFPair(pr.second, makeIFPair(true,adinfo)));
+			m_GetHostIPResultQueue.push_back(makeIFPair(pr.second, makeIFPair(true, adinfo)));
 		}
 		else
 		{
@@ -919,7 +919,7 @@ IFNetCore::UDPSocketInfo::UDPSocketInfo()
 
 IFNetCore::UDPSocketInfo::~UDPSocketInfo()
 {
-	if (m_Socket!=INVALID_SOCKET)
+	if (m_Socket != INVALID_SOCKET)
 		closesocket(m_Socket);
 
 }
