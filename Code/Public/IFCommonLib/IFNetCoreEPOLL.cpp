@@ -494,7 +494,8 @@ IFNetConnectionPtr IFNetCoreEPOLL::createConnection( const IFString& sAddress, i
 	{
 		IFLOG(IFLL_DEBUG,"sync connect ok!\r\n");
 	}
-
+	spConnection->setNoBlock();
+	
 	epoll_event epe;
 	//epe.data.fd = spConnection->m_Socket;
 	epe.data.ptr = spConnection;
