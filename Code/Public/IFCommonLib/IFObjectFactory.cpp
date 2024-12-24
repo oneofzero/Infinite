@@ -32,17 +32,28 @@ IFObjectFactory::~IFObjectFactory(void)
 {
 }
 
-bool IFObjectFactory::registerObject(const IFString& sObjectName, CREATEOBJECTFUN* pCreateFunction )
+bool IFObjectFactory::registerObject(const IFRTTI* pRTTI, CREATEOBJECTFUN* pCreateFunction )
 {
 	//m_FunList.insert(IFPair<IFString,CREATEOBJECTFUN*>(sObjectName));
-	m_FunList[sObjectName] = pCreateFunction;
+	m_FunList[pRTTI] = pCreateFunction;
+	m_STRFunList[pRTTI->GetTypeName()] = pCreateFunction;
 	return true;
 }
 
 IFObj* IFObjectFactory::createObject(const IFString& sObjectName)
 {
-	ObjectCreateFunList::iterator it = m_FunList.find( sObjectName );
-	if( it != m_FunList.end() )
+	auto it = m_STRFunList.find( sObjectName );
+	if( it != m_STRFunList.end() )
+	{
+		return (*(it->second))();
+	}
+	return NULL;
+}
+
+IFObj* IFObjectFactory::createObject(const IFRTTI* pRTTI)
+{
+	auto it = m_FunList.find(pRTTI);
+	if (it != m_FunList.end())
 	{
 		return (*(it->second))();
 	}

@@ -36,16 +36,18 @@ THE SOFTWARE.
 #define  LOGE(...)
 #endif
 
-#if defined(MAC)||defined(LINUX)||defined(IFPLATFORM_WEB)
+#if defined(MAC)||defined(LINUX)||defined(IFPLATFORM_WEB) || defined(IFPLATFORM_FREE_RTOS) || defined(IFPLATFORM_EMBED_NOSYS)
 #include <wchar.h>
 #include "androidwcs.h"
+#endif
+#ifdef IFPLATFORM_WEB
+void web_console_log(const char* s);
 #endif
 
 IF_DEFINESINGLETON(IFLogSystem);
 
 //static IFLogSystem logsystem;
-
-IFLogSystem::IFLogSystem(void):m_bExit(false),m_nLogLevel(IFLL_TRACE)
+IFLogSystem::IFLogSystem(void):event_Log(),m_bExit(false),m_nLogLevel(IFLL_TRACE)
 {
 
 	//DWORD dwThreadID = 0;
@@ -56,7 +58,8 @@ IFLogSystem::IFLogSystem(void):m_bExit(false),m_nLogLevel(IFLL_TRACE)
 
 IFLogSystem::~IFLogSystem(void)
 {
-
+	m_bExit = true;
+	m_Streams.clear();
 
 }
 static const char * pLevelName[IFLL_NUM] =
@@ -71,20 +74,28 @@ static const char * pLevelName[IFLL_NUM] =
 
 void IFLogSystem::log(int nLevel, const char* sformat, ... )
 {
+//#ifdef IFPLATFORM_WEB
+//	web_console_log(sformat);
+//#endif
+#if defined(IFPLATFORM_FREE_RTOS)
+	char buf[512];
+#else
 	char buf[32*1024];
+#endif
 
 	if(nLevel<0)
 		nLevel = 0;
 	if(nLevel>IFLL_FATAL)
 		nLevel = IFLL_FATAL;
-
+	if (m_bExit)
+		return;
 	
 	*((IFUI32*)buf) = *(IFUI32*)pLevelName[nLevel];
 	buf[4] = 0;
 #ifdef WIN32
 	va_list vlist;
 	va_start(vlist, sformat );
-	int nLen = _vsnprintf_s(buf+4, 32*1024-4, _TRUNCATE, sformat, vlist  );
+	int nLen = _vsnprintf_s(buf+4, sizeof(buf) -4, _TRUNCATE, sformat, vlist  );
 	va_end(vlist);
 
 #else
@@ -98,7 +109,7 @@ void IFLogSystem::log(int nLevel, const char* sformat, ... )
 	va_start(vlist, sformat );
 
 
-	int nLen = vsnprintf(buf+4,32*1024-4, sformat, vlist  );
+	int nLen = vsnprintf(buf+4,sizeof(buf)-4, sformat, vlist  );
 	va_end(vlist);
 
 #ifdef ANDROID
@@ -111,6 +122,8 @@ void IFLogSystem::log(int nLevel, const char* sformat, ... )
 
 	//IFCSLockHelper hl(m_LogMessagesLock);
 	//m_sLogMsg.push_back(makeIFPair(nLevel, pLogMsg));
+
+	event_Log((IFLogLevel)nLevel, buf, nLen + 4);
 
 	IFCSLockHelper lh(m_StreamLock);
 	for( int i = 0; i < m_Streams.size(); i ++ )
@@ -126,9 +139,9 @@ void IFLogSystem::log(int nLevel, const char* sformat, ... )
 }
 
 //#ifdef ANDROID
-//WCHAR android_fmtbuf[1024 * 1024];
+//IFWCHAR android_fmtbuf[1024 * 1024];
 //#endif
-static const WCHAR * pwLevelName[IFLL_NUM] =
+static const IFWCHAR * pwLevelName[IFLL_NUM] =
 {
 	L"TRA:",
 	L"DBG:",
@@ -137,31 +150,38 @@ static const WCHAR * pwLevelName[IFLL_NUM] =
 	L"ERR:",
 	L"FTL:"
 };
-void IFLogSystem::log( int nLevel, const WCHAR* sformat, ... )
+void IFLogSystem::log( int nLevel, const IFWCHAR* sformat, ... )
 {
 //#ifdef IFPLATFORM_ANDROID
-//	WCHAR* buf = android_fmtbuf;
+//	IFWCHAR* buf = android_fmtbuf;
 //#else
-	WCHAR wb[32 * 1024];
-	WCHAR* buf = wb;
+#ifdef IFPLATFORM_FREE_RTOS
+	IFWCHAR wb[512];
+#else
+	IFWCHAR wb[32 * 1024];
+#endif
+	int buffsize = IFArraySize(wb);
+
+	IFWCHAR* buf = wb;
 //#endif
-	const WCHAR** pLevelName = pwLevelName;
+	const IFWCHAR** pLevelName = pwLevelName;
 	//IFStringW wb;
 	//wb.resize(32*1024);
-	//WCHAR* buf = &wb[0];//[32*1024];
+	//IFWCHAR* buf = &wb[0];//[32*1024];
 
 	if(nLevel<0)
 		nLevel = 0;
 	if(nLevel>IFLL_FATAL)
 		nLevel = IFLL_FATAL;
-
+	if (m_bExit)
+		return;
 	
-	memcpy(buf, pLevelName[nLevel], 4*sizeof(WCHAR));;
+	memcpy(buf, pLevelName[nLevel], 4*sizeof(IFWCHAR));;
 	buf[4] = 0;
 #ifdef WIN32
 	va_list vlist;
 	va_start(vlist, sformat );
-	int fmtl = _vsnwprintf_s(buf+4, 32*1024-4, _TRUNCATE, sformat, vlist  );
+	int fmtl = _vsnwprintf_s(buf+4, buffsize -4, _TRUNCATE, sformat, vlist  );
 	va_end(vlist);
 
 #else
@@ -173,7 +193,7 @@ void IFLogSystem::log( int nLevel, const WCHAR* sformat, ... )
 	__va_list vlist;
 	va_start(vlist, sformat );
 	//vswprintf(buf,32*1024, sFormat, vlist  );
-	int fmtl = android_vwsprintf(buf+4, 32 * 1024 - 4, sformat,vlist);
+	int fmtl = android_vwsprintf(buf+4, buffsize - 4, sformat,vlist);
 	va_end(vlist);
 	LOGI("%s", IFStringW(buf).toUTF8String().c_str());
 #else
@@ -181,7 +201,7 @@ void IFLogSystem::log( int nLevel, const WCHAR* sformat, ... )
     va_list vlist;
     va_start(vlist, sformat );
     //vswprintf(buf,32*1024, sFormat, vlist  );
-    int fmtl = android_vwsprintf(buf+4, 32 * 1024 - 4, sformat,vlist);
+    int fmtl = android_vwsprintf(buf+4, buffsize - 4, sformat,vlist);
     va_end(vlist);
     LOGI("%s", IFStringW(buf, fmtl).toUTF8String().c_str());
 
@@ -191,9 +211,9 @@ void IFLogSystem::log( int nLevel, const WCHAR* sformat, ... )
 
 #endif
 
-
 	IFCSLockHelper lh(m_StreamLock);
 	IFString s = IFStringW(buf, fmtl+4).toLocalString();
+	event_Log((IFLogLevel)nLevel, s.c_str(), s.length());
 
 	for( int i = 0; i < m_Streams.size(); i ++ )
 	{
@@ -215,7 +235,7 @@ void IFLogSystem::logDirect(int nLevel, const char* sdata, int len)
 		for (int i = 0; i < m_Streams.size(); i++)
 		{
 			//m_Streams[i]->write("[", 1);
-			m_Streams[i]->write(pLevelName[nLevel], 4);
+			//m_Streams[i]->write(pLevelName[nLevel], 4);
 			//m_Streams[i]->write("]", 1);
 			m_Streams[i]->write(sdata, len);
 		}
@@ -229,7 +249,7 @@ void IFLogSystem::logToStream(IFStream* pStream, const IFString& s)
 
 void IFLogSystem::addLogStream( IFStream* pStream )
 {
-	IFLOG(IFLL_INFO, "log system add strem = %p\r\n", pStream);
+	IFLOG(IFLL_INFO, "log system add stream = %p\r\n", pStream);
 	if (pStream == NULL)
 		return;
 	IFCSLockHelper lh(m_StreamLock);
@@ -239,7 +259,7 @@ void IFLogSystem::addLogStream( IFStream* pStream )
 
 void IFLogSystem::removeLogStream( IFStream* pStream )
 {
-	IFLOG(IFLL_INFO, "log system remove strem = %p\r\n", pStream);
+	IFLOG(IFLL_INFO, "log system remove stream = %p\r\n", pStream);
 
 	IFCSLockHelper lh(m_StreamLock);
 	IFArray<IFRefPtr<IFStream> >::iterator it = m_Streams.find(pStream);
@@ -251,7 +271,7 @@ void IFLogSystem::removeLogStream( IFStream* pStream )
 void IFLogSystem::setCurLogLevel(int nLoglevel)
 {
 	m_nLogLevel = nLoglevel;
-	LOGI("loglevel change to %d\r\n", m_nLogLevel);
+	IFLOG(IFLL_INFO, "loglevel change to %d\r\n", m_nLogLevel);
 
 }
 
@@ -283,7 +303,7 @@ IFUI32 IFDebugOutStream::write( const void* pSourceData, IFUI32 nSize )
 	OutputDebugStringA((const char*)pSourceData);
 #	endif
 #else
-    fprintf(stdout, "%s", pSourceData);
+    fprintf(stdout, "%s", (const char*)pSourceData);
     fflush(stdout);
 #endif
 	return 0;

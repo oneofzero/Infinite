@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_STRING_H__
+#define __IF_STRING_H__
 #include "IFRefPtr.h"
 #include "IFArray.h"
 class IFStringW;
@@ -30,6 +32,7 @@ class IFMemStream;
 #define LOCAL_CHAR_ENCODING IFString::EC_ANSI
 #else
 #define LOCAL_CHAR_ENCODING IFString::EC_UTF8
+#define IF_STRING_NO_ANSI
 #endif
 #define IFSTRING_STANDALONE
 
@@ -141,14 +144,15 @@ void IFString_upper(STRINGT& o);
 
 class IFCOMMON_API IFString : public IFMemObj
 {
-	IF_DECLARERTTI;
+public:
 	typedef IFString THIS_TYPE;
 	typedef char THIS_CHAR_TYPE;
+	
 public:
 	enum ENCODING
 	{
-		EC_ANSI,
-		EC_UTF8,
+		EC_ANSI = 0,
+		EC_UTF8 = 1,
 	};
 public:
 	IFString();
@@ -214,9 +218,21 @@ public:
 	{
 		return (m_spBuffer)?m_spBuffer->m:m_SmallBuff;
 	} ;
+
+	char* w_str()
+	{
+		makeSureSelfBuffer(m_nSize);
+		return selfptr();
+	}
+
 	
 	IFUI32 size()const{return m_nSize;};
 	IFUI32 length()const{return m_nSize;}
+
+	bool isEmpty() const
+	{
+		return size() == 0;
+	}
 
 	void push_back(char c);
 
@@ -226,6 +242,13 @@ public:
 
 	void clear();
 
+	IFString trimStart(char c = 0) const;
+	IFString trimEnd(char c = 0) const;
+	IFString trim(char c = 0) const
+	{
+		return trimStart(c).trimEnd(c);
+	}
+
 	//void push_back(char c);
 
 	void erase(int nPos,int nSize = 1);
@@ -234,37 +257,52 @@ public:
 	int find(const IFString& other, int noffset = 0, bool nocase = false) const ;
 	int find_first_of(char c, int noffset = 0) const;
 	int find_last_of(char c, int noffset = 0) const;
+	bool endsWith(const IFString& end) const;
+	bool startsWith(const IFString& start) const;
+
 
 	void replace(char oldVal, char newVal, IFUI32 nBegin = 0, IFUI32 nEnd=-1);
 	void replace(const IFString& oldVal, const IFString& newVal, IFUI32 nBegin = 0, IFUI32 nEnd=-1);
+	IFString replace(char oldVal, char newVal, IFUI32 nBegin = 0, IFUI32 nEnd = -1) const;
 
 
 	bool isUTF8Codeing() const;
 	void setUTF8Codeing(bool b);
+	ENCODING getEncoding() const { return m_eEncoding; }
+
+	IFString convertEncoding(ENCODING encoding) const;
 
 	IFString& format(const char* sFormat, ... );
 
 	void upper();
 	IFString toUpper() const;
 
+	void lower();
+	IFString toLower() const;
+
 	IFString convertTo(ENCODING cd) const;
 	IFString sub(int index, int size) const;
+	IFString sub(int index) const
+	{
+		return sub(index, size() - index);
+	}
 
 	IFI32 toInt32(int nRadix = 10) const;
 	IFUI32 toUint32(int nRadix = 10) const;
 	IFUI64 toUint64(int nRadix = 10) const;
 	IFI64 toInt64(int nRadix = 10) const;
 
-	bool LoadInt64(IFI64 n);
-	bool LoadInt(int n);
-	bool LoadDouble(double f);
-	bool LoadFloat(float f);
+	IFString& loadInt64(IFI64 n);
+	IFString& loadInt(int n);
+	IFString& loadDouble(double f);
+	IFString& loadFloat(float f);
+
 
 	inline IFUI32 toRSHash() const
 	{
 		if (m_nRSHash)
 			return m_nRSHash;
-		m_nRSHash = RSHash(c_str());
+		m_nRSHash = RSHash(c_str(), (int)size());
 		return m_nRSHash;
 	}
 	
@@ -274,10 +312,13 @@ public:
 	IFString& encodeBase64(const IFString& s);
 	IFString encodeBase64() const;
 
+	IFString encodeHEX(bool upper) const;
+
+
 	bool decodeBase64(IFSimpleArray<char>& buf) const;
 	IFRefPtr<IFMemStream> decodeBase64() const;
 
-	IFArray<IFString> split(const  IFString& sep);
+	IFArray<IFString> split(const  IFString& sep) const;
 
 	static const IFString Empty;
 
@@ -291,6 +332,31 @@ public:
 	}
 
 	static IFString FromURLString(const IFString& s);
+
+	static IFString LoadInt64(IFI64 n)
+	{
+		IFString s;
+		s.loadInt64(n);
+		return s;
+	}
+	static IFString LoadInt(int n)
+	{
+		IFString s;
+		s.loadInt(n);
+		return s;
+	}
+	static IFString LoadDouble(double f)
+	{
+		IFString s;
+		s.loadDouble(f);
+		return s;
+	}
+	static IFString LoadFloat(float f)
+	{
+		IFString s;
+		s.loadFloat(f);
+		return s;
+	}
 
 private:
 	char* makeSureSelfBuffer(int nBufInitialSize);
@@ -319,60 +385,66 @@ private:
 	friend class IFStringW;
 
 };
+
+inline IFString operator+(const char* a, const IFString& b)
+{
+	IFString s = a;
+	return s + b;
+}
 #endif
 
-class IFCOMMON_API IFStringW : public IFObj
+class IFCOMMON_API IFStringW : public IFMemObj
 {
-	IF_DECLARERTTI;
+public:
 	typedef IFStringW THIS_TYPE;
-	typedef WCHAR THIS_CHAR_TYPE;
+	typedef IFWCHAR THIS_CHAR_TYPE;
 
 public:
 	IFStringW();
-	IFStringW(const WCHAR* sStr);
+	IFStringW(const IFWCHAR* sStr);
 	IFStringW(const IFStringW& o);
 	IFStringW(const IFString& o );
-	IFStringW(const WCHAR* sStr, const WCHAR* sEnd);
-	IFStringW(const WCHAR* sStr, int nLen);
+	IFStringW(const IFWCHAR* sStr, const IFWCHAR* sEnd);
+	IFStringW(const IFWCHAR* sStr, int nLen);
 	~IFStringW(void);
 	IFStringW& operator =(const IFStringW& o);
 	IFStringW& operator =(const IFString& o);
-	IFStringW& operator =(const  WCHAR* sStr);
+	IFStringW& operator =(const  IFWCHAR* sStr);
 	bool operator ==(const IFStringW& o) const;
-	bool operator ==(const WCHAR* o) const;
+	bool operator ==(const IFWCHAR* o) const;
 	bool operator <(const IFStringW& o) const;
 	bool operator !=(const IFStringW& o) const
 	{
 		return !((*this)==o);
 	}
 
-	bool operator !=(const WCHAR* s) const
+	bool operator !=(const IFWCHAR* s) const
 	{
 		return !((*this)==s);
 	}
 
 	IFStringW operator +(const IFStringW& o)const;
-	IFStringW operator +(const  WCHAR* sStr)const;
+	IFStringW operator +(const  IFWCHAR* sStr)const;
 	IFStringW& operator +=(const IFStringW& o);
-	IFStringW& operator +=(const  WCHAR* sStr);
-	IFStringW& operator +=( WCHAR sStr);
+	IFStringW& operator +=(const  IFWCHAR* sStr);
+	IFStringW& operator +=( IFWCHAR sStr);
 
-	inline WCHAR& operator[](int nIndex)
+	inline IFWCHAR& operator[](int nIndex)
 	{
-		WCHAR* pPtr = makeSureSelfBuffer(m_nSize);
+		IFWCHAR* pPtr = makeSureSelfBuffer(m_nSize);
 		return  pPtr[nIndex];
 	}
-	inline const WCHAR& operator[](int nIndex)const
+	inline const IFWCHAR& operator[](int nIndex)const
 	{
 		return  c_str()[nIndex];
 	}
 
-	inline operator const WCHAR*()
+	inline operator const IFWCHAR*()
 	{
 		return c_str();
 	}
 
-	inline const WCHAR* c_str()const
+	inline const IFWCHAR* c_str()const
 	{
 		return (m_spBuffer)?m_spBuffer->m:m_SmallBuff;
 	} ;
@@ -393,16 +465,16 @@ public:
 
 	void clear();
 
-	void push_back(WCHAR c);
+	void push_back(IFWCHAR c);
 
 	void erase(int nPos,int nSize = 1);
 	IFStringW& insert(int nPos, const IFStringW& s);
 
 	int find(const IFStringW& other, int noffset = 0, bool nocase = false) const ;
-	int find_first_of(WCHAR c,int noffset = 0) const;
-	int find_last_of(WCHAR c,int noffset = 0) const;
+	int find_first_of(IFWCHAR c,int noffset = 0) const;
+	int find_last_of(IFWCHAR c,int noffset = 0) const;
 
-	void replace(WCHAR oldVal, WCHAR newVal, IFUI32 nBegin = 0, IFUI32 nEnd=-1);
+	void replace(IFWCHAR oldVal, IFWCHAR newVal, IFUI32 nBegin = 0, IFUI32 nEnd=-1);
 	void replace(const IFStringW& oldVal, const IFStringW& newVal, IFUI32 nBegin = 0, IFUI32 nEnd=-1);
 
 
@@ -410,11 +482,18 @@ public:
 	IFStringW toUpper() const;
 
 	IFString toUTF8String() const;
+#ifndef IF_STRING_NO_ANSI
 	IFString toANSIString() const;
+#endif
+
+	bool isEmpty() const
+	{
+		return size() == 0;
+	}
 
 	IFStringW sub(int index, int size) const;
 
-	IFStringW& format(const WCHAR* sFormat, ... );
+	IFStringW& format(const IFWCHAR* sFormat, ... );
 
 	IFI32 toInt32(int nRadix = 10) const;
 	IFUI32 toUint32(int nRadix = 10) const;
@@ -425,40 +504,46 @@ public:
 		if (m_nRSHash)
 			return m_nRSHash;
 
-
+		m_nRSHash = RSHash(c_str(), (int)length());
 		return m_nRSHash;
 	}
-	static IFUI32 RSHash(const WCHAR* s, int nLen = -1);
+	static IFUI32 RSHash(const IFWCHAR* s, int nLen = -1);
 
 	static const IFStringW Empty;
 
 private:
-	WCHAR* makeSureSelfBuffer(int nBufInitialSize);
-	//friend WCHAR* IFString_makeSureSelfBuffer<WCHAR>(IFStringW& s, int nBufInitialSize);
+	IFWCHAR* makeSureSelfBuffer(int nBufInitialSize);
+	//friend IFWCHAR* IFString_makeSureSelfBuffer<IFWCHAR>(IFStringW& s, int nBufInitialSize);
 	inline bool isUseSmallBuff() const
 	{
 		return m_spBuffer==NULL;
 	}
-	inline WCHAR* selfptr()
+	inline IFWCHAR* selfptr()
 	{
-		return (WCHAR*)c_str();
+		return (IFWCHAR*)c_str();
 	}
 	DEFINE_FRIEND_FUN();
 
-	typedef IFStringBuffer<wchar_t> RefBuffer;
+	typedef IFStringBuffer<IFWCHAR> RefBuffer;
 	typedef IFRefPtr<RefBuffer> BufferPtr;
 
 	BufferPtr m_spBuffer;
-	wchar_t m_SmallBuff[IFSTRING_SMALL_LEN + 1];
+	IFWCHAR m_SmallBuff[IFSTRING_SMALL_LEN + 1];
 	int m_nSize;
 	int m_nCap;
 	mutable IFUI32 m_nRSHash;
 
 	//friend class IFString;
 };
-
+inline IFStringW operator+(const IFWCHAR* a, const IFStringW& b)
+{
+	IFStringW s = a;
+	return s + b;
+}
 #ifdef WIN32
 #define toLocalString toANSIString
 #else
 #define toLocalString toUTF8String
 #endif
+
+#endif //__IF_STRING_H__

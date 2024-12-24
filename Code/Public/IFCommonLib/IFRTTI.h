@@ -21,22 +21,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_RTTI_H__
+#define __IF_RTTI_H__
 
 #include "IFCommonLib_API.h"
 //#include "IFString.h"
+
+class IFAttributeAccessor;
 
 class IFCOMMON_API IFRTTI
 {
 
 public:
-	IFRTTI(const char* sTypeName, const IFRTTI* pSuperType )
+
+	typedef IFAttributeAccessor** (*GetAttributeAccessorFunPtr)(int& nAccessorCount);
+
+	IFRTTI(const char* sTypeName, const IFRTTI* pSuperType, GetAttributeAccessorFunPtr pFun)
+		:m_sTypeName(sTypeName)
+		, m_pSuperType(pSuperType)
+		, m_pExternalInfo(NULL)
+		, m_pGetAttributeFunPtr(pFun)
+		//, m_pAttributeAccessors(pAttributeAccessors)
+		//, m_nAttributeAccessorCount(nAccessorCount)
 	{
-		m_sTypeName = sTypeName;
-		m_pSuperType = pSuperType;
 		m_nClassID = ms_ClassCount;
-		m_pExternalInfo = NULL;
 		ms_ClassCount ++;
 	}
+
+
 	inline const IFRTTI* GetSuperType() const
 	{
 		return m_pSuperType;
@@ -70,10 +82,27 @@ public:
 		m_pExternalInfo = p;
 	}
 
+	IFAttributeAccessor** gettAttributeAccessor(int& nCount) const  
+	{ 
+		if (m_pGetAttributeFunPtr)
+		{
+			return (*m_pGetAttributeFunPtr)(nCount);
+		}
+		else
+		{
+			nCount = 0;
+			return NULL;
+		}
+	}
+
+
 private:
 	const char* m_sTypeName;
 	const IFRTTI* m_pSuperType;
 	mutable void* m_pExternalInfo;
+	GetAttributeAccessorFunPtr m_pGetAttributeFunPtr;
+	//IFAttributeAccessor* m_pAttributeAccessors;
+	//int m_nAttributeAccessorCount;
 	unsigned int m_nClassID;
 	static unsigned int ms_ClassCount;
 };
@@ -86,12 +115,14 @@ public:\
 	virtual const IFRTTI* GetType()const{return &m_Type;}
 
 #define IF_DEFINERTTI(classname,superclass)\
-	const IFRTTI classname::m_Type(#classname, &superclass::m_Type);\
+	const IFRTTI classname::m_Type(#classname, &superclass::m_Type, NULL);\
 
+#define IF_DEFINERTTI_WITH_ATTRIBUTE(classname,superclass, getattrfun)\
+	const IFRTTI classname::m_Type(#classname, &superclass::m_Type, getattrfun);\
 
 
 #define IF_DEFINERTTIROOT(classname)\
-	const IFRTTI classname::m_Type( #classname, NULL );\
+	const IFRTTI classname::m_Type( #classname, NULL, NULL );\
 
 #define IF_DECLARERTTI_STATIC \
 public:\
@@ -130,3 +161,5 @@ public:
 };
 
 #define IF_RTTIQUERYDEFINE(xxx)
+
+#endif //__IF_RTTI_H__

@@ -21,18 +21,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_ASYNC_TASK_MGR_H__
+#define __IF_ASYNC_TASK_MGR_H__
+
 #include "IFRefPtr.h"
 #include "ifsingleton.h"
 #include "IFList.h"
 #include "IFCommonLib_API.h"
 #include "IFEventSlot.h"
 #include "IFThread.h"
+#include "IFQueue.h"
+//#include "IFAsyncResult.h"
+//#ifndef IFTHREAD_NOT_ENABLE
 
 class IFThread;
 
 enum IFAsyncTaskState
 {
-	IFATS_UNKNWON,
 	IFATS_WAIT_EXECUTE,
 	IFATS_EXECUTING,
 	IFATS_DONE,
@@ -40,27 +45,13 @@ enum IFAsyncTaskState
 
 class IFAsyncTask;
 
-class IFAsyncTaskThread : public IFThread
-{
-public:
 
-protected:
-	~IFAsyncTaskThread();
-
-	IFRefPtr<IFAsyncTask> m_spTask;
-
-	friend class IFAsyncTaskMgr;
-};
 
 class IFCOMMON_API IFAsyncTask : public IFRefObj
 {
 	IF_DECLARERTTI;
 
-
-
-	IFEventSlot<void(IFAsyncTask* pTask)> event_TaskDone;
 public:
-	IFAsyncTask();
 
 	virtual bool cancel();
 
@@ -68,41 +59,95 @@ public:
 
 	IFAsyncTaskState getState();
 protected:
+	//IFAsyncTask(IFRefPtr<IFFunctor<void()>> spTaskFun);
+	IFAsyncTask();
 	~IFAsyncTask();
 
-	virtual void execute();
+	virtual void execute() = 0;
 
 	bool m_bCancel;
 
-private:
 	IFAsyncTaskState m_eState;
+	//IFRefPtr<IFFunctor<void()>> m_spTaskFun;
 	friend class IFAsyncTaskMgr;
 };
 
-class IFCOMMON_API IFAsyncTaskMgr :public IFSingleton<IFAsyncTaskMgr>,  public IFMemObj
+
+
+class IFAsyncResult;
+template<typename T>
+class IFAsyncResultT;
+template<typename T>
+class IFAsyncTaskWithResult;
+class IFCOMMON_API IFAsyncTaskMgr :public IFMemObj,  public IFSingleton<IFAsyncTaskMgr>
 {
 public:
-	IFAsyncTaskMgr(int nMaxThreadCount);
-	~IFAsyncTaskMgr(void);
+
+#ifndef IFTHREAD_NOT_ENABLE
 
 	int getMaxWorkThreadCount();
 
-	bool addTask(IFRefPtr<IFAsyncTask> spTask);
+	template<typename FUN>
+	IFRefPtr<IFAsyncTaskWithResult<bool>> addTask(FUN fun)
+	{
+		return addTask(makeIFFunctor<bool()>(fun));
+	}
+	template<typename RT, typename FUN>
+	IFRefPtr<IFAsyncTaskWithResult<RT>> addTask(FUN fun)
+	{
+		return addTask(makeIFFunctor<RT()>(fun));
+	}
 
+	template<typename RT>
+	IFRefPtr<IFAsyncTaskWithResult<RT>> addTask(IFRefPtr<IFFunctor<RT()>> spTaskFun);
+	//IFRefPtr<IFAsyncTask> addTask(IFRefPtr<IFFunctor<void()>> spTaskFun);
+	
+#endif
 	void process();
-private:
-	typedef IFList<IFRefPtr<IFAsyncTask>> TaskList; 
-	TaskList m_WaitExecuteList;
-	IFCSLock m_WaitExecuteListLock;
 
-	TaskList m_ExecutedList;
-	IFCSLock m_ExecutedListLock;
+	static void Create();
+	static void Destroy();
+
+private:
+	IFAsyncTaskMgr(int nMaxThreadCount);
+	~IFAsyncTaskMgr(void);
+
+	void pushAsyncResult(IFAsyncResult* pResult);
+
+#ifndef IFTHREAD_NOT_ENABLE
+
+	void addTaskInternal(IFAsyncTask* pTask);
 
 	int m_nMaxThreadCount;
-	void workThread(IFAsyncTaskThread* pThread,bool* bExit);
-	bool m_bExitWorkThread;
-
-	typedef IFMap<IFRefPtr<IFAsyncTaskThread>,bool> ThreadList;
+	void workThread(int threadIdx);
+	typedef IFArray<IFRefPtr<IFThread>> ThreadList;
 	ThreadList m_WorkThreadList;
-};
+	IFRefPtr<IFThreadSyncObj> m_spWaitTaskSignal;
+	IFQueue<IFRefPtr<IFAsyncTask>> m_waitQueue;
 
+#endif
+
+	IFQueue<IFRefPtr<IFAsyncResult>> m_asyncResults;
+
+	//IFQueue<IFRefPtr<IFAsyncTask>> m_ComplelteQueue;
+
+
+	
+
+	template<typename T>
+	friend class IFAsyncResultT;
+};
+#ifndef IFTHREAD_NOT_ENABLE
+#include "IFAsyncResult.h"
+template<typename RT>
+inline IFRefPtr<IFAsyncTaskWithResult<RT>> IFAsyncTaskMgr::addTask(IFRefPtr<IFFunctor<RT()>> spTaskFun)
+{
+	IFRefPtr<IFAsyncTaskWithResult<RT>> spTask =  IFNew IFAsyncTaskWithResult<RT>(spTaskFun);
+
+	addTaskInternal(spTask);
+	return spTask;
+}
+#endif
+//#endif
+
+#endif IFPH_IF_ASYNC_TASK_MGR_H

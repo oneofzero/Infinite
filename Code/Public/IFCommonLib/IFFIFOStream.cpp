@@ -127,9 +127,9 @@ bool IFFIFOStream::isVaild() const
 	return true;
 }
 
-const IFStringW& IFFIFOStream::getName()
+const IFString& IFFIFOStream::getName()
 {
-	return IFStringW::Empty;
+	return IFString::Empty;
 }
 
 void IFFIFOStream::flush()
@@ -137,57 +137,70 @@ void IFFIFOStream::flush()
 
 }
 
-IFFIFOFixedBuffer::IFFIFOFixedBuffer(int nCap /*= 1024 * 1024*/)
-	:m_buff(nCap)
-	,m_nReadPos(0)
+IFFIFOFixedStream::IFFIFOFixedStream(int nCap /*= 1024 * 1024*/)
+	:m_nReadPos(0)
 	,m_nWritePos(0)
+	,m_buff(nCap)
 {
 
 }
 
-int IFFIFOFixedBuffer::write(const void* pBuff, int nSize)
-{
-	int writesize = IFMin(freeSize(), nSize);
+IFUI32 IFFIFOFixedStream::write(const void* pBuff, IFUI32 nSize)
+{	
+	IFUI32 writesize = IFMin(freeSize(), nSize);
 	if (writesize <= 0)
 		return writesize;
 
-	int wpos = m_nWritePos % m_buff.size();
-	if (wpos + writesize <= m_buff.size())
+	//int wpos = m_nWritePos % m_buff.size();
+	auto writePos = m_nWritePos % m_buff.size();
+	if (writePos + writesize <= (IFUI32)m_buff.size())
 	{
-		memcpy(m_buff + wpos, pBuff, writesize);
+		memcpy(m_buff + writePos, pBuff, writesize);
 	}
 	else
 	{
-		int oversize =  (wpos + writesize) - m_buff.size();
+		int oversize =  (writePos + writesize) - m_buff.size();
 		int partone = writesize - oversize;
-		memcpy(m_buff + wpos, pBuff, partone);
+		memcpy(m_buff + writePos, pBuff, partone);
 		memcpy(m_buff, ((const char*)pBuff)+ partone,  oversize);
 	}
-	m_nWritePos += writesize;
+	ATOMIC_ADD_INT32(&m_nWritePos, writesize);
+	//m_nWritePos += writesize;
+	//if(m_)
+	//m_nWritePos = m_nWritePos % m_buff.size();
 	return writesize;
 }
 
-int IFFIFOFixedBuffer::readRaw(void** ppBuf, int nSize)
+IFUI32 IFFIFOFixedStream::readRaw(void** ppBuf, IFUI32 nSize)
 {
 	int readsize = IFMin(usedSize(), nSize);
 	if (readsize <= 0)
 		return readsize;
-	int readpos = m_nReadPos % m_buff.size();
-	if (readpos + readsize > m_buff.size())
+	//int readpos = m_nReadPos % m_buff.size();
+	if (m_nReadPos + readsize > (IFUI32)m_buff.size())
 	{
-		int oversize = (readpos + readsize) - m_buff.size();
+		int oversize = (m_nReadPos + readsize) - m_buff.size();
 		readsize -= oversize;
 	}
-	*ppBuf = m_buff + readpos;
+	*ppBuf = m_buff + m_nReadPos;
 	m_nReadPos += readsize;
+	if (m_nReadPos >= m_buff.size())
+	{
+		m_nReadPos -= m_buff.size();
+		//if(m_nWritePos>)
+		ATOMIC_ADD_INT32(&m_nWritePos, -m_buff.size());
+		//m_nWritePos %= m_buff.size();
+	}
+
+	//m_nReadPos %= m_buff.size();
 	return readsize;
 }
 
-int IFFIFOFixedBuffer::read(void* ppBuf, int nReadSize)
+IFUI32 IFFIFOFixedStream::read(void* ppBuf, IFUI32 nReadSize)
 {
 	void* p;
-	int r = readRaw(&p, nReadSize);
-	if (r = nReadSize)
+	auto r = readRaw(&p, nReadSize);
+	if (r == nReadSize)
 	{
 		memcpy(ppBuf, p, nReadSize);
 		return r;
@@ -209,9 +222,36 @@ int IFFIFOFixedBuffer::read(void* ppBuf, int nReadSize)
 	}
 }
 
-IFFIFOFixedBuffer::~IFFIFOFixedBuffer()
+const void* IFFIFOFixedStream::readUseInternalBuffer(IFUI32 readSize)
+{
+	if (readSize > usedSize())
+		return NULL;
+	void* p;
+	auto r = readRaw(&p, readSize);
+	if (r == readSize)
+	{		
+		return p;
+	}
+	else if (r < readSize)
+	{
+		auto readed = r;
+		if ((IFUI32)m_tempReadBuff.size() < readSize)
+			m_tempReadBuff.resize(readSize);
+		memcpy(m_tempReadBuff, p, r);
+		int left = readSize - r;
+		int rl = readRaw(&p, left);
+		readed += rl;
+		memcpy(((char*)m_tempReadBuff) + r, p, rl);
+		return m_tempReadBuff;
+	}
+
+
+	return nullptr;
+}
+
+IFFIFOFixedStream::~IFFIFOFixedStream()
 {
 
 }
 
-IF_DEFINERTTI(IFFIFOFixedBuffer, IFRefObj);
+IF_DEFINERTTI(IFFIFOFixedStream, IFStream);

@@ -1,4 +1,4 @@
-/*vsprintf.c
+﻿/*vsprintf.c
 
  Print formatting routines
 
@@ -93,6 +93,7 @@ static wchar_t * number(wchar_t * str, int nbuffsize, FNUMBER num, int base, int
 
 	c = (type & ZEROPAD) ? '0' : ' ';
 	sign = 0;
+	i = 0;
 	if (type & SIGN)
 	{
 		if (num < 0)
@@ -111,6 +112,30 @@ static wchar_t * number(wchar_t * str, int nbuffsize, FNUMBER num, int base, int
 			sign = ' ';
 			size--;
 		}
+		if (num == 0)
+			tmp[i++] = '0';
+		else
+		{
+			while (num != 0)
+			{
+				tmp[i++] = dig[((FNUMBER)num) % (unsigned)base];
+				num = ((FNUMBER)num) / (unsigned)base;
+			}
+		}
+	}
+	else
+	{
+		if (num == 0)
+			tmp[i++] = '0';
+		else
+		{
+			while (num != 0)
+			{
+				tmp[i++] = dig[((unsigned long long)num) % (unsigned)base];
+				num = ((unsigned long long)num) / (unsigned)base;
+			}
+		}
+
 	}
 
 	if (type & SPECIAL)
@@ -121,18 +146,9 @@ static wchar_t * number(wchar_t * str, int nbuffsize, FNUMBER num, int base, int
 			size--;
 	}
 
-	i = 0;
 
-	if (num == 0)
-		tmp[i++] = '0';
-	else
-	{
-		while (num != 0)
-		{
-			tmp[i++] = dig[((FNUMBER)num) % (unsigned)base];
-			num = ((FNUMBER)num) / (unsigned)base;
-		}
-	}
+
+	
 
 	if (i > precision) precision = i;
 	size -= precision;
@@ -377,7 +393,13 @@ static void cropzeros(wchar_t * buffer)
 		stop = buffer--;
 		while (*buffer == '0') buffer--;
 		if (*buffer == '.') buffer--;
-		while (*++buffer = *stop++);
+		while(*stop)
+		{
+			buffer++;
+			*buffer = *stop;
+			stop++;
+		}
+		//while (*(++buffer) = *(stop++));
 	}
 }
 
@@ -558,7 +580,7 @@ int android_vwsprintf(wchar_t * buf,int buffsize, const wchar_t * fmt, va_list a
 				field_width = 2 * sizeof(void *);
 				flags |= ZEROPAD;
 			}
-			str = number(str, str_end - str + 1, (unsigned long)va_arg(args, void *), 16, field_width, precision, flags);
+			str = number(str, str_end - str + 1, (unsigned long long)va_arg(args, void *), 16, field_width, precision, flags);
 			CHECKBUFSIZE();
 			continue;
 

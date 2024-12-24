@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include "stdafx.h"
 #include "IFAnyBasic.h"
 
+IF_DEFINERTTIROOT(IFAnyBasic)
 
 IFAnyBasic::IFAnyBasic(void)
 	:nType(T_UNKOWN)
@@ -104,15 +105,16 @@ IFAnyBasic::IFAnyBasic( double n ):nType(T_UNKOWN), sVal(NULL)
 
 
 IFAnyBasic::IFAnyBasic( const IFString& s )
-	:sVal(NULL)
-	,nType(T_UNKOWN)
+	:nType(T_UNKOWN)
+	,sVal(NULL)
 {
 	set(s);
 
 }
 IFAnyBasic::IFAnyBasic(const IFStringW& s)
-	:sVal(NULL)
-	, nType(T_UNKOWN)
+	:nType(T_UNKOWN)
+	,sVal(NULL)
+	
 {
 	set(s.toUTF8String());
 
@@ -120,8 +122,9 @@ IFAnyBasic::IFAnyBasic(const IFStringW& s)
 
 
 IFAnyBasic::IFAnyBasic(const wchar_t* s)
-	:sVal(NULL)
-	, nType(T_UNKOWN)
+	:nType(T_UNKOWN)
+	,sVal(NULL)
+	 
 {
 	set(IFStringW(s).toUTF8String());
 
@@ -129,15 +132,15 @@ IFAnyBasic::IFAnyBasic(const wchar_t* s)
 
 
 IFAnyBasic::IFAnyBasic( const IFFixNumber& FixNum )
-	:sVal(NULL)
-	,nType(T_UNKOWN)
+	:nType(T_UNKOWN)
+	,sVal(NULL)
 {
 	set(FixNum);
 }
 
 IFAnyBasic::IFAnyBasic( IFMemStream* pMemStream )
-	:sVal(NULL)
-	,nType(T_UNKOWN)
+	:nType(T_UNKOWN)
+	,sVal(NULL)	
 {
 	set(pMemStream);
 }
@@ -279,40 +282,40 @@ void IFAnyBasic::deserialize( IFStream* pStream )
 	}
 }
 
-const IFStringW IFAnyBasic::toString() const
+const IFString IFAnyBasic::toString() const
 {
 
-		//WCHAR buf[32]={0};
-	IFStringW buf;
+		//IFWCHAR buf[32]={0};
+	IFString buf;
 	switch (nType)
 	{
 	case T_I8:
 	case T_I16:
 	case T_I32:
-		buf.format(L"%d", n32);
+		buf.format("%d", n32);
 		break;
 
 	case T_UI8:
 	case T_UI16:
 	case T_UI32:
-		buf.format(L"%u", un32);
+		buf.format("%u", un32);
 		break;
 	case T_DOUBLE:
-		buf.format(L"%.15g", df);
+		buf.format("%.15g", df);
 		break;
 	case T_FLOAT:
-		buf.format(L"%g", f);
+		buf.format("%g", f);
 		break;
 	case T_UI64:
-		buf.format(L"%llu", un64);
+		buf.format("%llu", un64);
 		break;
 	case T_I64:
-		buf.format(L"%lld", n64);
+		buf.format("%lld", n64);
 		break;
 	case T_STRING:
 		return *sVal;
 	case T_BOOL:
-		buf.format(L"%s", b?L"true":L"false");
+		buf.format("%s", b?"true":"false");
 		break;
 	case T_FIX_NUMBER:
 		buf =  ((IFFixNumber*)&un64)->toString();
@@ -353,7 +356,7 @@ void IFAnyBasic::setNil()
 	if (nType == T_STRING && sVal)
 		delete sVal;
 	else if (nType == T_MEMSTREAM && pMemStream)
-		pMemStream->decRef();
+		pMemStream->decRef(IFREFPTRDEBUGINFO);
 	nType = T_UNKOWN;
 	sVal = NULL;
 }

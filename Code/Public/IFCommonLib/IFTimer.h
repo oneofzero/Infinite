@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_TIMER_H__
+#define __IF_TIMER_H__
 #include "IFCommonLib_API.h"
 #include "IFRefObj.h"
 #include "IFFunctor.h"
@@ -30,7 +32,7 @@ class IFCOMMON_API IFTimer : public IFRefObj
 {
 	IF_DECLARERTTI;
 public:
-	typedef IFRefPtr<IFFunctor<void()> > FunctorPtr;
+	typedef IFRefPtr<IFFunctor<void(IFI32)> > FunctorPtr;
 	typedef IFList<IFPair<FunctorPtr,IFPair<int,IFRefPtr<IFRefObj>>>> TimerFunList;
 public:
 
@@ -65,16 +67,16 @@ public:
 		IFRefPtr<IFTimer::TimerFunInfo> m_spInfo;
 	};
 public:
-	IFTimer(IFRefPtr<IFFunctor<IFUI64()>> spTickFun = NULL);
+	IFTimer(IFRefPtr<IFFunctor<IFUI64()>> spTickFun = nullptr);
 	//void setAccuracy(int ms);
 	//void update(IFUI32 curtick);
 	void update();
 
-	IFRefPtr<TimerFunInfo> addFunctor(FunctorPtr spFun, IFUI64  nDelay,  int nCallTime = 1,IFRefPtr<IFRefObj> spRefHoldObj = NULL);
+	IFRefPtr<TimerFunInfo> addFunctor(FunctorPtr spFun, IFUI64  nDelay,  int nCallTime = 1,IFRefPtr<IFRefObj> spRefHoldObj = nullptr);
 	template<typename L>
 	IFRefPtr<TimerFunInfo> addFunctor(const L& lmd, IFUI64  nDelay, int nCallTime = 1)
 	{
-		return addFunctor(makeIFFunctor<void()>(lmd), nDelay);
+		return addFunctor(makeIFFunctor<void(IFI32)>(lmd), nDelay);
 	}
 
 	void addFunctorNoGC(IFRefPtr<FunctorWrapper> spWrapper, IFUI64  nDelay, int nCallTime);
@@ -177,9 +179,11 @@ private:
 
 
 	IFRefPtr<IFTimer> m_spTimer;
-	typedef IFRBTree<IFRefPtr<IFTimer::TimerFunInfo>> FunctorList;
+	typedef IFSet<IFRefPtr<IFTimer::TimerFunInfo>> FunctorList;
 	FunctorList m_Functors;
 
 
 };
 #endif
+
+#endif //__IF_TIMER_H__

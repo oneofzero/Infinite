@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_REF_OBJ_H__
+#define __IF_REF_OBJ_H__
 #include "IFObj.h"
 #include "IFCSLockHelper.h"
 #include "IFMap.h"
@@ -28,6 +30,7 @@ THE SOFTWARE.
 #include "IFCommonLib_API.h"
 #include "IFAtomicOperation.h"
 //#define IFREFTHREADSAFE
+class IFString;
 
 class IFCOMMON_API IFRefObj : public IFObj
 {
@@ -49,31 +52,15 @@ protected:
 public:
 
 #ifdef IFREFOBJDEBUG
-	typedef IFMap<void*,int> RefPtrHolderList;
+	typedef IFMap<void*,void*> RefPtrHolderList;
 	RefPtrHolderList m_HolderList;
-	int m_nOperateCount;
+	//int m_nOperateCount;
 
-	inline void addRef(void* pHolder, const char* sFile, int nLine)
-	{
-		m_nOperateCount++;
-		m_nRefCount ++;
-		RefPtrHolderList::iterator it = m_HolderList.find(pHolder);
-		assert(it==m_HolderList.end());
-		m_HolderList[pHolder] = m_nOperateCount;
-	}
+	void addRef(void* pHolder);
 
-	inline void decRef(void* pHolder, const char* sFile, int nLine)
-	{
-		m_nOperateCount++;
-		m_nRefCount --;
-		RefPtrHolderList::iterator it = m_HolderList.find(pHolder);
-		assert(it!=m_HolderList.end());
-		m_HolderList.erase(it);
-		if( m_nRefCount == 0)
-			release();
-	}
+	void decRef(void* pHolder);
 
-
+	void dumpRefInfo(IFString& out);
 #else
 
 	inline void addRef()
@@ -126,6 +113,11 @@ public:
 
 	static bool GetAllocInfo(void* pOut); //pOut must is IFHashMap<IFStackDumper, IFUI32>
 
+	void setThreadSafe()
+	{
+		m_bThreadSafe = true;
+	}
+
 protected:
 
 	virtual void release();
@@ -155,3 +147,11 @@ public:
 
 	T m;
 };
+
+template<typename T, typename... ARGS>
+inline IFRefPtr<T> NewIFRefObj(ARGS... args)
+{
+	return IFNew T(args...);
+}
+
+#endif //__IF_REF_OBJ_H__

@@ -23,7 +23,7 @@ THE SOFTWARE.
 //这里是放全局变量的
 #include "stdafx.h"
 
-#include "IFMemPool.h"
+//#include "IFMemPool.h"
 #include <vector>
 #include "IFMap.h"
 #include "IFHashMap.h"
@@ -39,7 +39,7 @@ IFCSLock g_ptrlistlock;
 
 IFCSLock g_WeakPtrListLock;
 
-IFMap<void*,IFRBTree<void*> > g_WeakPtrList;
+IFMap<void*,IFSet<void*> > g_WeakPtrList;
 
 #if defined(_DEBUG) && (defined(IFPLATFORM_WINDOWS) || defined(IFPLATFORM_LINUX))
 #define DUMP_REF_STACK

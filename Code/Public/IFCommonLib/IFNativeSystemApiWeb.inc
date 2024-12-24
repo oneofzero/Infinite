@@ -1,14 +1,10 @@
-#include <time.h>
-#include <unistd.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-
-class IFWebSystemAPI 
+﻿class IFWebSystemAPI 
 {
 public:
 	static void init()
 	{
 		IF_NATIVESYSTEMAPI_MAP(IFWebSystemAPI);
+		IF_NATIVESYSTEMAPI_MAP_FUN(IFWebSystemAPI, getProcessorCount);
 	}
 	static IFUI32 getTickCount()
 	{
@@ -18,11 +14,19 @@ public:
 
 	}
 
+	static int getProcessorCount()
+	{
+		return 1;
+	}
+
 	static IFUI64 getMicrosSec()
 	{
-     	timeval tv;
-        gettimeofday (&tv, NULL);
-        return tv.tv_sec * 1000000 + tv.tv_usec;
+		timespec now;
+		clock_gettime(CLOCK_MONOTONIC, &now);
+		return now.tv_sec * 1000000ull + now.tv_nsec / 1000;
+     	//timeval tv;
+        //gettimeofday (&tv, NULL);
+        //return tv.tv_sec * 1000000ull + tv.tv_usec;
 	}
 
 	static void enableIME(IFNativeWindowHandle hWnd,IFNativeIMC ime)
@@ -45,15 +49,15 @@ public:
 	{
 
 	}
-	static IFStringW getModuleFileName(IFNativeModule module)
+	static IFString getModuleFileName(IFNativeModule module)
 	{
-		WCHAR buf[512]={0};
-		return buf;
+
+		return IFString::Empty;
 	}
-	static IFStringW getSystemDirectory()
+	static IFString getSystemDirectory()
 	{
-		WCHAR buf[512]={0};
-		return buf;
+
+		return IFString::Empty;
 	}
 	static int getKeyState(int nKey)
 	{
@@ -66,17 +70,20 @@ public:
 	{
 		return false;
 	}
-	static void openURL(const IFStringW& url)
+	static void openURL(const IFString& url)
 	{
 
-		//ShellExecuteW(NULL, L"open",  url.c_str(), NULL, NULL, SW_SHOW );
 	};
 	static IFUI64 getDateTime()
 	{
-        return getMicrosSec();
+		timespec now;
+		clock_gettime(CLOCK_REALTIME, &now);
+		return now.tv_sec * 1000000ull + now.tv_nsec / 1000;
+
+        //return getMicrosSec();
 	}
 
-	static void* loadDLL(const IFStringW& s)
+	static void* loadDLL(const IFString& s)
 	{
         return NULL;
 	}
@@ -85,14 +92,16 @@ public:
 	{
         return NULL;
 	}
-	static IFStringW getWriteableDirectory()
+	static IFString getWriteableDirectory()
 	{
-		return IFStringW::Empty;
+		return "/data/";
 	}
+
 	static IFString getPackagePath()
 	{
-		return IFString::Empty;
+		return "/data/";
 	}
+
 };
 
 void NativeSystemAPIInit()

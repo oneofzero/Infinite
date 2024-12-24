@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_WEAK_PTR_H__
+#define __IF_WEAK_PTR_H__
 #include "IFCommonLib_API.h"
 #include "IFRefPtr.h"
 
@@ -116,3 +118,4 @@ private:
 	T* m_pObj;
 };
 
+#endif //__IF_WEAK_PTR_H__

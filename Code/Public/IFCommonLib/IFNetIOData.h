@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_IO_DATA_H__
+#define __IF_NET_IO_DATA_H__
 #include "IFNetConnection.h"
 #include "IFNetGlobalDefine.h"
 
@@ -154,3 +156,5 @@ public:
 	friend class IFNetCore;
 
 };
+
+#endif //__IF_NET_IO_DATA_H__

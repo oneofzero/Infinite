@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_FILE_PROVIDER_H__
+#define __IF_FILE_PROVIDER_H__
 #include "IFRefObj.h"
 #include "IFString.h"
 #include "IFFileSystem.h"
@@ -30,11 +32,17 @@ class IFCOMMON_API IFFileProvider : public IFRefObj
 public:
 	IF_DECLARERTTI;
 	IFFileProvider(void);
-	virtual IFRefPtr<IFStream> openStream(const IFStringW& sName, const char* sMode) = 0;
-	virtual bool listDirectory(const IFStringW& sParentDir, IFFileInfoList& list, const IFStringW& sFilter = L"*") = 0;
+	virtual IFRefPtr<IFStream> openStream(const IFString& sName, const char* sMode) = 0;
+	virtual IFRefPtr<IFAsyncOpenStreamResult> openStreamAsync(const IFString& sName, const char* sMode) = 0;
+
+	virtual bool listDirectory(const IFString& sParentDir, IFFileInfoList& list, const IFString& sFilter = "*") = 0;
+
+	virtual IFString getName() = 0;
 protected:
 	~IFFileProvider(void);
 
 
 };
 
+
+#endif //__IF_FILE_PROVIDER_H__

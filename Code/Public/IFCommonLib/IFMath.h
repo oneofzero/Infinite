@@ -21,8 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_MATH_H__
+#define __IF_MATH_H__
 #include "IFCommonLib_API.h"
 #include "IFTypes.h"
+#include "float.h"
 
 void IFCOMMON_API UMatrixPerspectiveFovRH(IFMatrix4x4 *pOut, float fovy, float Aspect, float zn, float zf );
 void IFCOMMON_API UMatrixLookAtRH(IFMatrix4x4 *pOut, const IFVector3D *pEye, const IFVector3D *pAt, const IFVector3D *pUp );
@@ -70,3 +73,19 @@ inline int IFRound(float f)
 		return int(f + 0.5f);
 }
 
+template<class T>
+inline T IFClamp(const T& val, const T& vMin, const T& vMax)
+{
+	if (val < vMin)
+		return vMin;
+	else if (val > vMax)
+		return vMax;
+	else
+		return val;
+}
+
+
+
+float IFCOMMON_API IFSmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float deltaTime, float maxSpeed = FLT_MAX);
+
+#endif //__IF_MATH_H__

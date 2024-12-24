@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_ZIP_FILE_PROVIDER_H__
+#define __IF_ZIP_FILE_PROVIDER_H__
 #include "IFFileProvider.h"
 
 class IFUnZip;
@@ -29,12 +31,19 @@ class IFCOMMON_API IFZipFileProvider : public IFFileProvider
 	IF_DECLARERTTI;
 public:
 	IFZipFileProvider();
-	bool init(IFRefPtr<IFStream> spZipStream, const IFStringW& sZipPerfix = IFStringW::Empty);
-	bool init(const IFStringW& zippath, const IFStringW& sZipPerfix = IFStringW::Empty);
-	virtual IFRefPtr<IFStream> openStream(const IFStringW& sName, const char* sMode);
-	virtual bool listDirectory(const IFStringW& sParentDir, IFFileInfoList& list, const IFStringW& sFilter = L"*");
+	bool init(IFRefPtr<IFStream> spZipStream, const IFString& sZipPerfix = IFString::Empty);
+	bool init(const IFString& zippath, const IFString& sZipPerfix = IFString::Empty);
+	IFRefPtr<IFStream> openStream(const IFString& sName, const char* sMode) override;
+	IFRefPtr<IFAsyncOpenStreamResult> openStreamAsync(const IFString& sName, const char* sMode) override;
 
+	bool listDirectory(const IFString& sParentDir, IFFileInfoList& list, const IFString& sFilter = "*") override;
+	virtual IFString getName() override
+	{
+		return GetTypeName();
+	}
 protected:
-	IFStringW m_sZipPerfix;
+	IFString m_sZipPerfix;
 	IFRefPtr<IFUnZip> m_spUnZip;
 };
+
+#endif //__IF_ZIP_FILE_PROVIDER_H__

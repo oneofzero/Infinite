@@ -37,22 +37,33 @@ THE SOFTWARE.
 //#pragma comment(lib,"dbghelp.lib")
 
 IFStackDumper::IFStackDumper(void)
+#ifndef IFPLATFORM_WEB
 	:m_Stack(32)
+	, m_nHash(0)
+#endif
 {
-	m_nHash = 0;
+
 }
 
 IFStackDumper::IFStackDumper(const IFStackDumper& dmp)
 {
+#ifndef IFPLATFORM_WEB
 	m_Stack = dmp.m_Stack;
 	m_nHash = dmp.m_nHash;
+#else
+	m_CallStackString = dmp.m_CallStackString;
+#endif
 }
 
 IFStackDumper::IFStackDumper(IFStackDumper&& dmp)
+#ifndef IFPLATFORM_WEB
 	:m_nHash(dmp.m_nHash)
 	,m_Stack(static_cast<IFArray<void*>&&>(dmp.m_Stack))
+#endif
 {
-
+#ifdef IFPLATFORM_WEB
+	m_CallStackString = dmp.m_CallStackString;
+#endif
 }
 
 IFStackDumper::~IFStackDumper(void)
@@ -279,11 +290,13 @@ struct MYSYMBOINFO : SYMBOL_INFO
 	char buf[max_name_length];
 };
 
+static IFHashMap<void*, IFString> StackString(1024 * 16);
+static IFCSLock StackStringLock;
 
 
 IFString IFStackDumper::toString() const
 {
-	static IFHashMap<void*, IFString> StackString(1024*16);
+	IFCSLockHelper stackstringlockhelper(StackStringLock);
 	MYSYMBOINFO m;
 	MYSYMBOINFO* symbol = &m;            // Debugging symbol's information.   
 	IMAGEHLP_LINE64 source_info;        // Source information (file name & line number)   
@@ -410,13 +423,13 @@ void* GetSOBaseAddr(const IFString& basename)
 			buf[sz] = 0;
 			fclose(fp);
 			StringList lines;
-			USplitStrings(&lines, buf, "\n");
+			USplitStrings(&lines, IFString(buf), "\n");
 			for (int l = 0; l < lines.size(); l++)
 			{
 				//printf("read ok!\n");
 				//7ff729661000-7ff72996a000 r-xp 00000000 fc:15 32593                      /mnt/webserver/bin/libIFLuaScript.so
 				StringList sl;
-				USplitStrings(&sl, lines[l].c_str(), " ");
+				USplitStrings(&sl, lines[l], " ");
 				/*	for (int i = 0; i < sl.size(); i++)
 					{
 						printf("%d:%s\n", i, sl[i].c_str());
@@ -430,7 +443,7 @@ void* GetSOBaseAddr(const IFString& basename)
 						IFString soname = sl[5].sub(sonamestart + 1, sl[5].length() - sonamestart - 1);
 
 						StringList addressrange;
-						USplitStrings(&addressrange, sl[0].c_str(), "-");
+						USplitStrings(&addressrange, sl[0], "-");
 						if (addressrange.size() == 2)
 						{
 							soMap[soname] = (void*)addressrange[0].toUint64(16);

@@ -62,7 +62,7 @@ void  UMatrixPerspectiveFovLH(IFMatrix4x4 *pOut, float fovy, float Aspect, float
 
 	//	xScale = yScale / aspect ratio
 
-	float yScale = tan((3.14159265f-fovy)/2);
+	float yScale = tan((3.14159265f-fovy)/2.0f);
 	float xScale = yScale/Aspect;
 
 
@@ -283,13 +283,48 @@ void  UMatrixInverse(IFMatrix4x4 *pOut, const IFMatrix4x4* pIn )
 #undef idx
 
 }
-
+//#undef IF_MATH_USE_SEE
 void UMatrixMultiply(IFMatrix4x4 *pOut, const IFMatrix4x4 *pA, const IFMatrix4x4 *pB )
 {
 	if (!pOut||!pA||!pB)
 		return;
 	float* mresult = (float*)pOut;
 #ifdef IF_MATH_USE_SEE
+	
+	__m128 a;
+	__m128 b1,b2,b3,b4;
+
+	
+	b1 = _mm_set_ps(pB->d[12], pB->d[8], pB->d[4], pB->d[0]);
+	b2 = _mm_set_ps(pB->d[13], pB->d[9], pB->d[5], pB->d[1]);
+	b3 = _mm_set_ps(pB->d[14], pB->d[10], pB->d[6], pB->d[2]);
+	b4 = _mm_set_ps(pB->d[15], pB->d[11], pB->d[7], pB->d[3]);
+	
+	a = _mm_load_ps(pA->d);
+	mresult[0] = _mm_dp_ps(a, b1, 0xff).m128_f32[0];
+	mresult[1] = _mm_dp_ps(a, b2, 0xff).m128_f32[0];
+	mresult[2] = _mm_dp_ps(a, b3, 0xff).m128_f32[0];
+	mresult[3] = _mm_dp_ps(a, b4, 0xff).m128_f32[0];
+
+	a = _mm_load_ps(pA->d+4);
+	mresult[4] = _mm_dp_ps(a, b1, 0xff).m128_f32[0];
+	mresult[5] = _mm_dp_ps(a, b2, 0xff).m128_f32[0];
+	mresult[6] = _mm_dp_ps(a, b3, 0xff).m128_f32[0];
+	mresult[7] = _mm_dp_ps(a, b4, 0xff).m128_f32[0];
+
+	a = _mm_load_ps(pA->d+8);
+	mresult[8] = _mm_dp_ps(a, b1, 0xff).m128_f32[0];
+	mresult[9] = _mm_dp_ps(a, b2, 0xff).m128_f32[0];
+	mresult[10] = _mm_dp_ps(a, b3, 0xff).m128_f32[0];
+	mresult[11] = _mm_dp_ps(a, b4, 0xff).m128_f32[0];
+
+	a = _mm_load_ps(pA->d+12);
+	mresult[12] = _mm_dp_ps(a, b1, 0xff).m128_f32[0];
+	mresult[13] = _mm_dp_ps(a, b2, 0xff).m128_f32[0];
+	mresult[14] = _mm_dp_ps(a, b3, 0xff).m128_f32[0];
+	mresult[15] = _mm_dp_ps(a, b4, 0xff).m128_f32[0];
+
+	/*
 	IFMatrix4x4 tb;
 	//UMatrixTranspose(&tb, pB);
 	float*m1 = (float*)tb.m;
@@ -331,8 +366,8 @@ void UMatrixMultiply(IFMatrix4x4 *pOut, const IFMatrix4x4 *pA, const IFMatrix4x4
 	mresult[13] = _mm_dp_ps(pA->m128[3], tb.m128[1], 0xff).m128_f32[0];
 	mresult[14] = _mm_dp_ps(pA->m128[3], tb.m128[2], 0xff).m128_f32[0];
 	mresult[15] = _mm_dp_ps(pA->m128[3], tb.m128[3], 0xff).m128_f32[0];
-
-
+	*/
+	
 #else
 	float* a = (float*)pA;
 	float* b = (float*)pB;
@@ -774,3 +809,32 @@ int URandomInt()
 	return rand();
 }
 
+
+float IFSmoothDamp(float current, float target, float& currentVelocity, float smoothTime, float deltaTime, float maxSpeed)
+{
+	// Based on Game Programming Gems 4 Chapter 1.10
+	smoothTime = IFMax(0.0001F, smoothTime);
+	auto omega = 2.f / smoothTime;
+
+	auto x = omega * deltaTime;
+	auto exp = 1.f / (1.f + x + 0.48F * x * x + 0.235F * x * x * x);
+	auto change = current - target;
+	auto originalTo = target;
+
+	auto maxChange = maxSpeed * smoothTime;
+	change = IFClamp(change, -maxChange, maxChange);
+	target = current - change;
+
+	auto temp = (currentVelocity + change * omega) * deltaTime;
+	currentVelocity = (currentVelocity - omega * temp) * exp;
+	auto d = change + temp;
+	auto output = target +  d* exp;
+
+	if (originalTo - current > 0.0F == output > originalTo)
+	{
+		output = originalTo;
+		currentVelocity = (output - originalTo) / deltaTime;
+	}
+
+	return output;
+}

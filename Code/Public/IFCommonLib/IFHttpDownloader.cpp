@@ -36,11 +36,15 @@ IF_DEFINERTTI(IFHttpDowloadQueue, IFRefObj)
 
 IFHttpDownloader::IFHttpDownloader( IFNetCore* pNetCore )
 	:IFRefObj(true)
+	, event_DownloadProgress()
+	, event_DownloadResult()
+
 	,m_spNetCore(pNetCore)
-	,event_DownloadResult(true)
-	,event_DownloadProgress(true)
 	, m_nTimeOutMS(0)
-	,m_bHTTPS(false)
+	
+	, m_ServerPort(0)
+	, m_httpState(0)
+	, m_bHTTPS(false)
 	, m_disconnectAfterDone(true)
 {
 	m_State = HS_NOT_CONNECT;
@@ -60,7 +64,7 @@ void IFHttpDownloader::setTimeOut(int nMS)
 	m_nTimeOutMS = nMS;
 	if (nMS > 0)
 	{
-		m_spCheckTimeOut = m_spNetCore->getTimer()->addFunctor([=]()
+		m_spCheckTimeOut = m_spNetCore->getTimer()->addFunctor([=](int deltaTime)
 		{
 			if (m_spConnection && m_spConnection->getState() == IFNCS_CONNECTED)
 			{
@@ -93,22 +97,20 @@ IFHttpDownloader::~IFHttpDownloader()
 }
 
 
-void IFHttpDownloader::retry()
-{
-	download(m_sURL, m_spOutPutStream, m_spOutPutStream->size());
-}
 
 
-void IFHttpDownloader::download( const IFStringW& surl, IFRefPtr<IFStream> spStream,IFUI64 nByesOffset )
+void IFHttpDownloader::download( const IFString& surl, IFRefPtr<IFStream> spStream,IFUI64 nByesOffset )
 {
 
 	m_ResponseHead.clear();
 	m_spOutPutStream = spStream;
 	m_nContentLength = 0;
+	m_State = HS_NOT_CONNECT;
+
 	m_nRecvLength = 0;
 	m_bHTTPS = false;
-	IFStringW sServer;
-	IFStringW sFileName;
+	IFString sServer;
+	IFString sFileName;
 
 	int nPort;
 	if (!parseURL(surl, m_bHTTPS, sServer, nPort, sFileName))
@@ -121,36 +123,41 @@ void IFHttpDownloader::download( const IFStringW& surl, IFRefPtr<IFStream> spStr
 	m_ServerPort = nPort;
 
 	m_sURL = surl;
-	IFStringW request;
-	request += L"GET ";
+	IFString request;
+	request += "GET ";
 	request += sFileName;
-	request += L" HTTP/1.1\r\n";
-	request += L"User-Agent: Mozialla/4.0\r\n";
+	request += " HTTP/1.1\r\n";
+	request += "User-Agent: Mozialla/4.0\r\n";
 
 	if (nByesOffset)
 	{
-		request += IFStringW().format(L"RANGE: bytes=%lld-\r\n", nByesOffset);
+		request += IFString().format("RANGE: bytes=%lld-\r\n", nByesOffset);
 	}
 
 
-	request += L"Host: ";
+	request += "Host: ";
 	request += sServer;
-	request += L"\r\n";
+	request += "\r\n";
 
 	for (auto& pr: m_Params)
 	{
 		request += pr.first;
-		request += L": ";
+		request += ": ";
 		request += pr.second;
-		request += L"\r\n";
+		request += "\r\n";
 	}
 
 
-	request += L"Accept:*/*\r\n";
-	request += L"\r\n";
+	request += "Accept:*/*\r\n";
+	request += "\r\n";
 
-	m_HTTPRequest = IFNew IFMemStream;
-	auto s = request.toUTF8String();
+	m_HTTPRequest = IFNew IFMemStream();
+	IFString s = request;// .toUTF8String();
+	if (!s.isUTF8Codeing())
+	{
+		s = IFStringW(request).toUTF8String();
+	}
+
 	m_HTTPRequest->write(s.c_str(), s.length());
 	m_sHTTPHead.clear();
 
@@ -159,10 +166,10 @@ void IFHttpDownloader::download( const IFStringW& surl, IFRefPtr<IFStream> spStr
 		m_handleConnectResult.disconnectAllSlot();
 		m_handleRecvData.disconnectAllSlot();
 		m_handleSSLEstablished.disconnectAllSlot();
-		IFLOG(IFLL_DEBUG, L"connect to %s:%d\r\n", sServer.c_str(), nPort);
+		IFLOG(IFLL_DEBUG, "connect to %s:%d\r\n", sServer.c_str(), nPort);
 		if (!sServer.size())
 			return;
-		m_spConnection = m_spNetCore->createConnection(sServer.toLocalString().c_str(), nPort, false, false);
+		m_spConnection = m_spNetCore->createConnection(sServer.c_str(), nPort, false, false);
 		if (!m_spConnection)
 		{
 			event_DownloadResult(this, surl, ER_CONNECTTION, spStream, 0);
@@ -182,16 +189,17 @@ void IFHttpDownloader::download( const IFStringW& surl, IFRefPtr<IFStream> spStr
 	m_nLastReceiveDataTime = IFDateTime::now().toIntTime();
 
 }
-void IFHttpDownloader::downloadByPost(const IFStringW& surl, IFRefPtr<IFStream> spStream, IFRefPtr<IFStream> spPostStream)
+void IFHttpDownloader::downloadByPost(const IFString& surl, IFRefPtr<IFStream> spStream, IFRefPtr<IFStream> spPostStream)
 {
 	m_ResponseHead.clear();
 	m_spOutPutStream = spStream;
 	m_State = HS_NOT_CONNECT;
+	m_httpState = 0;
 	m_nContentLength = 0;
 	m_nRecvLength = 0;
 	m_bHTTPS = false;
-	IFStringW sServer;
-	IFStringW sFileName;
+	IFString sServer;
+	IFString sFileName;
 	m_sHTTPHead.clear();
 
 	int nPort;
@@ -199,6 +207,10 @@ void IFHttpDownloader::downloadByPost(const IFStringW& surl, IFRefPtr<IFStream> 
 	{
 		return;
 	}
+	bool serverchange = m_ServerAddress != sServer || m_ServerPort != nPort;
+	m_ServerAddress = sServer;
+	m_ServerPort = nPort;
+
 	m_sURL = surl;
 	IFStringW postrequest;
 
@@ -245,10 +257,10 @@ void IFHttpDownloader::downloadByPost(const IFStringW& surl, IFRefPtr<IFStream> 
 	m_handleConnectResult.disconnectAllSlot();
 	m_handleRecvData.disconnectAllSlot();
 	m_handleSSLEstablished.disconnectAllSlot();
-	IFLOG(IFLL_DEBUG, L"connect to %s:%d\r\n", sServer.c_str(), nPort);
+	IFLOG(IFLL_DEBUG, "connect to %s:%d\r\n", sServer.c_str(), nPort);
 	if (!sServer.size())
 		return;
-	m_spConnection = m_spNetCore->createConnection(sServer.toLocalString().c_str(), nPort, false, false);
+	m_spConnection = m_spNetCore->createConnection(sServer.c_str(), nPort, false, false);
 	if (!m_spConnection)
 	{
 		event_DownloadResult(this, surl, ER_CONNECTTION, spStream, 0);
@@ -259,7 +271,7 @@ void IFHttpDownloader::downloadByPost(const IFStringW& surl, IFRefPtr<IFStream> 
 	m_nLastReceiveDataTime = IFDateTime::now().toIntTime();
 }
 
-bool IFHttpDownloader::parseURL(const IFStringW& surl, bool& bHTTPS, IFStringW& sServer, int& nPort, IFStringW& sFileName)
+bool IFHttpDownloader::parseURL(const IFString& surl, bool& bHTTPS, IFString& sServer, int& nPort, IFString& sFileName)
 {
 	if (surl.size() == 0)
 		return false;
@@ -267,9 +279,9 @@ bool IFHttpDownloader::parseURL(const IFStringW& surl, bool& bHTTPS, IFStringW& 
 	bHTTPS = false;
 
 	int nFindStart = 0;
-	if (surl.size() > 7 && surl.sub(0, 7).toUpper() == L"HTTP://")
+	if (surl.size() > 7 && surl.sub(0, 7).toUpper() == "HTTP://")
 		nFindStart = 7;
-	if (surl.size() > 8 && surl.sub(0, 8).toUpper() == L"HTTPS://")
+	if (surl.size() > 8 && surl.sub(0, 8).toUpper() == "HTTPS://")
 	{
 		nFindStart = 8;
 		bHTTPS = true;
@@ -286,7 +298,7 @@ bool IFHttpDownloader::parseURL(const IFStringW& surl, bool& bHTTPS, IFStringW& 
 
 	nPort = bHTTPS ? 443 : 80;
 	int nPortPos = sServer.find_first_of(':');
-	IFLOG(IFLL_DEBUG, L"IFHttpDownloader download %d %d %d\r\n", nFindStart, nFileSplit, nPortPos);
+	IFLOG(IFLL_DEBUG, "IFHttpDownloader download %d %d %d\r\n", nFindStart, nFileSplit, nPortPos);
 
 	if (nPortPos != -1)
 	{
@@ -309,7 +321,7 @@ void IFHttpDownloader::procSSLEstablished(IFNetConnection* pConnection, bool bOK
 	}
 	else
 	{
-		IFLOG(IFLL_ERROR, L"http download connect to %s failed! ssl error\r\n", m_sURL.c_str());
+		IFLOG(IFLL_ERROR, "http download connect to %s failed! ssl error\r\n", m_sURL.c_str());
 
 		//event_DownloadResult(this, m_sURL, ER_CONNECTTION, m_spOutPutStream, 0);
 		m_spOutPutStream = NULL;
@@ -327,12 +339,12 @@ void IFHttpDownloader::procConnectResult( IFNetConnection* pConnection, bool bSu
 		{
 			IFLOG(IFLL_DEBUG, "use https\r\n");
 
-			pConnection->establishSSL();
+			pConnection->establishSSL(m_ServerAddress);
 			m_handleSSLEstablished.connectSlot(pConnection->event_SSLEstablishResult);
 		}
 		else
 		{
-			IFLOG(IFLL_DEBUG, L"http download connect to %s ok!\r\n", m_sURL.c_str());
+			IFLOG(IFLL_DEBUG, "http download connect to %s ok!\r\n", m_sURL.c_str());
 			pConnection->sendData(m_HTTPRequest->getBuffer(), m_HTTPRequest->size());
 			m_handleRecvData.connectSlot(pConnection->event_RecvData);
 			//pConnection->event_RecvData.AddSelfHoldHandle(makeIFFunctor(this, &IFHttpDownloader::procDataReceive)	);
@@ -348,7 +360,7 @@ void IFHttpDownloader::procConnectResult( IFNetConnection* pConnection, bool bSu
 	}
 	else
 	{
-		IFLOG(IFLL_ERROR,L"http download connect to %s failed!\r\n", m_sURL.c_str());
+		IFLOG(IFLL_ERROR,"http download connect to %s failed!\r\n", m_sURL.c_str());
 
 		event_DownloadResult(this,m_sURL, ER_CONNECTTION, m_spOutPutStream, 0);
 		m_spOutPutStream = NULL;
@@ -377,16 +389,16 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 				HeadLineEndPos = m_sHTTPHead.size();
 			IFString sHeadLine = m_sHTTPHead.sub(0, HeadLineEndPos);
 			IFArray<IFString> headinfos;
-			USplitStrings(&headinfos, sHeadLine.c_str(), " ");
+			USplitStrings(&headinfos, sHeadLine, " ");
 
 			IFString sResponseParams = m_sHTTPHead.sub(HeadLineEndPos + 2, nDataPos);
 			IFArray<IFString> responseParams;
-			USplitStrings(&responseParams, sResponseParams.c_str(), "\r\n");
+			USplitStrings(&responseParams, sResponseParams, "\r\n");
 			IFArray<IFString> kv;
 			m_ResponseHead.clear();
 			for (auto& p: responseParams)
 			{
-				USplitStrings(&kv, p.c_str(), ": ");
+				USplitStrings(&kv, p, ": ");
 				if (kv.size() == 2)
 				{
 					auto exits = m_ResponseHead.find(kv[0]);
@@ -399,9 +411,11 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 			//IFString okHeader11 = "HTTP/1.1 200 OK";
 			//IFString okHeader10 = "HTTP/1.0 200 OK";
 			int nhttpstate = headinfos.size() >= 2 ? headinfos[1].toInt32() : 0;
+			m_httpState = nhttpstate;
 			if (nhttpstate >= 200 &&
 				nhttpstate < 300)
 			{
+				
 				IFLOG(IFLL_DEBUG, "http is ok!\r\n");
 
 				IFString clfalg = "Content-Length:";
@@ -415,7 +429,7 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 					clfalgPos = m_sHTTPHead.find(tcflag);
 					if (clfalgPos == -1)
 					{
-						notifyDownloadResult(ER_HTTP_ERROR, 0);
+						notifyDownloadResult(ER_HTTP_ERROR);
 						return;
 					}
 					else
@@ -425,7 +439,7 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 						int nDataPos = m_sHTTPHead.find("\r\n\r\n");
 						if (nDataPos == -1)
 						{
-							notifyDownloadResult(ER_HTTP_ERROR, 0);
+							notifyDownloadResult(ER_HTTP_ERROR);
 							return;
 						}
 
@@ -447,7 +461,7 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 					int nDataPos = m_sHTTPHead.find("\r\n\r\n");
 					if (nDataPos == -1)
 					{
-						notifyDownloadResult(ER_HTTP_ERROR, 0);
+						notifyDownloadResult(ER_HTTP_ERROR);
 						return;
 					}
 					nDataPos += 4;
@@ -480,10 +494,8 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 				}*/
 				
 
-				if (headinfos.size() > 2)
-					notifyDownloadResult(ER_HTTP_ERROR, headinfos[1].toUint32());
-				else
-					notifyDownloadResult(ER_HTTP_ERROR, 0);
+				
+				notifyDownloadResult(ER_HTTP_ERROR);
 
 			}
 		}
@@ -502,7 +514,12 @@ void IFHttpDownloader::procDataReceive( IFNetConnection* pConnection, const void
 	}
 }
 
-void IFHttpDownloader::notifyDownloadResult( ERROCODE err, IFUI32 nState )
+void IFHttpDownloader::retry()
+{
+	download(m_sURL, m_spOutPutStream, m_spOutPutStream->size());
+}
+
+void IFHttpDownloader::notifyDownloadResult( ERROCODE err)
 {
 	IFREFHOLDTHIS();
 	if (m_spConnection&&m_disconnectAfterDone)
@@ -517,7 +534,7 @@ void IFHttpDownloader::notifyDownloadResult( ERROCODE err, IFUI32 nState )
 	m_spOutPutStream = NULL;
 
 
-	event_DownloadResult(this, m_sURL, err,spStream, nState);
+	event_DownloadResult(this, m_sURL, err,spStream, m_httpState);
 
 
 }
@@ -537,7 +554,7 @@ void IFHttpDownloader::fillData(const void* pData, IFUI32 nLen)
 	event_DownloadProgress(this, m_sURL, m_nRecvLength, m_nContentLength);
 	if (m_nRecvLength == m_nContentLength)
 	{
-		notifyDownloadResult(ER_OK,200);
+		notifyDownloadResult(ER_OK);
 	}
 }
 
@@ -548,28 +565,10 @@ bool IFHttpDownloader::hasTask()
 
 void IFHttpDownloader::cancelTask()
 {
-	notifyDownloadResult(ER_CANCEL,0);
+	notifyDownloadResult(ER_CANCEL);
 }
 
-IFUI32 IFHttpDownloader::getLastReceiveDataTime()
-{
-	return m_nLastReceiveDataTime;
-}
 
-const IFMap<IFString, IFString>& IFHttpDownloader::getResponseHead()
-{
-	return m_ResponseHead;
-}
-
-void IFHttpDownloader::setDisconnectAfterDone(bool b)
-{
-	m_disconnectAfterDone = b;
-}
-
-bool IFHttpDownloader::isDisconnectAfterDone()
-{
-	return m_disconnectAfterDone;
-}
 
 void IFHttpDownloader::fillChunkData(const IFI8* pData, IFUI32 nLen)
 {
@@ -589,7 +588,7 @@ void IFHttpDownloader::fillChunkData(const IFI8* pData, IFUI32 nLen)
 						m_ChunkSizeData.clear();
 						if (m_nChunkDataLeft==0)
 						{
-							notifyDownloadResult(ER_OK,0);
+							notifyDownloadResult(ER_OK);
 							return;
 						}
 						break;
@@ -614,7 +613,7 @@ void IFHttpDownloader::fillChunkData(const IFI8* pData, IFUI32 nLen)
 	}
 }
 
-IFRefPtr<IFHttpDownloader> IFHttpDowloadQueue::download(const IFStringW& surl, IFRefPtr<IFStream> spStream, IFUI64 nByesOffset /*= 0*/)
+IFRefPtr<IFHttpDownloader> IFHttpDowloadQueue::download(const IFString& surl, IFRefPtr<IFStream> spStream, IFUI64 nByesOffset /*= 0*/)
 {
 	IFRefPtr<IFHttpDownloader> spDownloader;
 	if (m_FreeList.size())
@@ -649,7 +648,7 @@ IFHttpDowloadQueue::~IFHttpDowloadQueue()
 
 }
 
-void IFHttpDowloadQueue::procDownloadResult(IFHttpDownloader* pDownload, const IFStringW& surl, IFHttpDownloader::ERROCODE bOK, IFStream* pStream, IFUI32 nStatusCode)
+void IFHttpDowloadQueue::procDownloadResult(IFHttpDownloader* pDownload, const IFString& surl, IFHttpDownloader::ERROCODE bOK, IFStream* pStream, IFUI32 nStatusCode)
 {
 	if (m_FreeList.find(pDownload) == m_FreeList.end())
 		m_FreeList.push_back(pDownload);

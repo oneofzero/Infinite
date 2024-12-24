@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_SERVER_FRAME_H__
+#define __IF_SERVER_FRAME_H__
 #include "IFCommonLib_API.h"
 #include "ifsingleton.h"
 #include "IFObj.h"
@@ -52,7 +54,7 @@ protected:
 	virtual void procDataReceive(IFNetConnection* pConnection,const void* pBuf, IFUI32 nSize);
 	virtual void procDisconnect(IFNetConnection* pConnection);
 
-	void checkTimeOut();
+	void checkTimeOut(int deltaTime);
 
 	virtual void onInit();
 	virtual void onShutdown();
@@ -74,3 +76,4 @@ protected:
 
 };
 
+#endif //__IF_SERVER_FRAME_H__

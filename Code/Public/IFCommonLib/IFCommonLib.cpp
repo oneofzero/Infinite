@@ -31,7 +31,7 @@ THE SOFTWARE.
 #include "IFLogSystem.h"
 #include "androidwcs.h"
 #include "IFRSA.h"
-#include "IFComPort.h"
+#include "IFAsyncTaskMgr.h"
 
 void registerDefaultAttribute();
 
@@ -56,10 +56,13 @@ bool IFCommonLibInit(
 		jni
 #endif
 	);
-	WCHAR buf[512];
-	IFI64 n = 32123123123123113;
+	//IFWCHAR buf[512];
+	//IFI64 n = 32123123123123113;
 	//android_wsprintf(buf,IFArraySize(buf), L"%I64d", n);
 	//IFNew IFLogSystem;
+//#ifndef IFTHREAD_NOT_ENABLE
+	IFAsyncTaskMgr::Create();
+//#endif
 
 	IFLOG(IFLL_INFO, "Begin Initial IFCommonLib\r\n");
 
@@ -85,13 +88,10 @@ bool IFCommonLibInit(
 	registerDefaultObjects();
 	IFLOG(IFLL_INFO, "registerDefaultObjects Done\r\n");
 
-	registerDefaultAttribute();
+	//registerDefaultAttribute();
 	IFLOG(IFLL_INFO, "registerDefaultAttribute Done\r\n");
 
-#ifdef IFPLATFORM_WINDOWS
-	IFNew IFComPort();
-#endif
-//	IFNew IFRSA();
+
 
 	return true;
 }
@@ -110,18 +110,9 @@ bool IFCommonLibShutdown()
 
 	if (IFFileSystem::getSingletonPtr())
 		delete IFFileSystem::getSingletonPtr();
-
-#ifdef IFPLATFORM_WINDOWS
-	if (IFComPort::getSingletonPtr())
-		delete IFComPort::getSingletonPtr();
+#ifndef IFTHREAD_NOT_ENABLE
+	IFAsyncTaskMgr::Destroy();
 #endif
-	//if (IFRSA::getSingletonPtr())
-	//	delete IFRSA::getSingletonPtr();
-
-	//if (IFLogSystem::getSingletonPtr())
-	//{
-	//	delete IFLogSystem::getSingletonPtr();
-	//}
 
 	return true;
 
@@ -133,24 +124,6 @@ void registerDefaultObjects()
 	IFLOG(IFLL_INFO, "IFObjectFactory::getSingleton() = %p\r\n",  IFObjectFactory::getSingletonPtr());
 
 
-	IFObjectFactory::getSingleton().registerObject(IFAttributeSet::m_Type.GetTypeName(), &IFAttributeSet::CreateObjStatic);
-
-}
-
-void registerDefaultAttribute()
-{
-	IF_REGISTER_ATTRIBTE(IFAttrINT			);
-	IF_REGISTER_ATTRIBTE(IFAttrSTR			);
-	IF_REGISTER_ATTRIBTE(IFAttrFLOAT			);
-	IF_REGISTER_ATTRIBTE(IFAttrSTRFileName	);
-	IF_REGISTER_ATTRIBTE(IFAttrLongStr	);
-	IF_REGISTER_ATTRIBTE(IFAttrBOOL			);
-	IF_REGISTER_ATTRIBTE(IFAttrCOLOR			);
-	IF_REGISTER_ATTRIBTE(IFAttrENUM			);
-	IF_REGISTER_ATTRIBTE(IFAttrENUMSTR		);
-	IF_REGISTER_ATTRIBTE(IFAttrCombine		);
-	IF_REGISTER_ATTRIBTE(IFAttrSubAttr		);
-	IF_REGISTER_ATTRIBTE(IFAttrRECT			);
-	IF_REGISTER_ATTRIBTE(IFAttrFixNumber	);
+	IFObjectFactory::getSingleton().registerObject<IFAttributeSet>();// IFAttributeSet::m_Type.GetTypeName(), & IFAttributeSet::CreateObjStatic);
 
 }

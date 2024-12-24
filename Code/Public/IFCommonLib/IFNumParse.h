@@ -1,4 +1,4 @@
-#include "IFTypes.h"
+﻿#include "IFTypes.h"
 
 namespace IFNumParse
 {
@@ -16,7 +16,7 @@ namespace IFNumParse
 		10,
 	};
 	const  char numbers[] = "00010203040506070809101112131415161718192021222324252627282930313233343536373839404142434445464748495051525354555657585960616263646566676869707172737475767778798081828384858687888990919293949596979899";
-	inline char* int1002buf(int n, char* p)
+	inline char* int1002buf(unsigned n, char* p)
 	{
 		n <<= 1;
 		if (n > 19)
@@ -27,10 +27,10 @@ namespace IFNumParse
 		return p;
 	}
 
-	inline char* int100002buf(int n, char* p)
+	inline char* int100002buf(unsigned int n, char* p)
 	{
-		int high = (n / 100) << 1;
-		int low = (n % 100) << 1;
+		auto high = (n / 100) << 1;
+		auto low = (n % 100) << 1;
 
 		if (high)
 		{
@@ -49,7 +49,7 @@ namespace IFNumParse
 		return p;
 	}
 
-	inline char* int100002bufptr(int n, char* p)
+	inline char* int100002bufptr(unsigned int n, char* p)
 	{
 		int high = (n / 100) << 1;
 		int low = (n % 100) << 1;
@@ -91,7 +91,7 @@ namespace IFNumParse
 		return p;
 	}
 
-	inline char* int100002buf2(int n, char* p)
+	inline char* int100002buf2(unsigned int n, char* p)
 	{
 		int high = (n / 100) << 1;
 		int low = (n % 100) << 1;
@@ -104,14 +104,14 @@ namespace IFNumParse
 
 		return p;
 	}
-	inline char* int180buf(int n, char* p)
+	inline char* int180buf(unsigned int n, char* p)
 	{
 		int high = n / 10000;
 		int low = n % 10000;
 		p = int100002buf(high, p);
 		return  int100002buf2(low, p);
 	}
-	inline char* int180bufptr(int n, char* p)
+	inline char* int180bufptr(unsigned int n, char* p)
 	{
 		int high = n / 10000;
 		int low = n % 10000;
@@ -133,6 +133,26 @@ namespace IFNumParse
 		p = int180buf2(high, p);
 		return  int180buf2(low, p);
 	}
+
+	inline char* uint32buf(int un, char* p)
+	{
+		if (un < 10000)
+		{
+			return int100002buf(un, p);
+		}
+		else if (un < 100000000)
+		{
+			return int180buf(un, p);
+		}
+		else
+		{
+			int high = un / 100000000;
+			int low = un % 100000000;
+			p = int100002buf(high, p);
+			return int180buf2(low, p);
+		}
+	}
+
 	inline char* int32buf(int n, char* p)
 	{
 		if (n < 0)
@@ -140,21 +160,8 @@ namespace IFNumParse
 			n = -n;
 			*p++ = '-';
 		}
-		if (n < 10000)
-		{
-			return int100002buf(n, p);
-		}
-		else if (n < 100000000)
-		{
-			return int180buf(n, p);
-		}
-		else
-		{
-			int high = n / 100000000;
-			int low = n % 100000000;
-			p = int100002buf(high, p);
-			return int180buf2(low, p);
-		}
+		unsigned int un = n;
+		return uint32buf(un, p);
 	}
 	inline char* int32bufptr(int n, char* p)
 	{
@@ -195,6 +202,29 @@ namespace IFNumParse
 		}
 	}
 
+	inline char* uint64buf(IFUI64 un, char* p)
+	{
+		IFI64 left = un / 100000000;
+		IFI64 part3 = un % 100000000;
+		IFI64 part1 = left / 100000000;
+		IFI64 part2 = left % 100000000;
+
+		if (part1)
+		{
+			p = int32buf((int)part1, p);
+			p = int180buf2((unsigned int)part2, p);
+			return  int180buf2((unsigned int)part3, p);
+		}
+		else if (part2)
+		{
+			p = int32buf((int)part2, p);
+			return  int180buf2((unsigned int)part3, p);
+		}
+		else
+		{
+			return int32buf((unsigned int)part3, p);
+		}
+	}
 
 	inline char* int64buf(IFI64 n, char* p)
 	{
@@ -203,17 +233,8 @@ namespace IFNumParse
 			*p++ = '-';
 			n = -n;;
 		}
-		IFI64 hightpart = n / 100000000;
-		IFI64 lowpart = n % 100000000;
-		if (hightpart)
-		{
-			p = int32buf((int)hightpart, p);
-			return  int180buf2((unsigned int)lowpart, p);
-		}
-		else
-		{
-			return int32buf((unsigned int)lowpart, p);
-		}
+		IFUI64 un = n;
+		return uint64buf(un, p);
 
 	}
 
@@ -224,8 +245,10 @@ namespace IFNumParse
 			*p++ = '-';
 			n = -n;;
 		}
-		IFI64 hightpart = n / 1000000000;
-		IFI64 lowpart = n % 1000000000;
+		IFUI64 un = n;
+
+		IFI64 hightpart = un / 1000000000;
+		IFI64 lowpart = un % 1000000000;
 		if (hightpart)
 		{
 			p = int32bufptr((int)hightpart, p);
@@ -243,11 +266,11 @@ namespace IFNumParse
 
 	static const float power10[] =
 	{
-		1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17,1e18,1e19,1e20,1e21,1e22,1e23,1e24,1e25,1e26,1e27,1e28,1e29,1e30,1e31,1e32,1e33,1e34,1e35,1e36,
+		1,1e1f,1e2f,1e3f,1e4f,1e5f,1e6f,1e7f,1e8f,1e9f,1e10f,1e11f,1e12f,1e13f,1e14f,1e15f,1e16f,1e17f,1e18f,1e19f,1e20f,1e21f,1e22f,1e23f,1e24f,1e25f,1e26f,1e27f,1e28f,1e29f,1e30f,1e31f,1e32f,1e33f,1e34f,1e35f,1e36f,
 	};
 	static const float power10_inv[] =
 	{
-		1,1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11,1e-12,1e-13,1e-14,1e-15,1e-16,1e-17,1e-18,1e-19,1e-20,1e-21,1e-22,1e-23,1e-24,1e-25,1e-26,1e-27,1e-28,1e-29,1e-30,1e-31,1e-32,1e-33,1e-34,1e-35,1e-36,
+		1,1e-1f,1e-2f,1e-3f,1e-4f,1e-5f,1e-6f,1e-7f,1e-8f,1e-9f,1e-10f,1e-11f,1e-12f,1e-13f,1e-14f,1e-15f,1e-16f,1e-17f,1e-18f,1e-19f,1e-20f,1e-21f,1e-22f,1e-23f,1e-24f,1e-25f,1e-26f,1e-27f,1e-28f,1e-29f,1e-30f,1e-31f,1e-32f,1e-33f,1e-34f,1e-35f,1e-36f,
 	};
 
 	inline char* float2bufnon0(float f, char* buf)
@@ -260,7 +283,7 @@ namespace IFNumParse
 		}
 
 		int exp = (fb & 0x7F800000) >> 23;
-		int intpart = fb & 0x7fffff | (1 << 23);
+		int intpart = (fb & 0x7fffff) | (1 << 23);
 		exp -= 127;
 
 		if (exp > 0)

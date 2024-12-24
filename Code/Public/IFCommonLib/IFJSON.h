@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_JSON_H__
+#define __IF_JSON_H__
 #include "IFCommonLib_API.h"
 #include "IFRefObj.h"
 #include "IFString.h"
@@ -120,12 +122,14 @@ public:
 		if (m_NT == NT_ARRAY)
 		{
 			if (m_pChildArray)
+			{	
 				for (int i = 0; i < m_pChildArray->size(); i ++  )
 				{
 					if(!f(i,(*m_pChildArray)[i]))
 						return false;
 				}
 				return true;
+			}
 		}
 		return false;
 	}
@@ -189,3 +193,4 @@ public:
 private:
 
 };
+#endif //__IF_JSON_H__

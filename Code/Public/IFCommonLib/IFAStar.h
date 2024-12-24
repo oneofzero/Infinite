@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_A_START_H__
+#define __IF_A_START_H__
 #include "IFArray.h"
 #include "IFHashMap.h"
 
@@ -126,3 +128,5 @@ public:
 	int m_nW, m_nH;
 	int m_nLinkNum;
 };
+
+#endif //__IF_A_START_H__

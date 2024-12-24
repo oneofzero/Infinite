@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_SINGLETON_H__
+#define __IF_SINGLETON_H__
 #include <assert.h>
 #include "IFCommonLib_API.h"
 #include "IFBaseTypeDefine.h"
@@ -36,7 +38,7 @@ public:
 	IFSingleton()
 	{
 		assert(ms_pSingleton==NULL);
-		ms_pSingleton = (T*)this;
+		ms_pSingleton = static_cast<T*>(this);
 	}
 	virtual ~IFSingleton()
 	{
@@ -65,3 +67,5 @@ protected:
 	static classname& getSingleton(){return *(classname*)ms_pSingleton;}\
 	static classname* getSingletonPtr(){return (classname*)ms_pSingleton;}\
 
+
+#endif //__IF_SINGLETON_H__

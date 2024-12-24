@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_SET_H__
+#define __IF_SET_H__
 #include "IFAlloc.h"
 template<class T>
 class IFSet
@@ -383,3 +385,5 @@ private:
 	Node* m_pNill;
 
 };
+
+#endif //__IF_SET_H__

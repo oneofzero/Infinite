@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_MSG_FACTORY_H__
+#define __IF_NET_MSG_FACTORY_H__
 #include "IFCommonLib_API.h"
 #include "ifsingleton.h"
 #include "IFRefObj.h"
@@ -129,8 +131,8 @@ template <> IFI32 IFNet_MessageGen<MSGSTRUCT>::MsgID = MSGID;
 
 #define IF_NET_REGISTERMSG(MSGSTRUCT, processfun, netcore) \
 	netcore->getMsgFactory()->registerMsg(processfun);
-	//assert(MSGSTRUCT::getMsgProc()==NULL);\
-	//MSGSTRUCT::setMsgProc(processfun);\
+	//assert(MSGSTRUCT::getMsgProc()==NULL);
+	//MSGSTRUCT::setMsgProc(processfun);
 
 
 class IFCOMMON_API IFNetMsgFactory: public IFRefObj
@@ -196,10 +198,28 @@ class IFNet_Message_EstablishEncryption_Req : public IFNet_MessageGen<IFNet_Mess
 	virtual void deserialize(IFStream* pStream);
 	virtual void serialize(IFStream* pStream);
 };
+
 class IFNet_Message_EstablishEncryption_Res : public IFNet_MessageGen<IFNet_Message_EstablishEncryption_Res>
 {
 	IF_DECLARERTTI;
 	IFSimpleArray<char> m_sTestData;
+	virtual void deserialize(IFStream* pStream);
+	virtual void serialize(IFStream* pStream);
+};
+
+class IFCOMMON_API IFNet_Message_Generic_Encrypt_Pack : public IFNet_MessageGen<IFNet_Message_Generic_Encrypt_Pack>
+{
+	IF_DECLARERTTI;
+	IFRefPtr<IFMemStream> m_spStream;
+	IFMemStream* getRawPack()
+	{
+		return m_spStream;
+	}
+	void setRawPack(IFMemStream* pRawPack)
+	{
+		m_spStream = pRawPack;
+	}
+
 	virtual void deserialize(IFStream* pStream);
 	virtual void serialize(IFStream* pStream);
 };
@@ -218,14 +238,25 @@ public:
 	{
 		m_sSProtoBuf = s;
 	}
-	~IFNet_Message_Sproto()
+	IFNet_Message_Sproto(const char* p, int len)
 	{
-
+		m_sSProtoBuf = IFString(p, len);
 	}
+
+
+
+	static void sendSprotoPack(IFNetConnection* pConnection, const char* p, int len);
 
 	IFString m_sSProtoBuf;
 
 	IFString getSprotoBuf();
 	virtual void deserialize(IFStream* pStream);
 	virtual void serialize(IFStream* pStream);
+
+protected:
+	~IFNet_Message_Sproto()
+	{
+
+	}
 };
+#endif //__IF_NET_MSG_FACTORY_H__

@@ -21,7 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
-
+#ifndef __IF_SORT_H__
+#define __IF_SORT_H__
 template<class T>
 class IFDefaultSmaller
 {
@@ -52,34 +53,32 @@ public:
 	}
 };
 
-
 template<class Titer, class Comparer, class Swapper>
-void IFSort(Titer a, Titer b,const Comparer& compSmaller = IFDefaultSmaller<Titer>(), const Swapper& swapper = IFDefaultSwapper<Titer>())
+inline Titer IFSortImpl(Titer a, Titer b, const Comparer& compSmaller = IFDefaultSmaller<Titer>(), const Swapper& swapper = IFDefaultSwapper<Titer>())
 {
-	if(a==b)
-		return;
 
-	Titer key = a;
+
+	Titer key = a;// +(b - a) / 2;
 	Titer l = a;
 	Titer r = b;
 
-	while(l!=r)
+	while (l != r)
 	{
 		do
 		{
 			--r;
-			if(compSmaller(r,key))
+			if (compSmaller(r, key))
 			{
-				swapper(key,r);
+				swapper(key, r);
 				//key.swap(r);
 				key = r;
 				break;
 			}
-		} while (r!=l);
+		} while (r != l);
 
-		while(l!=r)
+		while (l != r)
 		{
-			if(compSmaller(key,l))
+			if (compSmaller(key, l))
 			{
 				swapper(key, l);
 				//key.swap(l);
@@ -89,10 +88,43 @@ void IFSort(Titer a, Titer b,const Comparer& compSmaller = IFDefaultSmaller<Tite
 			++l;
 		}
 	}
+	return r;
+}
 
-	IFSort(a,r,compSmaller, swapper);
-	IFSort(r+1,b,compSmaller, swapper);
+template<class Titer, class Comparer, class Swapper>
+void IFSort(Titer a, Titer b,const Comparer& compSmaller = IFDefaultSmaller<Titer>(), const Swapper& swapper = IFDefaultSwapper<Titer>(), int depth = 1024)
+{
+	if (a == b)
+		return;
+	if (depth > 0)
+	{
+		auto m = IFSortImpl(a, b, compSmaller, swapper);
+		IFSort(a, m, compSmaller, swapper, depth - 1);
+		++m;
+		IFSort(m, b, compSmaller, swapper, depth - 1);
+	}
+	else
+	{
 
+		IFArray<IFPair<Titer,Titer>> stacks;
+		stacks.push_back({a,b});
+		while (stacks.size())
+		{
+
+			auto r = stacks.back();
+			stacks.pop_back();
+			auto m = IFSortImpl(r.first, r.second, compSmaller, swapper);
+			if (m != r.first)
+				stacks.push_back({r.first, m });
+			++m;
+			if (m != r.second)
+				stacks.push_back({m, r.second });
+
+		}
+
+		
+	}
+	
 
 }
 
@@ -108,3 +140,4 @@ void IFSort(Titer a, Titer b, const Comparer& cmp)
 {
 	IFSort(a, b, cmp, IFDefaultSwapper<Titer>());
 }
+#endif //__IF_SORT_H__

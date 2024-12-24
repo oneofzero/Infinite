@@ -112,8 +112,14 @@ BOOL CrashDump::Install(DumpType dt)
 #endif
 	return TRUE;
 }
-
-
+static CrashDump::CustomCrashHandler* m_pCustomHandler = NULL;
+static void* m_pCustomHandlerUserData = NULL;
+BOOL CrashDump::Install(DumpType dt, CustomCrashHandler* pHandler, void* pUserData)
+{
+	m_pCustomHandler = pHandler;
+	m_pCustomHandlerUserData = pUserData;
+	return CrashDump::Install(dt);
+}
 
 
 DWORD WINAPI WriteCrashDumpThread(LPVOID pParam)
@@ -121,13 +127,13 @@ DWORD WINAPI WriteCrashDumpThread(LPVOID pParam)
 	//MessageBox(NULL,L"Crash!",L"Crash!", MB_OK);
 	PEXCEPTION_POINTERS pExceptPtrs = (PEXCEPTION_POINTERS)pParam;
 	//IFStringW sFileName;// = *(IFNew IFStringW);
-	WCHAR buf[512];
+	IFWCHAR buf[512];
 	GetModuleFileName(NULL, buf, 512);
 
 	SYSTEMTIME st;
 	GetSystemTime(&st);
 
-	WCHAR sFileName[512];
+	IFWCHAR sFileName[512];
 	wsprintf(sFileName,L"%s.%d(%d).%04d%02d%02d%02d%02d%02d.dmp", buf, GetCurrentProcessId(), GetCurrentThreadId(),
 		st.wYear, st.wMonth, st.wDay, st.wHour, st.wMinute, st.wSecond);
 

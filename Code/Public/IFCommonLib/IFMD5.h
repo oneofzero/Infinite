@@ -21,10 +21,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_MD5_H__
+#define __IF_MD5_H__
 #include "IFCommonLib_API.h"
 #include "ifsingleton.h"
 #include "IFString.h"
 #include "IFStream.h"
+
+struct IFCOMMON_API IFMD5Binary
+{
+
+	IFUI8 data[16];
+		
+	IFString toString() const;
+
+};
 
 struct IFCOMMON_API IFMD5Result : public IFMemObj
 {
@@ -72,8 +83,12 @@ public:
 
 
 
-
-	IFUI8 m_Result[16];
+	union
+	{
+		IFUI8 m_Result[16];
+		IFMD5Binary m_Binary;
+	};
+	
 
 private:
 	void* m_pMD5State;
@@ -91,3 +106,4 @@ inline IFStream& operator >> (IFStream& stream, IFMD5Result& o)
 	o.deserialize(&stream);
 	return stream;
 }
+#endif //__IF_MD5_H__

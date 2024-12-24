@@ -21,12 +21,17 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_MAP_H__
+#define __IF_MAP_H__
 #include "IFRBTree.h"
 
 template<class First,class Second>
 class IFPair
 {
 public:
+	typedef First KeyType;
+	typedef IFPair<First,Second> ValueType;
+
 	IFPair(){}
 	IFPair(const First& _first):first(_first)
 	{
@@ -56,6 +61,16 @@ public:
 		return first == other.first && second == other.second;
 	}
 
+	operator First& ()
+	{
+		return first;
+	}
+
+	operator const First& () const
+	{
+		return first;
+	}
+
 	First first;
 	Second second;
 
@@ -69,13 +84,13 @@ IFPair<First, Second> makeIFPair(const First& first, const Second& second)
 }
 
 template<class TKey,class TVal, bool bMultiMap = false>
-class  IFMap : public IFRBTree<IFPair<TKey,TVal>,bMultiMap >
+class  IFMap : public IFRBTree<IFPair<TKey,TVal>, TKey, bMultiMap >
 {
 public:
-	typedef typename IFRBTree<IFPair<TKey, TVal>,bMultiMap >::iterator iterator; 
-	typedef typename IFRBTree<IFPair<TKey, TVal>,bMultiMap >::const_iterator const_iterator; 
+	typedef typename IFRBTree<IFPair<TKey, TVal>, TKey, bMultiMap >::iterator iterator;
+	typedef typename IFRBTree<IFPair<TKey, TVal>, TKey, bMultiMap >::const_iterator const_iterator;
 
-	typedef IFRBTree<IFPair<TKey,TVal>, bMultiMap > SuperClass;
+	typedef IFRBTree<IFPair<TKey,TVal>, TKey, bMultiMap > SuperClass;
 
 	IFMap(void)
 	{
@@ -90,13 +105,13 @@ public:
 	inline iterator find(const TKey& key)
 	{
 		//IFPair<TKey,TVal> pair(key);
-		return SuperClass::find(*(IFPair<TKey,TVal>*)&key);
+		return SuperClass::find(key);
 	}
 	inline const_iterator find(const TKey& key) const
 	{
 		//IFPair<TKey,TVal> pair(key);
 		//return SuperClass::find(pair);
-		return SuperClass::find(*(IFPair<TKey,TVal>*)&key);
+		return SuperClass::find(key);
 	}
 
 	inline TVal& operator[](const TKey& key)
@@ -116,8 +131,6 @@ public:
 };
 
 template<class TKey,class TVal>
-class IFMultiMap  : public IFMap<TKey,TVal, true>
-{
-public:
+using IFMultiMap = IFMap<TKey, TVal, true>;
 
-};
+#endif //__IF_MAP_H__

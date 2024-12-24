@@ -36,11 +36,11 @@ IF_DEFINERTTI(IFMemStream, IFStream)
 
 IFMemStream::IFMemStream(void* pBuffer , IFUI32 nBufferSize, IFUI32 nReservesize):
 m_pExternalBuffer((char*)pBuffer),
-m_nMaxBufferSize(nBufferSize),
-m_nCurAccessPos(0),
-m_nCurBufferSize(nBufferSize),
 m_pInternalBuffer(NULL),
 m_pAccessBuffer((char*)pBuffer ),
+m_nCurAccessPos(0),
+m_nMaxBufferSize(nBufferSize),
+m_nCurBufferSize(nBufferSize),
 m_bReadOnly(false)
 {
 	if( m_pExternalBuffer == NULL)
@@ -54,11 +54,11 @@ m_bReadOnly(false)
 
 IFMemStream::IFMemStream(const void* pBuffer , IFUI32 nBufferSize):
 	m_pExternalBuffer((char*)pBuffer),
-	m_nMaxBufferSize(nBufferSize),
-	m_nCurAccessPos(0),
-	m_nCurBufferSize(nBufferSize),
 	m_pInternalBuffer(NULL),
 	m_pAccessBuffer((char*)pBuffer ),
+	m_nCurAccessPos(0),
+	m_nMaxBufferSize(nBufferSize),	
+	m_nCurBufferSize(nBufferSize),
 	m_bReadOnly(true)
 {
 
@@ -222,7 +222,7 @@ IFString IFMemStream::toString() const
 	return IFString((const char*)getBuffer(), (int)size(), IFString::EC_UTF8);
 }
 
-const IFStringW& IFMemStream::getName()
+const IFString& IFMemStream::getName()
 {
 	return m_sStreamName;
 }

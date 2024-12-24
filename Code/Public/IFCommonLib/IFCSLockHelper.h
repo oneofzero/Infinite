@@ -21,10 +21,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_CSLOCK_HELPER_H__
+#define __IF_CSLOCK_HELPER_H__
 #include "IFCommonLib_API.h"
 #include "IFObj.h"
 #include "IFPlatformDefine.h"
-#ifdef WIN32
+
+#ifdef IFTHREAD_NOT_ENABLE
+
+class IFCOMMON_API IFCSLock
+{
+public:
+	inline void lock()
+	{
+
+	}
+
+	inline void unlock()
+	{
+
+	}
+};
+
+#else
+#if defined(WIN32)||defined(_WIN32)
+
 
 class IFCOMMON_API IFCSLock  : public IFMemObj
 {
@@ -45,23 +66,29 @@ public:
 #else
 		InitializeCriticalSection(&m_lock);
 #endif
+		m_deleted = false;
 	}
 
 	~IFCSLock()
 	{
 		DeleteCriticalSection(&m_lock);
+		m_deleted = true;
 	}
 	
 	inline void lock()
 	{
-		EnterCriticalSection(&m_lock);
-
+		if (!m_deleted)
+		{
+			EnterCriticalSection(&m_lock);
+		}
 	}
 
 	inline void unlock()
 	{
-		LeaveCriticalSection(&m_lock);
-
+		if (!m_deleted)
+		{
+			LeaveCriticalSection(&m_lock);
+		}	
 	}
 
 	operator  LPCRITICAL_SECTION()
@@ -70,6 +97,7 @@ public:
 	}
 
 	CRITICAL_SECTION m_lock;
+	bool m_deleted;
 };
 
 class IFCSLockEmpty  : public IFMemObj
@@ -88,51 +116,66 @@ public:
 
 #else
 
+#ifndef IFTHREAD_USE_EMBED_THREAD		
 #include <pthread.h>
+#endif
 
 class IFCOMMON_API IFCSLock : public IFMemObj
 {
 public:
 	IFCSLock()
 	{
-	    #ifdef ANDROID
-		pthread_mutexattr_t  att = PTHREAD_MUTEX_RECURSIVE_NP;
-		#else
-		pthread_mutexattr_t  att;
-		pthread_mutexattr_init(&att);
-		pthread_mutexattr_settype(&att, PTHREAD_MUTEX_RECURSIVE);
-		#endif
-		pthread_mutex_init(&m_lock, &att);
+#ifdef IFTHREAD_USE_EMBED_THREAD
+#else		
+	#ifdef ANDROID
+			pthread_mutexattr_t  att = PTHREAD_MUTEX_RECURSIVE_NP;
+	#else
+			pthread_mutexattr_t  att;
+			pthread_mutexattr_init(&att);
+			pthread_mutexattr_settype(&att, PTHREAD_MUTEX_RECURSIVE);
+	#endif
+			pthread_mutex_init(&m_lock, &att);
+#endif
+		m_deleted = false;
+		
 	}
 
 	~IFCSLock()
 	{
+#ifndef IFTHREAD_USE_EMBED_THREAD
 		pthread_mutex_destroy(&m_lock);
+#endif
+		m_deleted = true;
 	}
 
 	inline void lock()
 	{
+#ifndef IFTHREAD_USE_EMBED_THREAD
 		pthread_mutex_lock(&m_lock);
-
+#endif
 	}
 
 	inline void unlock()
 	{
+#ifndef IFTHREAD_USE_EMBED_THREAD		
 		pthread_mutex_unlock(&m_lock);
-
+#endif
 	}
-
+#ifndef IFTHREAD_USE_EMBED_THREAD		
 	operator  pthread_mutex_t*()
 	{
 		return &m_lock;
 	}
 	//pthread_mutex_t mtx
 	pthread_mutex_t m_lock;
+#endif
+	bool m_deleted;
+
 };
 
 
 #	endif
-
+#endif
 template<class LOCK>
 class  IFLockHelper
 {
@@ -155,3 +198,4 @@ public:
 	LOCK* m_pCS;
 };
 typedef IFLockHelper<IFCSLock> IFCSLockHelper;
+#endif //__IF_CSLOCK_HELPER_H__

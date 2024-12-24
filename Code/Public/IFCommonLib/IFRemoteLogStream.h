@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_REMOTE_LOG_STREAM_H__
+#define __IF_REMOTE_LOG_STREAM_H__
 #include "IFLogSystem.h"
 #include "IFNetCore.h"
 
@@ -13,9 +15,9 @@ public:
 
 	void init(IFNetCore* pNetCore, const IFString& sAddr, int nPort);
 
-	const IFStringW& getName()
+	const IFString& getName()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 	virtual IFUI32 read(void* pDestData, IFUI32 nSize)
 	{
@@ -62,3 +64,5 @@ private:
 	IFRefPtr<IFNetCore> m_spNetCore;
 	IFQueue<IFSimpleArray<char>*> m_buff;
 };
+
+#endif

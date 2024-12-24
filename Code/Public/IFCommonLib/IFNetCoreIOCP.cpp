@@ -46,7 +46,8 @@ IFNetCoreIOCP::IFNetCoreIOCP( void )
 
 IFNetCoreIOCP::~IFNetCoreIOCP( void )
 {
-
+	if (m_bServiceStarted)
+		stopService();
 }
 
 bool IFNetCoreIOCP::startListen(int nPort, bool enableSSL, bool packagemode)
@@ -128,6 +129,11 @@ bool IFNetCoreIOCP::stopListen(int nPort)
 		return true;
 	}
 	return false;
+}
+
+bool IFNetCoreIOCP::isListening(int nPort)
+{
+	return m_ListenerList.find(nPort)!=m_ListenerList.end();
 }
 
 bool IFNetCoreIOCP::onServiceStart(  )
@@ -266,7 +272,8 @@ void IFNetCoreIOCP::processThread()
 	SOCKET socket;
 	DWORD dwLastError = 0;
 	IFNetCoreIOCP_IODATA* pIOData = NULL;
-
+	auto nCurThreadID = IFThread::getCurrentThreadID();
+	event_OnRecvThreadStart(this, nCurThreadID);
 	while (true)
 	{
 		if (!GetQueuedCompletionStatus( m_hCompletionPort,
@@ -302,6 +309,7 @@ void IFNetCoreIOCP::processThread()
 
 	//no io data need exit
 	IFLOG(IFLL_DEBUG, "if net core process exit!\r\n");
+	event_OnRecvThreadEnd(this, nCurThreadID);
 
 
 }
@@ -367,10 +375,11 @@ void IFNetCoreIOCP::processAccept(IFNetCoreIOCP_IODATA* pData, DWORD dwTransByte
 		(char *)&pAcceptData->m_ListenSocket, 
 		sizeof(pAcceptData->m_ListenSocket) );
 
-	
-	sockaddr_in* localaddress;
-	sockaddr_in* remoteaddress;
-	int localaddsize,remoteaddsize;
+	char laddr[64];
+	char raddr[64];
+	sockaddr_in* localaddress = (sockaddr_in*)laddr;
+	sockaddr_in* remoteaddress = (sockaddr_in*)raddr;
+	int localaddsize = 64,remoteaddsize = 64;
 	m_WSAGetAcceptExSockAddrs(
 		pAcceptData->m_buf,
 		0,
@@ -385,13 +394,15 @@ void IFNetCoreIOCP::processAccept(IFNetCoreIOCP_IODATA* pData, DWORD dwTransByte
 	//int socksize = sizeof(sockaddr_in) + 16+2;
 	//sockaddr_in* pAddress = (sockaddr_in*)&pAcceptData->m_buf[];
 	IFNetCore::AddressInfo adinfo;
-	memcpy(adinfo.addr, remoteaddress, remoteaddsize);
-	adinfo.addrlen = remoteaddsize;
+	//memcpy(adinfo.addr, remoteaddress, remoteaddsize);
+	
 	char ip[128] = { 0 };
 	if (pData->m_spConnection->m_bIPV6)
 	{
 		sockaddr_in6* remoteaddress6 = (sockaddr_in6*)remoteaddress;
+		memcpy(adinfo.addr, remoteaddress, sizeof(sockaddr_in6));
 		adinfo.family = AF_INET6 ;
+		adinfo.addrlen = sizeof(sockaddr_in6);
 		inet_ntop(AF_INET6, &(remoteaddress6->sin6_addr), ip, sizeof(ip));
 
 		adinfo.ip = ip;
@@ -400,9 +411,11 @@ void IFNetCoreIOCP::processAccept(IFNetCoreIOCP_IODATA* pData, DWORD dwTransByte
 	else
 	{
 		adinfo.family =  AF_INET;
+		adinfo.addrlen = sizeof(sockaddr_in);
 		inet_ntop(AF_INET, &(remoteaddress->sin_addr), ip, sizeof(ip));
 		adinfo.ip = ip;
 		adinfo.port = ntohs(remoteaddress->sin_port);
+		memcpy(adinfo.addr, remoteaddress, sizeof(sockaddr_in));
 	}
 
 	addConnectedConnection(pAcceptData->m_spConnection);
@@ -435,7 +448,7 @@ void IFNetCoreIOCP::processConnect( IFNetCoreIOCP_IODATA* pData, DWORD dwTransBy
 	}
 	if (pConnection->isSyncEvent())
 	{
-		IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, bSuccess);
+		IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, bSuccess);		
 		pushEvent(pEvent);
 	}
 	else
@@ -488,7 +501,12 @@ void IFNetCoreIOCP::processSendData( IFNetCoreIOCP_IODATA* pData, DWORD dwTransB
 		ATOMIC_INC_INT64((volatile LONG64*)&m_nSendPackage);
 		pData->m_spConnection->fireSendDoneEvent(pSendData->m_nSendID, true);
 	}
-	
+#ifdef _DEBUG
+	//if (pSendData->m_bIsDirectSend)
+	//{
+	//	IFLOG(IFLL_DEBUG, "send direct deleted!%lld\r\n", pSendData->m_nSendID);
+	//}
+#endif
 
 
 	pSendData->decRef();
@@ -624,6 +642,9 @@ IFUI64 IFNetConnectionIOCP::sendPack( IFRefPtr<IFMemStream> pStream, IFUI64 nSen
 	}
 	IFNetCoreIOCP_IODATA_Send* pSendData = IFNew IFNetCoreIOCP_IODATA_Send(this, pStream);
 	pSendData->m_nSendID = nCurSendID;
+#ifdef _DEBUG
+	pSendData->m_bIsDirectSend = false;
+#endif
 	//IFNetCoreIOCP_IODATA_Send* pSendData2 = pSendData;
 	DWORD dwSendSize = 0;
 	pSendData->addRef();
@@ -641,6 +662,14 @@ IFUI64 IFNetConnectionIOCP::sendPack( IFRefPtr<IFMemStream> pStream, IFUI64 nSen
 			disconnect();
 			return 0;
 		};
+	}
+	else
+	{
+#ifdef _DEBUG
+		pSendData->m_bIsDirectSend = true;
+#endif
+		//pSendData->decRef();
+		//IFLOG(IFLL_DEBUG, "data direct send!%llu\r\n", pSendData->m_nSendID);
 	}
 	pSendData->decRef();
 	ATOMIC_ADD_INT32((volatile long*)&m_nSendPendingBytes, (long)pStream->size());
@@ -908,4 +937,9 @@ bool IFNetConnectionIOCP::requestRecvData()
 		}
 	}
 	return true;
+}
+
+IFRefPtr<IFNetCore> IFNetCore::createNetCore()
+{
+	return IFNew IFNetCoreIOCP;
 }

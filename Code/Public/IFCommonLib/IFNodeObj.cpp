@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "IFNodeObj.h"
 #include "IFUtility.h"
 #include "IFObjectFactory.h"
@@ -333,4 +333,3 @@ IFNodeObj* IFNodeObj::getObj(const IFString& sName)
 }
 
 
-IF_DEFINECREATEOBJ(IFNodeObj);

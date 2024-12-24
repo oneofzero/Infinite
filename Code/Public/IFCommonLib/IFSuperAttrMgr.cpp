@@ -40,24 +40,31 @@ IFSuperAttrMgr::~IFSuperAttrMgr(void)
 {
 }
 
-bool IFSuperAttrMgr::loadSuperAttrs( const IFStringW& sSuperAttrFileName )
+bool IFSuperAttrMgr::loadSuperAttr(IFSuperAttrInfo* pInfo)
 {
-	m_sCurSuperAttrFileName = sSuperAttrFileName;
+	//auto sPath = getAttFilePath(sSuperAttrName);
 
-	IFRefPtr<IFStream> pStream = IFFileSystem::getSingletonPtr()->openStream(sSuperAttrFileName,"rb");
-	if(!pStream)
+	IFRefPtr<IFStream> pStream = IFFileSystem::getSingletonPtr()->openStream(pInfo->getPath(), "rb");
+	if (!pStream || pStream->size() == 0)
+	{
+		IFLogError("loadSuperAttr error file not exist!%s\r\n", pInfo->getPath().c_str());
 		return false;
+	}
 
 	{
-		IFRefPtr<IFJSONNode> spRoot = IFJSONParser::parse(pStream);
+		IFString err;
+		IFRefPtr<IFJSONNode> spRoot = IFJSONParser::parse(pStream,&err);
 		if (spRoot)
 		{
+			IFAttributeRemap::Guard guard;
 			IFRefPtr<IFAttributeRemap> spRemap = IFNew IFAttributeRemap;
+			
 			if(spRemap->loadFromJSON(spRoot))
 			{
 				IFAttributeMgr::getSingleton().setIndexRemap(spRemap);
 			}
-			IFRefPtr<IFSuperAttrInfo> pInfo = IFNew IFSuperAttrInfo;
+			//IFRefPtr<IFSuperAttrInfo> pInfo = IFNew IFSuperAttrInfo;
+			//auto pInfo = &info;
 			pInfo->m_ClassName = spRoot->getSubValue("attclassname").getString();
 			pInfo->m_sName = spRoot->getSubValue("attname").getString();
 			if (IFJSONNode* pSuper = spRoot->getSubNode("super"))
@@ -70,12 +77,13 @@ bool IFSuperAttrMgr::loadSuperAttrs( const IFStringW& sSuperAttrFileName )
 			{
 				pInfo->m_AttributeList.loadFromJSON(pAtts);
 			}
-
-			addSuperAttr(pInfo);
+			pInfo->m_loaded = true;
+			//addSuperAttr(pInfo);
 			return true;
 		}
 		else
 		{
+			IFLOG(IFLL_ERROR, "super attr %s load error:%s\r\n", pInfo->getPath().c_str(), err.c_str());
 			pStream->seek(0, IFStream::ISSF_BEGIN);
 		}
 	}
@@ -88,7 +96,7 @@ bool IFSuperAttrMgr::loadSuperAttrs( const IFStringW& sSuperAttrFileName )
 
 
 
-bool IFSuperAttrMgr::saveSuperAttrs( const IFStringW& sSuperAttrFileName )
+bool IFSuperAttrMgr::saveSuperAttrs( const IFString& sSuperAttrFileName )
 {	
 	
 	return true;
@@ -105,7 +113,7 @@ bool IFSuperAttrMgr::saveSuperAttrs()
 }
 
 
-bool IFSuperAttrMgr::saveSuperAttr( const IFStringW& sSuperAttrName )
+bool IFSuperAttrMgr::saveSuperAttr( const IFString& sSuperAttrName )
 {
 
 	SuperAttList::iterator it = m_SuperAttList.find(sSuperAttrName);
@@ -128,15 +136,15 @@ bool IFSuperAttrMgr::saveSuperAttr( IFSuperAttrInfo* pInfo )
 		spRemap->saveTOJSON(spRoot);
 
 		spRoot->setSubValue("attclassname", pInfo->m_ClassName);
-		spRoot->setSubValue("attname", pInfo->m_sName.toUTF8String());
+		spRoot->setSubValue("attname", pInfo->m_sName);
 
 		if (pInfo->m_AttributeList.getSuperAttrListName() == pInfo->m_sName)
 		{
-			pInfo->m_AttributeList.setSuperAttrList(IFStringW::Empty);
+			pInfo->m_AttributeList.setSuperAttrList(IFString::Empty);
 		}
 
 		if(pInfo->m_AttributeList.getSuperAttrListName().size())
-			spRoot->setSubValue("super", pInfo->m_AttributeList.getSuperAttrListName().toUTF8String());
+			spRoot->setSubValue("super", pInfo->m_AttributeList.getSuperAttrListName());
 
 
 		IFRefPtr<IFJSONNode> spAtts = IFNew IFJSONNode;
@@ -161,8 +169,8 @@ bool IFSuperAttrMgr::saveSuperAttr( IFSuperAttrInfo* pInfo )
 		//tempatt.removeSameAttr(IFAttributeMgr::getSingleton().getDefaultAttribute(pInfo->m_ClassName));
 		tempatt.saveToJSON(spAtts);
 		spRoot->insert("atts", spAtts);
-		IFString sUTF8 = spRoot->toString(true,false);
-		IFStringW sFullName = getAttFilePath(pInfo->m_sName);
+		IFString sUTF8 = spRoot->toString(true,true);
+		IFString sFullName = pInfo->getPath(); //getAttFilePath(pInfo->m_sName);
 
 		IFRefPtr<IFStream> spStream = IFFileSystem::getSingleton().openStream(sFullName,"wb");
 		if (!spStream)
@@ -170,92 +178,78 @@ bool IFSuperAttrMgr::saveSuperAttr( IFSuperAttrInfo* pInfo )
 		spStream->write(IFString::UTF8Flag, IFArraySize(IFString::UTF8Flag));
 		spStream->write(sUTF8.c_str(), sUTF8.size());
 
-		saveSuperAttriNameList();
+		saveSuperAttriNameList(pInfo->m_sDir);
 	}
 
 	return true;
 
 }
-IFStringW IFSuperAttrMgr::getAttFilePath( const IFStringW& sSuperAttrName )
-{
-	IFStringW sFullName = UCombinePathW(m_sSuperAttrDir,  sSuperAttrName);
-	sFullName += L".attrxml";
-	return sFullName;
-}
-
-bool IFSuperAttrMgr::loadSuperAttrsFromDir( const IFStringW& sDir )
-{
-	m_sSuperAttrDir = sDir;
-	//IFStringW sCurDir = IFFileSystem::getSingleton().getCurrentDirectory();
-	//if (IFFileSystem::getSingleton().setCurrentDirectory(m_sSuperAttrDir))
-	{
-		IFFileInfoList filelist = IFFileSystem::getSingleton().listDirectory(m_sSuperAttrDir, L"*.attrxml");
-		if (filelist.size() == 0)
-			return false;
-		//IFFileSystem::getSingleton().setCurrentDirectory(sCurDir);
-		for (int i = 0; i < filelist.size(); i ++ )
-		{
-			loadSuperAttrs(filelist[i]->getPath());
-		}
-	}
-	return true;
-}
 
 
-IFSuperAttrInfo* IFSuperAttrMgr::getSuperAttr( const IFStringW& sName )
+IFSuperAttrInfo* IFSuperAttrMgr::getSuperAttr( const IFString& sName )
 {
 	SuperAttList::iterator it = m_SuperAttList.find(sName);
 	if(it!=m_SuperAttList.end())
 	{
+		if (!it->second->isLoaded())
+		{
+			//m_Loaded.insert(sName);
+			loadSuperAttr(it->second);
+		}
+
 		return it->second;
 	}
 	return NULL;
 }
 
-void IFSuperAttrMgr::addSuperAttr( IFSuperAttrInfo* pInfo,bool bNeedSave )
+void IFSuperAttrMgr::addSuperAttr(IFSuperAttrInfo* pInfo )
 {
 	m_SuperAttList[pInfo->m_sName] = pInfo;
-	if(bNeedSave)
-		saveSuperAttr(pInfo);
+	saveSuperAttr(pInfo);
 
 	event_SuperAttrAdd(pInfo);
 }
 
-void IFSuperAttrMgr::removeSuperAttr( const IFStringW& sName,bool bNeedSave )
+void IFSuperAttrMgr::removeSuperAttr( const IFString& sName, bool needSave)
 {
 	SuperAttList::iterator it = m_SuperAttList.find(sName);
 	if(it!=m_SuperAttList.end())
 	{
-		if (bNeedSave)
+		if (needSave)
 		{
-			IFFileSystem::getSingleton().removeFile(getAttFilePath(sName));
-		}
+			IFFileSystem::getSingleton().removeFile(it->second->getPath());
+		}		
 
 		event_SuperAttrRemove(it->second);
+		auto sDir = it->second->m_sDir;
 		m_SuperAttList.erase(it);
+		if (needSave)
+		{
+			saveSuperAttriNameList(sDir);
+		}
+
 	}
-	saveSuperAttriNameList();
 
 	//if(bNeedSave)
 	//	saveSuperAttrs( );
 }
 
-void IFSuperAttrMgr::renameSuperAttr( const IFStringW& sOldName, const IFStringW& sNewName, bool bNeedSave /*= false*/ )
+void IFSuperAttrMgr::renameSuperAttr( const IFString& sOldName, const IFString& sNewName )
 {
 	if(sOldName == sNewName )
 		return;
 	SuperAttList::iterator it = m_SuperAttList.find(sOldName);
 	if(it!=m_SuperAttList.end())
 	{
-		if(bNeedSave)
-		{
-			IFFileSystem::getSingleton().rename(getAttFilePath(sOldName), getAttFilePath(sNewName));
-			//saveSuperAttrs( );
-		}
+		auto sOldName = it->second->getPath();
+
+	
 		IFRefPtr<IFSuperAttrInfo> spSA = it->second;
 		m_SuperAttList.erase(it);
 		spSA->m_sName = sNewName;
 		m_SuperAttList[sNewName] = spSA;
+		IFFileSystem::getSingleton().rename(sOldName, it->second->getPath());
+
 
 	}
 
@@ -271,20 +265,25 @@ IFSuperAttrMgr::SuperAttList::iterator IFSuperAttrMgr::getEndSuperAttr()
 	return m_SuperAttList.end();
 }
 
-bool IFSuperAttrMgr::saveSuperAttriNameList()
+bool IFSuperAttrMgr::saveSuperAttriNameList(const IFString& sDir)
 {
+	if (sDir.isEmpty())
+		return false;
+
 	IFRefPtr<IFJSONNode> spRoot = IFNew IFJSONNode;
 	for (auto& pr:m_SuperAttList)
 	{
 		IFRefPtr<IFJSONNode> spValue = IFNew IFJSONNode;
-		IFStringW sFullName = UGetRelativePathW(getAttFilePath(pr.first), m_sSuperAttrDir);
-		spValue->setValue(sFullName.toUTF8String());
+		//IFString sFullName = UGetRelativePath(getAttFilePath(pr.first), sDir);
+		if (pr.second->m_sDir != sDir)
+			continue;
+		spValue->setValue(pr.second->getPath());
 		spRoot->push_back(spValue);
 	}
 
 	IFString s = spRoot->toString();
 
-	IFRefPtr<IFStream> spStream = IFFileSystem::getSingleton().openStream(UCombinePathW(m_sSuperAttrDir,L"attlist.json"), "wb");
+	IFRefPtr<IFStream> spStream = IFFileSystem::getSingleton().openStream(UCombinePath(sDir,"attlist.json"), "wb");
 	if (!spStream)
 		return false;
 	spStream->write(IFString::UTF8Flag, IFArraySize(IFString::UTF8Flag));
@@ -293,28 +292,86 @@ bool IFSuperAttrMgr::saveSuperAttriNameList()
 
 }
 
-bool IFSuperAttrMgr::loadSuperAttrsFromFileList(const IFStringW& sDir)
+bool IFSuperAttrMgr::loadSuperAttrsFromFileList(const IFString& sDir)
 {
-	m_sSuperAttrDir = sDir;
-	IFRefPtr<IFStream> spStream = IFFileSystem::getSingleton().openStream(UCombinePathW(m_sSuperAttrDir, L"attlist.json"), "rb");
+	//m_sSuperAttrDir = sDir;
+	auto loadPath = UCombinePath(sDir, "attlist.json");
+	IFRefPtr<IFStream> spStream = IFFileSystem::getSingleton().openStream(loadPath, "rb");
 	if (!spStream)
+	{
+		IFLogError("loadSuperAttrsFromFileList error!can't open %s\r\n", loadPath.c_str());
 		return false;
-	IFRefPtr<IFJSONNode> spNode = IFJSONParser::parse(spStream);
+	}
+	
+	return loadSuperAttrsFromStream(sDir, spStream);
+}
+
+bool IFSuperAttrMgr::loadSuperAttrsFromStream(const IFString& sDir, IFStream* pStream)
+{
+	IFRefPtr<IFJSONNode> spNode = IFJSONParser::parse(pStream);
 	if (!spNode)
 		return false;
+
 	spNode->for_each_array([&](int i, IFJSONNode* pValue)
-	{
-		IFStringW sFullPath = UCombinePathW(m_sSuperAttrDir, pValue->getValue().getString());
-		loadSuperAttrs(sFullPath);
-		return true;
-	});
+		{
+			if (pValue->isValue() && pValue->getValue().isString())
+			{
+				auto attName = UGetFileMainName(pValue->getValue().getString());
+				auto spInfo = NewIFRefObj< IFSuperAttrInfo>();
+				spInfo->m_sDir = sDir;
+				spInfo->m_sName = attName;
+				m_SuperAttList[attName] = spInfo;
+
+				event_SuperAttrAdd(spInfo);
+
+			}
+			else
+			{
+
+			}
+
+			//IFString sFullPath = UCombinePath(m_sSuperAttrDir, pValue->getValue().getString());
+			//loadSuperAttrs(sFullPath);
+			return true;
+		});
 
 	return true;
 }
 
+IFRefPtr<IFAsyncResultBool> IFSuperAttrMgr::loadSuperAttrsFromFileListAsync(const IFString& sDirPath, bool loadAttrs)
+{
+	auto spResult = NewIFRefObj<IFAsyncResultBool>();
+	auto loadPath = UCombinePath(sDirPath, "attlist.json");
+
+	IFFileSystem::getSingleton().openStreamAsync(loadPath, "rb")->onResult(
+		[=](auto spStream) {
+			if (!loadSuperAttrsFromStream(sDirPath, spStream))
+			{
+				spResult->setResult(false);
+				return;
+			}
+			if (loadAttrs)
+			{
+				for (auto it = m_SuperAttList.begin(); it != m_SuperAttList.end(); ++it)
+				{
+					if (!it->second->isLoaded())
+					{
+						//m_Loaded.insert(sName);
+						loadSuperAttr(it->second);
+					}
+				}
+			}
+			spResult->setResult(true);
+		}
+	);
+
+
+	return spResult;
+}
 
 
 
+const IFString IFSuperAttrMgr::BUILTIN_DIR = "ui/superattr";
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -322,11 +379,24 @@ bool IFSuperAttrMgr::loadSuperAttrsFromFileList(const IFStringW& sDir)
 IF_DEFINERTTI(IFSuperAttrInfo, IFRefObj);
 
 IFSuperAttrInfo::IFSuperAttrInfo()
+	:m_loaded(false)
 {
 
+}
+
+bool IFSuperAttrInfo::load()
+{
+	return IFSuperAttrMgr::getSingleton().loadSuperAttr(this);
+}
+
+
+IFString IFSuperAttrInfo::getPath()
+{
+	return UCombinePath(m_sDir, m_sName) + ".attrxml";
 }
 
 IFSuperAttrInfo::~IFSuperAttrInfo()
 {
 
 }
+

@@ -25,7 +25,7 @@ THE SOFTWARE.
 #include "IFNetIOData.h"
 #include "IFNetCore.h"
 #include "IFLogSystem.h"
-#include "IFNetMsgFactory.h"
+
 #include "IFTimer.h"
 #include "IFSystemAPI.h"
 #include "IFCompress.h"
@@ -43,6 +43,10 @@ THE SOFTWARE.
 #include <openssl/rand.h>
 #include <openssl/err.h>
 #endif
+#ifndef IFPLATFORM_FREE_RTOS
+#include "IFNetMsgFactory.h"
+#endif
+#include "IFException.h"
 
 class PackageMemStream : public IFMemStream
 {
@@ -81,24 +85,27 @@ SSL_CTX * GetSSLContext()
 }
 #endif
 
-IFNetConnection::IFNetConnection( IFNetCore* pNetCore,bool bSyncEvent, bool bPackageMode ):
-IFRefObj(true),
-m_pNetCore(pNetCore),m_eConnectionState(IFNCS_UNKNOWN),
-	m_nNotCompletePackLen(0),
-	m_nSendPendingBytes(0),
-	m_nMaxSendBufferSize(64*1024),
-	m_nAutoKeepAliveTimeOutMS(0),
-	m_bSyncEvent(bSyncEvent),
-	m_bPackageMode(bPackageMode),
-	m_nSendID(0),
-	m_bEncryption(false),
-	m_ssl(0),m_rbio(0),m_wbio(0), ssl_state(SSL_NONE), ssl_decrpyted(false)
-
-
+IFUI64 IFNetConnection::m_nSendID = 0;
+IFNetConnection::IFNetConnection(IFNetCore* pNetCore, bool bSyncEvent, bool bPackageMode)
+	:IFRefObj(true)
+	, m_nLocalPort(0)
+	, m_nRemotePort(0)
+	, m_pNetCore(pNetCore)
+	, m_eConnectionState(IFNCS_UNKNOWN)
+	, m_nSendPendingBytes(0)
+	, m_nMaxSendBufferSize(64 * 1024)
+	, m_nAutoKeepAliveTimeOutMS(0)
+	, m_bEncryption(false)
+	, m_bPackageMode(bPackageMode)
+	, m_bSyncEvent(bSyncEvent)
+	, m_nNotCompletePackLen(0)
+	, m_ssl(0), m_rbio(0), m_wbio(0), ssl_state(SSL_NONE), ssl_decrpyted(false)
 {
-	m_nLocalPort = 0;
+#ifndef IFPLATFORM_FREE_RTOS
+
 	if (bPackageMode)
 		m_spDepacker = IFNew IFNetDepacker;
+#endif
 	m_LastCommunicateTime = IFNativeSystemAPI::getTickCount();
 	//m_pRecvDataBuf = pNetCore->AllocIOData(this, IFNIO_RECV, true);
 	//if (!ssl_ctx)
@@ -117,11 +124,66 @@ IFNetConnection::~IFNetConnection(void)
 	}
 #endif
 }
+#ifndef DONT_USE_SSL
+static size_t
+ssl_error(char* err, size_t max)
+{
+	int          flags;
+	const char* data;
+	char* p, * first, * last;
+	size_t       n;
 
+	p = err;
+	first = err;
+	last = err + max;
 
+	for (;; ) {
+		n = ERR_peek_error_line_data(NULL, NULL, &data, &flags);
+		if (n == 0) {
+			break;
+		}
 
+		if (p != first && p < last) {
+			*p++ = ' ';
+		}
+
+		/* ERR_error_string_n() requires at least one byte */
+		if (p >= last - 1) {
+			goto next;
+		}
+
+		ERR_error_string_n(n, p, last - p);
+		while (p < last && *p) {
+			p++;
+		}
+
+		if (p < last && *data && (flags & ERR_TXT_STRING)) {
+			*p++ = ':';
+
+			while (p < last && *data) {
+				*p = *data;
+				p++;
+				data++;
+			}
+		}
+
+	next:
+		(void)ERR_get_error();
+	}
+
+	return p - first;
+}
+#endif
 bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 {
+	if (IFLogSystem::getSingleton().getCurLogLevel() <= IFLL_TRACE)
+	{
+		//const char sLine[] = "\r\n--------------------\r\n";
+		IFLOG(IFLL_TRACE, "IFNetConnection::recvData %p, size:%d\r\n", pData, nLen);
+		//IFLogSystem::getSingleton().logDirect(IFLL_TRACE, pData, nLen);
+		//IFLogSystem::getSingleton().logDirect(IFLL_TRACE, sLine, sizeof(sLine)-1);
+	}
+
 #ifndef DONT_USE_SSL
 	if (m_ssl&&!ssl_decrpyted)
 	{
@@ -133,16 +195,21 @@ bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 
 			int n = SSL_do_handshake(m_ssl);
 			int sslerr = SSL_get_error(m_ssl, n);
+			IFSimpleArray<char> buf;
+			buf.resize(4096);
+
 			if (sslerr == SSL_ERROR_SSL)
 			{
+				IFLOG(IFLL_ERROR, "ssl handshake error:%d version:%s\r\n", sslerr, SSL_get_version(m_ssl));
+				ssl_error(buf, buf.size());
+				IFLOG(IFLL_ERROR, "ssl error detail:\r\n%s\r\n", (const char*)buf);
+
 				//event_SSLEstablishResult(this, false);
 				IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(this, IFNetCoreEvent::ET_SSL_ESTABLISH_RESULT,false);
 				m_pNetCore->pushEvent(pEvent);
 
 				return true;
 			}
-			IFSimpleArray<char> buf;
-			buf.resize(4096);
 			int rl = BIO_read(m_wbio, buf, buf.size()); // Read from BIO, put data in buffer
 			if (rl > 0)
 			{
@@ -184,6 +251,7 @@ bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 #endif
 	//IFLOG(IFLL_DEBUG, "process normal data\r\n");
 
+#ifndef IFPLATFORM_FREE_RTOS
 	if(m_bPackageMode )
 	{
 		//m_FIFO->write(pData->getBuffer(),nLen);
@@ -202,7 +270,8 @@ bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 		while (IFRefPtr<IFNetRecvPackage> spPackage = m_spDepacker->getPackage())
 		{
 			int nMsgID = 0;
-			try
+			//try
+			IF_TRY_BEGIN
 			{
 				IFRefPtr<IFMemStream> spStream = IFNew PackageMemStream(spPackage);
 				if (m_spPackPreProcessFun)
@@ -269,7 +338,8 @@ bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 					//KeepAlive Msg
 				}
 			}
-			catch(IFStreamReadException& )
+			IF_CATCH
+			//catch(IFStreamReadException& )
 			{
 				if (m_pNetCore->m_bSyncEvent)
 				{
@@ -281,19 +351,25 @@ bool IFNetConnection::recvData( const char* pData, IFUI32 nLen )
 					event_ErrorPack(this);
 				IFLOG(IFLL_WARNING, "无法解析的错误消息[%d]\r\n", nMsgID);
 			}
+			IF_TRY_END
 		}
 		
 
 	}
 	else
+#endif
 	{
 		if (m_bSyncEvent)
 		{
 			IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(this, IFNew IFSimpleArray<char>(nLen,pData));
 			m_pNetCore->pushEvent(pEvent);
+			IFLOG(IFLL_TRACE, "sync event push:%p\r\n", pEvent);
 		}
 		else
-			event_RecvData(this, pData,nLen);
+		{
+			event_RecvData(this, pData, nLen);
+			IFLOG(IFLL_TRACE, "async event fired:\r\n");
+		}
 	}
 
 	return true;
@@ -326,7 +402,7 @@ IFUI64 IFNetConnection::sendString( const char* sString )
 {
 	return sendData(sString, (IFUI32)strlen(sString)+1);
 }
-
+#ifndef IFPLATFORM_FREE_RTOS
 IFUI64 IFNetConnection::sendMsg(IFNet_Message* pMsg, bool bCompress /*= false*/, IFNetEncryptFunctor* pFun /*= NULL*/)
 {
 	//IFLOG(IFLL_TRACE, "IFNetConnection::sendMsg 1\r\n");
@@ -348,6 +424,7 @@ IFUI64 IFNetConnection::sendMsg(IFNet_Message* pMsg, bool bCompress /*= false*/,
 
 	return info.nSendID;
 }
+#endif
 
 void IFNetConnection::setPackageMode(bool b)
 {
@@ -414,7 +491,7 @@ void IFNetConnection::setUserData( IFRefPtr<IFRefObj> spUserData )
 {
 	m_spUserData = spUserData;
 }
-
+#ifndef IFPLATFORM_FREE_RTOS
 void IFNetConnection::fireRecvPackageEvent( IFNetRecvPackage* pPackage )
 {
 
@@ -435,6 +512,8 @@ void IFNetConnection::fireSendDoneEvent(IFUI64 nSendID, bool bOK)
 
 void IFNetConnection::procEstablishEncryptRes(IFNet_Message_EstablishEncryption_Res* pRes)
 {
+
+
 	if (m_spAES&& m_EncryptTestData.size() > 0&& m_EncryptTestData.size()== pRes->m_sTestData.size())
 	{
 		if (memcmp(m_EncryptTestData, pRes->m_sTestData, pRes->m_sTestData.size()) == 0)
@@ -455,12 +534,14 @@ void IFNetConnection::procEstablishEncryptRes(IFNet_Message_EstablishEncryption_
 			event_EncryptionEstablished(this);
 		}
 	}
+
 }
 
 void IFNetConnection::ProcEstablishEncryptRes(IFNetConnection* pCon, IFNet_Message_EstablishEncryption_Res* pRes)
 {
 	pCon->procEstablishEncryptRes(pRes);
 }
+#endif
 
 IFUI64 IFNetConnection::getSendID()
 {
@@ -514,6 +595,7 @@ IFUI32 IFNetConnection::getAutoKeepAliveTime()
 
 void IFNetConnection::establishEncryption(IFMemStream* pPublicKey)
 {
+#ifndef IFPLATFORM_FREE_RTOS
 	IFString sAesKey;
 	srand(IFNativeSystemAPI::getTickCount());
 	for (int i = 0; i < 16; i++)
@@ -560,7 +642,7 @@ void IFNetConnection::establishEncryption(IFMemStream* pPublicKey)
 
 	sendMsg(spReq);
 	IFLOG(IFLL_DEBUG, "rsa encrypt 8\r\n");
-
+#endif
 }
 
 bool IFNetConnection::isEncryption()
@@ -568,7 +650,7 @@ bool IFNetConnection::isEncryption()
 	return m_bEncryption;
 }
 
-bool IFNetConnection::establishSSL()
+bool IFNetConnection::establishSSL(const IFString& hostname)
 {
 #ifndef DONT_USE_SSL
 	m_ssl = SSL_new(GetSSLContext());
@@ -579,6 +661,10 @@ bool IFNetConnection::establishSSL()
 	SSL_set_bio(m_ssl, m_rbio, m_wbio);
 
 	SSL_set_connect_state(m_ssl);
+	if (hostname.size())
+	{
+		SSL_set_tlsext_host_name(m_ssl, hostname.c_str());
+	}
 
 	int n = SSL_do_handshake(m_ssl);
 	int sslerr = SSL_get_error(m_ssl, n);
@@ -632,7 +718,11 @@ bool IFNetConnection::waitEstablishSSL()
 
 void IFNetConnection::setDecryptFun(IFNetEncryptFunctor* pDecryptFun)
 {
+#ifndef IFPLATFORM_FREE_RTOS
 	m_spDecryptFun = pDecryptFun;
+	if (m_spDecryptFun)
+		m_spDecryptFun->setThreadSafe();
+#endif
 }
 
 
@@ -641,7 +731,12 @@ void IFNetConnection::setDecryptFun(IFNetEncryptFunctor* pDecryptFun)
 
 void IFNetConnection::setDefalutEncryptFun(IFNetEncryptFunctor* pEncryptFun)
 {
+#ifndef IFPLATFORM_FREE_RTOS
 	m_spDefaultEncryptFun = pEncryptFun;
+	if (m_spDefaultEncryptFun)
+		m_spDefaultEncryptFun->setThreadSafe();
+	
+#endif
 }
 
 bool IFNetDepacker::write(const void* pData, int nLen)
@@ -718,6 +813,11 @@ IFNetDepacker::IFNetDepacker()
 
 {
 	//m_spSizeBuf = IFNew IFMemStream();
+}
+
+IFNetRecvPackage::~IFNetRecvPackage()
+{
+
 }
 
 int IFNetRecvPackage::write(const void* p, IFUI32 nSize)

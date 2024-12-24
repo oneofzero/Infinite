@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IFPH_CRASH_DUMP_H__
+#define __IFPH_CRASH_DUMP_H__
 #include "IFCommonLib_API.h"
 
 
@@ -32,8 +34,10 @@ public:
 		DT_STACK,
 		DT_MEMORY,
 	};
-
+	typedef void CustomCrashHandler(void* puserdata);
+	static BOOL Install(DumpType dt, CustomCrashHandler* pHandler, void* pUserData);
 	static BOOL Install(DumpType dt);
 private:
 };
 
+#endif //IFPH_CRASH_DUMP_H

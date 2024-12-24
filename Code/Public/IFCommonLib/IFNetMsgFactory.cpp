@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include "stdafx.h"
 #include "IFNetMsgFactory.h"
 #include "IFCompress.h"
+#include "IFNetConnection.h"
 
 IF_DEFINERTTIROOT(IFNet_Message)
 
@@ -133,6 +134,32 @@ IF_DEFINERTTI(IFNet_Message_EstablishEncryption_Req, IFNet_Message);
 IF_NET_DEFINEMSG(IFNet_Message_EstablishEncryption_Req, 0xFFFF0001);
 IF_DEFINERTTI(IFNet_Message_EstablishEncryption_Res, IFNet_Message);
 IF_NET_DEFINEMSG(IFNet_Message_EstablishEncryption_Res, 0xFFFF0002);
+IF_DEFINERTTI(IFNet_Message_Generic_Encrypt_Pack, IFNet_Message);
+IF_NET_DEFINEMSG(IFNet_Message_Generic_Encrypt_Pack, 0xFFFF0003);
+
+void IFNet_Message_Generic_Encrypt_Pack::deserialize(IFStream* pStream)
+{
+	IFNet_MessageGen<IFNet_Message_Generic_Encrypt_Pack>::deserialize(pStream);
+	auto size = pStream->readI32();
+	m_spStream = IFNew IFMemStream(0, 0, size);
+	
+	m_spStream->seek(size, IFStream::ISSF_BEGIN);
+
+	pStream->read((char*)m_spStream->getBuffer(), size);
+
+	m_spStream->seek(0, IFStream::ISSF_BEGIN);
+
+}
+
+void IFNet_Message_Generic_Encrypt_Pack::serialize(IFStream* pStream)
+{
+	IFNet_MessageGen<IFNet_Message_Generic_Encrypt_Pack>::serialize(pStream);
+	
+	pStream->writeI32(m_spStream->size());
+	pStream->write(m_spStream->getBuffer(), m_spStream->size());
+
+
+}
 
 IFString IFNet_Message_Sproto::getSprotoBuf()
 {
@@ -154,6 +181,12 @@ void IFNet_Message_Sproto::serialize(IFStream* pStream)
 	pStream->write(m_sSProtoBuf.c_str(), m_sSProtoBuf.length());
 }
 
-IF_NET_DEFINEMSG(IFNet_Message_Sproto, 139772879);
+void IFNet_Message_Sproto::sendSprotoPack(IFNetConnection* pCore, const char* p, int len)
+{
+	IFRefPtr<IFNet_Message_Sproto> spMsg = IFNew IFNet_Message_Sproto(p, len);
+	pCore->sendPack(spMsg->toPackage(), 0);
+}
+
+IF_NET_DEFINEMSG(IFNet_Message_Sproto, 1397772879);
 
 IF_DEFINERTTI(IFNet_Message_Sproto, IFNet_Message)

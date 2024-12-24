@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_AES_H__
+#define __IF_AES_H__
 #include "IFRefPtr.h"
 #include "ifsingleton.h"
 #include "IFString.h"
@@ -50,11 +52,12 @@ private:
 
 };
 
-class IFCOMMON_API IFDES : public IFRefObj
+class IFCOMMON_API IFDES : public IFMemObj
 {
-	IF_DECLARERTTI;
+	IF_DECLARERTTI_STATIC;
 public:
 	IFDES(const IFString& sUserKey);
+	~IFDES();
 	void encrypt(IFStream* pInStream, IFStream* pOutStream) const;
 	void decrypt(IFStream* pInStream, IFStream* pOutStream) const;
 
@@ -62,7 +65,7 @@ public:
 	void decrypt(char* in_block, char* out_block) const; //block size = 8
 
 protected:
-	~IFDES();
+
 	IFDES(const IFDES& o) {};
 	IFDES& operator=(const IFDES& o) { return *this; };
 
@@ -82,3 +85,5 @@ public:
 	Key generateKey(const IFString& sUserKey);
 };
 */
+
+#endif //__IF_AES_H__

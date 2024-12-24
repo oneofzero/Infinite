@@ -1,4 +1,4 @@
-
+﻿
 return
 {
 	name="IFCommonLib",
@@ -6,7 +6,7 @@ return
 	--compiler = "g++",
 	
 	base = function(proj)
-			proj:RemoveSrc("IFComPort;CrashDump;IFAPKFileProvider;IFCoroutine;IFNetCoreIOCP;gzio.c;gzlib.c;gzread.c;gzwrite.c;iowin32.c;minigzip.c;aes.c;example.c;gzclose.c");
+			proj:RemoveSrc("IFComPort;CrashDump;IFAPKFileProvider;IFCoroutine;IFNetCoreIOCP;IFNetCoreSelect;gzio.c;gzlib.c;gzread.c;gzwrite.c;iowin32.c;minigzip.c;aes.c;example.c;gzclose.c");
 			proj:AddIncludePath("./aes;./zlib;./rsa;../3rd/include");
 		
 	end,
@@ -16,6 +16,7 @@ return
 
 		IFCommonLib = function(proj)
 			proj.base(proj);
+			proj:RemoveSrc("IFNetCoreWebSocket.cpp")
 			proj:SetTargetType("so");
 			proj:AddLinkFlag("-pthread");
 			proj:AddLib("uuid");
@@ -23,6 +24,7 @@ return
 			proj:AddLib("ssl")
 			proj:AddLib("crypto");
 			proj:SetOutputPath("../../../bin/libIFCommonLib.so");
+			proj.linker = "g++";
 		end,
 		win = function(proj)
 			require("win_config")
@@ -66,6 +68,7 @@ return
 			proj.targets.IFCommonLib(proj);
 			proj:AddLib("dl");
 			proj:AddLibPath("../3rd/lib/linux/");
+			proj:AddFlag("-fPIC");
 			proj:AddDefine("_REENTRANT")
 		end,
 		linux_debug = function(proj)
@@ -97,7 +100,14 @@ return
 			proj:SetOutputPath("../../../binD/libIFCommonLib.a");
 
 		end,
-
+		mac = function(proj)
+			proj.targets.IFCommonLib(proj);
+			proj:AddCXXFlag("-std=gnu++11")
+			proj:RemoveSrc("IFNetCoreEPOLL.cpp")
+			proj:AddLib("dl");
+			proj:AddLibPath("../3rd/lib/mac/");
+			proj:SetOutputPath("../../../binD/libIFCommonLib.so");
+		end,
 
 		android = function (proj, targettype)
 			
@@ -109,18 +119,19 @@ return
 			proj:AddLib("android");
 			proj:AddSrc("IFAPKFileProvider.cpp");
 			proj:AddSrc("android-ifarrds/ifaddrs.c")
+			proj:AddFlag("-Wno-inconsistent-missing-override -Wno-parentheses -Wno-undefined-var-template")
 		end,
 		
 		android_arm = function (proj, targettype  )
 			proj.targets.android(proj,targettype);
 			android_config(proj);
-			proj:AddDefine("DEBUG")
+			--proj:AddDefine("DEBUG")
 			proj:AddLibPath("../3rd/lib/android/arm/");
 		end,
 		android_arm64 = function (proj, targettype  )
 			proj.targets.android(proj,targettype);
-			android_config(proj, nil, "arm64", nil);		
-			proj:AddLibPath("../3rd/lib/android/arm/");
+			android_config(proj, "android-21", "arm64", nil);		
+			proj:AddLibPath("../3rd/lib/android/arm64/");
 		end,
 		android_x86 = function (proj,targettype)
 			proj.targets.android(proj,targettype);
@@ -130,27 +141,50 @@ return
 
 		android_arm_static = function(proj)
 			proj:AddDefine("IFCOMMON_STATIC");
+			proj:AddDefine("DONT_USE_SSL")
 			proj.targets.android_arm(proj, "a");
 			
+		end,
+		android_arm64_static = function (proj  )
+			proj:AddDefine("IFCOMMON_STATIC");
+			proj:AddDefine("DONT_USE_SSL")
+			proj.targets.android_arm64(proj,"a");
+						
 		end,
 		android_x86_static = function(proj)
 			proj:AddDefine("IFCOMMON_STATIC");
 			proj.targets.android_x86(proj, "a");
 		end,
 		android_arm_unity = function(proj)
+			proj:AddDefine("IFCOMMON_STATIC");
+			proj:AddDefine("DONT_USE_SSL")
 			proj:AddDefine("IFCOMMON_UNITY_SUPPORT");
 			proj.targets.android_arm(proj, "a");
 			
 		end,
-		android_x86_unity = function(proj)
+		android_arm64_unity = function(proj)
 			proj:AddDefine("IFCOMMON_STATIC");
 			proj:AddDefine("IFCOMMON_UNITY_SUPPORT");
-			proj.targets.android_x86(proj, "a");
+			proj:AddDefine("DONT_USE_SSL")
+			proj.targets.android_arm64(proj, "a");
 		end,
 		web = function(proj)
 			require("web_config")(proj);
+			--proj:AddCXXFlag("-pthread");
+			proj:AddDefine("DONT_USE_SSL")
+			proj:AddDefine("NDEBUG")
+			proj:AddFlag("-Oz")
+			proj:RemoveSrc("IFNetCoreEPOLL.cpp;IFNetCoreSelect.cpp;IFPipe.cpp;IFPipeCore.cpp")
+			proj:RemoveSrc("IFFileLogStream.cpp;IFRemoteLogStream.cpp;IFWIN32FileStream.cpp;IFCFileStream.cpp")
+			proj:RemoveSrc("IFHttpDownloader.cpp;IFThread.cpp;IFServerFrame.cpp;IFRedis.cpp;IFThreadSyncObj.cpp")
+
 			proj:SetOutputPath("../../../web/libIFCommonLib.a");
 			proj:AddDefine("IFCOMMON_STATIC");
+		end,
+		web_debug = function (proj)
+			proj.targets.web(proj)
+			proj:AddDefine("DEBUG")
+			proj:RemoveDefine("NDEBUG")
 		end,
 	},
 }

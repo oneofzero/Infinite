@@ -1,4 +1,4 @@
-/*
+﻿/*
 The MIT License (MIT)
 Copyright © 2014 Huang Cong
 
@@ -48,13 +48,13 @@ THE SOFTWARE.
 #else
 #ifdef LINUX
 #include "IFNetCoreEPOLL.h"
+#elif defined(IFPLATFORM_WEB)
+#include "IFNetCoreWebSocket.h"
 #else
 #include "IFNetCoreSelect.h"
 #endif
 #endif
-#ifdef IFCOMMON_UNITY_SUPPORT
-#define DONT_USE_SSL
-#endif
+
 
 #if defined(IFPLATFORM_IOS)
 #include <ifaddrs.h>
@@ -65,6 +65,14 @@ THE SOFTWARE.
 //#include "android-ifarrds/ifaddrs.h"
 #include <sys/ioctl.h>
 #include <net/if.h>
+
+#include <errno.h>
+
+
+#endif
+
+#ifdef IFPLATFORM_FREE_RTOS
+#define gai_strerror(r) r
 #endif
 
 #ifndef DONT_USE_SSL
@@ -74,6 +82,10 @@ THE SOFTWARE.
 #include <openssl/err.h>
 
 SSL_CTX* GetSSLContext();
+#else
+#if defined(IFPLATFORM_LINUX)
+	#include <errno.h>
+#endif
 #endif
 
 
@@ -83,13 +95,21 @@ IF_DEFINERTTI(IFNetCore::UDPData, IFRefObj);
 IFNetCore::IFNetCore(void) :
 	m_nMaxConnectionCount(1000),
 	//m_nCurConnectionCount(0),
+	m_nPort(0),
+	m_bSyncEvent(false),
+	m_bPackageMode(false),
+	m_bServiceStarted(false),
 	m_nSendPackage(0),
 	m_nRecvPackage(0),
 	m_nSendBytes(0),
 	m_nRecvBytes(0)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	m_spEventSyncObj = IFNew IFThreadSyncObj();
+#endif
+
 	m_spTimer = IFNew IFTimer();
+#ifndef IFPLATFORM_FREE_RTOS
 	m_spMsgFactory = IFNew IFNetMsgFactory;
 	m_spMsgFactory->registerMsg(makeIFFunctor<void(IFNetConnection*, IFNet_Message_EstablishEncryption_Req*)>([=](IFNetConnection* pConnection, IFNet_Message_EstablishEncryption_Req* pMsg)
 		{
@@ -147,6 +167,10 @@ IFNetCore::IFNetCore(void) :
 
 		}));
 	m_spMsgFactory->registerMsg(makeIFFunctor(&IFNetConnection::ProcEstablishEncryptRes));
+	m_spMsgFactory->registerMsg<IFNet_Message_Sproto>();
+	m_spMsgFactory->registerMsg<IFNet_Message_Generic_Encrypt_Pack>();
+#endif
+
 	//m_spMsgFactory->registerMsg(IFNet_Message_Sproto::MsgID, makeIFFunctor(IFNet_Message_Sproto::createMsg));
 
 	//IFNet_Message_EstablishEncryption_Req::setMsgProc();
@@ -158,6 +182,8 @@ IFNetCore::IFNetCore(void) :
 IFNetCore::~IFNetCore(void)
 {
 	//	DeleteCriticalSection(&m_ConnectionListLock);
+	//if (m_bServiceStarted)
+	//	stopService();
 }
 
 
@@ -233,27 +259,34 @@ void IFNetCore::fireNewConnectionEvent(IFNetConnection* pConnection)
 
 void IFNetCore::pushEvent(IFNetCoreEvent* e)
 {
-	m_EventList.push(e);
-	m_spEventSyncObj->notify();
+	IFLOG(IFLL_TRACE, "evt type:%s pushed!\r\n", e->getEventTypeName());
 
+	m_EventList.push(e);
+#ifndef IFTHREAD_NOT_ENABLE
+	m_spEventSyncObj->notify();
+#endif
 }
 
 
 bool IFNetCore::process()
 {
+#ifdef IFPLATFORM_FREE_RTOS
+	const int maxNum = 1000;
+#else
 	const int maxNum = 1000000;
-	int nNum = 1000000;
+#endif
+	int nNum = maxNum;
 	while (nNum)
 	{
-		//IFLOG(IFLL_DEBUG, "process event\r\n");
+		//IFLOG(IFLL_TRACE, "process event\r\n");
 
 
 		IFNetCoreEvent* pEvent = NULL;
 		if (m_EventList.pop(pEvent))
 		{
-			//IFLOG(IFLL_DEBUG, "pop event\r\n" );
+			IFLOG(IFLL_TRACE, "pop event:%s\r\n", pEvent->getEventTypeName());
 			pEvent->fireEvent(this);
-			//IFLOG(IFLL_DEBUG, "fire event\r\n");
+			IFLOG(IFLL_TRACE, "fired event:%s\r\n",  pEvent->getEventTypeName());
 			if (pEvent->eventType == IFNetCoreEvent::ET_DISCONNECT)
 			{
 				IFLOG(IFLL_DEBUG, "disconnect event fired!%p\r\n", pEvent->spConnection.getPtr());
@@ -306,7 +339,7 @@ bool IFNetCore::process()
 			++it;
 		}
 	}
-
+#ifndef IFTHREAD_NOT_ENABLE
 	if (m_OpendUDPProcThreadList.size())
 	{
 		for (auto it = m_OpendUDPProcThreadList.begin(); it != m_OpendUDPProcThreadList.end(); ++it)
@@ -324,6 +357,7 @@ bool IFNetCore::process()
 
 		}
 	}
+#endif
 
 	if (m_GetHostIPResultQueue.size())
 	{
@@ -349,16 +383,21 @@ bool IFNetCore::process()
 
 bool IFNetCore::waitAndProcess(int ms)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	m_spEventSyncObj->wait(ms);
+#endif
 	return process();
 }
 
 bool IFNetCore::startService(int nPort, int nMaxConnection, bool bPackagemode, bool bSyncEvent)
 {
+	if (m_bPackageMode)
+		return false;
 	m_nPort = nPort;
 	m_nMaxConnectionCount = nMaxConnection;
 	m_bPackageMode = bPackagemode;
 	m_bSyncEvent = bSyncEvent;
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	int processornum = IFNativeSystemAPI::getProcessorCount();
 	if (processornum > 1)
 		processornum /= 2;
@@ -370,23 +409,31 @@ bool IFNetCore::startService(int nPort, int nMaxConnection, bool bPackagemode, b
 		m_PackSerializeThreads.push_back(spThread);
 		spThread->start(makeIFDPFunctor(this, &IFNetCore::processPackSerialize, makeIFDefaultParam(spThread, i)));
 	}
-
+#endif
+	m_bServiceStarted = true;
 	return onServiceStart();
 }
 
 bool IFNetCore::stopService()
 {
+	if (!m_bServiceStarted)
+		return false;
+#ifndef IFTHREAD_NOT_ENABLE
 	while (m_OpendUDPProcThreadList.size())
 	{
 		closeUDPPort(m_OpendUDPProcThreadList.begin()->first);
 	}
 
+
 	if (m_spGetHostIPThread)
 	{
 		m_spGetHostIPThread->requestExit();
 		m_spGetHostIPThread->waitExit();
+		m_spGetHostIPThread = NULL;
 	}
+#endif
 
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	for (auto pThread : m_PackSerializeThreads)
 	{
 		pThread->requestExit();
@@ -395,6 +442,10 @@ bool IFNetCore::stopService()
 	{
 		pThread->waitExit();
 	}
+	m_PackSerializeThreads.clear();
+#endif
+
+	m_bServiceStarted = false;
 	if (onServiceStop())
 	{
 		process();
@@ -410,22 +461,33 @@ bool IFNetCore::stopService()
 
 void IFNetCoreEvent::fireEvent(IFNetCore* pNetCore)
 {
+	
 	switch (eventType)
 	{
 	case ET_NEW_CONNECTION:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", pNetCore->event_NewConnection.getHandleCount());
+
 		pNetCore->event_NewConnection(pNetCore, spConnection);
 		break;
 	case ET_CONNECT:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_ConnectResult.getHandleCount());
 		spConnection->event_ConnectResult(spConnection, bConnectSuccess);
+
 		break;
 	case ET_DISCONNECT:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_Disconnect.getHandleCount());
 		spConnection->event_Disconnect(spConnection);
+		
 		break;
 	case ET_DATA_RECV:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_RecvData.getHandleCount());
 		spConnection->event_RecvData(spConnection, *pData, pData->size());
+		
 		delete pData;
 		break;
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	case ET_PACK_RECV:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_RecvPackage.getHandleCount());
 		spConnection->event_RecvPackage(spConnection, pPack);
 		{
 			auto pInfo = pNetCore->getMsgFactory()->getMsgInfo(pPack->getMsgID());
@@ -434,17 +496,25 @@ void IFNetCoreEvent::fireEvent(IFNetCore* pNetCore)
 				(*pInfo->spProcess)(spConnection, pPack);
 			}
 		}
+		
 		//pPack->process(spConnection);
 		//delete pPack;
 		break;
 	case ET_ERROR_PACK:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_ErrorPack.getHandleCount());
 		spConnection->event_ErrorPack(spConnection);
+		
 		break;
+#endif
 	case ET_DATA_SENDED:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_SendResult.getHandleCount());
 		spConnection->event_SendResult(spConnection, nSendID, bSendSuccess);
+		
 		break;
 	case ET_SSL_ESTABLISH_RESULT:
+		IFLOG(IFLL_TRACE, "handler count:%d\r\n", spConnection->event_SSLEstablishResult.getHandleCount());
 		spConnection->event_SSLEstablishResult(spConnection, bConnectSuccess);
+		
 		break;
 	default:
 		break;
@@ -469,6 +539,7 @@ void IFNetCore::removeAutoKeepAliveConnection(IFNetConnection* pConnection)
 
 void IFNetCore::sendAsyncMsg(const IFAsyncSendMsgInfo& info)
 {
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	IFLOG(IFLL_TRACE, "sendAsyncMsg 1");
 	int nThreadIdx = ((IFUI64)(void*)info.spConnection.getPtr()) % m_SerializeQueue.size();
 	auto& queue = m_SerializeQueue[nThreadIdx];
@@ -478,29 +549,35 @@ void IFNetCore::sendAsyncMsg(const IFAsyncSendMsgInfo& info)
 	IFLOG(IFLL_TRACE, "sendAsyncMsg 3");
 	m_PackSerializeThreads[nThreadIdx]->getSyncObj()->notify();
 	IFLOG(IFLL_TRACE, "sendAsyncMsg 4");
+#else
+	auto package = info.spMsg->toPackage(info.bCompress, info.pFun);
+	IFLOG(IFLL_TRACE, "send serialize msg!\r\n");
+	info.spConnection->sendPack(package, info.nSendID);
+#endif
 }
 
-IFRefPtr<IFNetCore> IFNetCore::createNetCore()
-{
-#ifdef WIN32
-#if defined(IFPLATFORM_WP)
-	return IFNew IFNetCoreSelect;
-#else
-	return IFNew IFNetCoreIOCP;
-	//return IFNew IFNetCoreSelect;
-#endif
-#else
-#ifdef LINUX
-	return IFNew IFNetCoreEPOLL;
-#else
-	return IFNew IFNetCoreSelect;
-#endif
-#endif
-
-}
+//IFRefPtr<IFNetCore> IFNetCore::createNetCore()
+//{
+//#ifdef WIN32
+//#if defined(IFPLATFORM_WP)
+//	return IFNew IFNetCoreSelect;
+//#else
+//	return IFNew IFNetCoreIOCP;
+//	//return IFNew IFNetCoreSelect;
+//#endif
+//#else
+//#ifdef LINUX
+//	return IFNew IFNetCoreEPOLL;
+//#else
+//	return IFNew IFNetCoreSelect;
+//#endif
+//#endif
+//
+//}
 
 bool IFNetCore::openUDPPort(int nPort)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	auto it = m_OpendUDPProcThreadList.find(nPort);
 	if (it != m_OpendUDPProcThreadList.end())
 		return false;
@@ -528,16 +605,20 @@ bool IFNetCore::openUDPPort(int nPort)
 		return false;
 	}
 
-	pInfo->addRef();
+	pInfo->addRef(IFREFPTRDEBUGINFO);
 	IFRefPtr<IFThread> spThread = IFNew IFThread;
 	spThread->start(makeIFDPFunctor(this, &IFNetCore::processUDPReceive, IFFunctorParam<UDPSocketInfo*>(pInfo)));
 	m_OpendUDPProcThreadList[nPort] = makeIFPair(spThread, pInfo);
 
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool IFNetCore::closeUDPPort(int nPort)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	auto it = m_OpendUDPProcThreadList.find(nPort);
 	if (it == m_OpendUDPProcThreadList.end())
 		return false;
@@ -549,10 +630,14 @@ bool IFNetCore::closeUDPPort(int nPort)
 	}
 	m_OpendUDPProcThreadList.erase(it);
 	return true;
+#else
+	return false;
+#endif
 }
 
 bool IFNetCore::sendUDPData(const IFString& address, int nRemotePort, int nLocalPort, const char* pData, int nLen)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	auto it = m_OpendUDPProcThreadList.find(nLocalPort);
 	if (it == m_OpendUDPProcThreadList.end())
 		return false;
@@ -579,15 +664,23 @@ bool IFNetCore::sendUDPData(const IFString& address, int nRemotePort, int nLocal
 
 	int nSendBytes = sendto(it->second.second->m_Socket, pData, nLen, 0, (struct sockaddr*) & server, len);
 	return nSendBytes == nLen;
+#else
+	return false;
+#endif
+
 }
 
 bool IFNetCore::sendUDPDataByAddr(const AddressInfo* address, int nLocalPort, const char* pData, int nLen)
 {
+#ifndef IFTHREAD_NOT_ENABLE
 	auto it = m_OpendUDPProcThreadList.find(nLocalPort);
 	if (it == m_OpendUDPProcThreadList.end())
 		return false;
 	int nSendBytes = sendto(it->second.second->m_Socket, pData, nLen, 0, (struct sockaddr*)address->addr, address->addrlen);
 	return nSendBytes == nLen;
+#else
+	return false;
+#endif
 }
 
 
@@ -612,7 +705,7 @@ void IFNetCore::processUDPReceive(UDPSocketInfo* pSocket)
 				continue;
 			}
 #endif
-			pSocket->decRef();
+			pSocket->decRef(IFREFPTRDEBUGINFO);
 			return;
 		}
 		else if (nrecvLen == 0)
@@ -621,8 +714,14 @@ void IFNetCore::processUDPReceive(UDPSocketInfo* pSocket)
 			continue;
 		}
 		IFRefPtr<UDPData> spUDPData = IFNew UDPData;
-		spUDPData->nRemotePort = ntohs(from.sin_port);
-		spUDPData->remoteAddress = inet_ntoa(from.sin_addr);
+		spUDPData->removeAddress.port = ntohs(from.sin_port);
+		spUDPData->removeAddress.ip = inet_ntoa(from.sin_addr);
+	
+		
+		spUDPData->removeAddress.family = from.sin_family;
+		memcpy(spUDPData->removeAddress.addr, &from, fromlen);
+		spUDPData->removeAddress.addrlen = fromlen;
+
 		spUDPData->nLocalPort = pSocket->m_nLocalPort;
 		spUDPData->dataBuf.resize(nrecvLen);
 		memcpy(spUDPData->dataBuf, buf, nrecvLen);
@@ -630,7 +729,7 @@ void IFNetCore::processUDPReceive(UDPSocketInfo* pSocket)
 		IFCSLockHelper lh(pSocket->m_DataLock);
 		pSocket->m_Datas.push_back(spUDPData);
 	}
-	pSocket->decRef();
+	pSocket->decRef(IFREFPTRDEBUGINFO);
 }
 
 void IFNetCore::getHostAddressAsync(const IFString& address, int nPort, AsyncGetAddressCallbackPtr spResult)
@@ -643,6 +742,7 @@ void IFNetCore::getHostAddressAsync(const IFString& address, int nPort, AsyncGet
 	}
 	else
 	{*/
+#ifndef IFTHREAD_NOT_ENABLE
 	IFCSLockHelper lh(m_GetHostIPQueueLock);
 	GetAddressRequestInfo info;
 	info.add = address;
@@ -653,6 +753,7 @@ void IFNetCore::getHostAddressAsync(const IFString& address, int nPort, AsyncGet
 		m_spGetHostIPThread = IFNew IFThread;
 		m_spGetHostIPThread->start(makeIFDPFunctor(this, &IFNetCore::processGetHostIP, IFFunctorParam<IFThread*>(m_spGetHostIPThread)));
 	}
+#endif
 	//}
 }
 
@@ -734,7 +835,16 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 	int r = getaddrinfo(address.c_str(), NULL, &hadi, &adi);
 	if (r != 0)
 	{
-		IFLOG(IFLL_ERROR, "getaddrinfo error:%s\r\n", gai_strerror(r));
+		auto errs =
+#ifdef IFPLATFORM_WINDOWS
+			gai_strerrorA(r);
+#else
+			gai_strerror(r);
+#endif
+		IFLOG(IFLL_ERROR, "getaddrinfo:%s error:%s\r\n", address.c_str(), errs);
+		
+
+		
 		return false;
 	}
 	const struct sockaddr* sa = adi->ai_addr;
@@ -766,14 +876,18 @@ bool IFNetCore::getHostAddress(const IFString& address, int nPort, AddressInfo* 
 
 void IFNetCore::addRSAPrivateKey(const IFString& sPublickKeyMD5, IFRefPtr<IFMemStream> spPirvateKey)
 {
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	m_RSAPrivateKeyList[sPublickKeyMD5] = spPirvateKey;
+#endif
 }
 
 IFRefPtr<IFMemStream> IFNetCore::getRSAPrivateKey(const IFString& sPublicKeyMD5)
 {
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 	auto it = m_RSAPrivateKeyList.find(sPublicKeyMD5);
 	if (it != m_RSAPrivateKeyList.end())
-		return it->second;
+return it->second;
+		#endif
 	return NULL;
 }
 
@@ -815,7 +929,14 @@ bool IFNetCore::loadSSLCA()
 
 }
 
+#ifndef DONT_USE_SSL
+static int VerifySSL2( X509_STORE_CTX* ctx, void* pUserData)
+{
 
+	//GetSSLContext()->cert
+	return 1;
+}
+#endif
 
 bool IFNetCore::loadSSLCA(const IFString& pem, const IFString& key)
 {
@@ -832,18 +953,28 @@ bool IFNetCore::loadSSLCA(const IFString& pem, const IFString& key)
 		return false;
 	}
 
-	if (SSL_CTX_use_PrivateKey_file(GetSSLContext(), key.c_str(), SSL_FILETYPE_PEM) <= 0)
+	if (key.length())
 	{
-		IFLOG(IFLL_ERROR, "SSL_CTX_use_PrivateKey_file error!\r\n");
+		if (SSL_CTX_use_PrivateKey_file(GetSSLContext(), key.c_str(), SSL_FILETYPE_PEM) <= 0)
+		{
+			IFLOG(IFLL_ERROR, "SSL_CTX_use_PrivateKey_file error!\r\n");
 
-		return false;
+			return false;
+		}
+		if (!SSL_CTX_check_private_key(GetSSLContext()))
+		{
+			IFLOG(IFLL_ERROR, "SSL_CTX_check_private_key error!\r\n");
+
+			return false;
+		}
 	}
-	if (!SSL_CTX_check_private_key(GetSSLContext()))
+	else
 	{
-		IFLOG(IFLL_ERROR, "SSL_CTX_check_private_key error!\r\n");
+		SSL_CTX_set_verify(GetSSLContext(), SSL_VERIFY_PEER, NULL);
 
-		return false;
+		SSL_CTX_set_cert_verify_callback(GetSSLContext(), VerifySSL2, this);
 	}
+
 
 	return true;
 #else
@@ -852,6 +983,21 @@ bool IFNetCore::loadSSLCA(const IFString& pem, const IFString& key)
 #endif
 }
 
+IFString IFNetCore::convertNetAddr2Str(const char* s, int len)
+{
+	char ip[128] = { 0 };
+	if (len == 4)
+	{
+		inet_ntop(AF_INET, s, ip, sizeof(ip));
+	}
+	else if(len == 6)
+	{
+		inet_ntop(AF_INET6, s, ip, sizeof(ip));
+	}
+	
+	return ip;
+}
+#ifndef IFTHREAD_NOT_ENABLE
 void IFNetCore::processGetHostIP(IFThread* pThread)
 {
 	while (!pThread->isNeedExit())
@@ -885,11 +1031,13 @@ void IFNetCore::processGetHostIP(IFThread* pThread)
 
 	}
 }
+#endif
 
-
+#if !defined(IFPLATFORM_FREE_RTOS) && !defined(IFPLATFORM_WEB)
 
 void IFNetCore::processPackSerialize(IFThread* pThread, int nThreadIDX)
 {
+
 	IFLOG(IFLL_TRACE, "serailze thread start!\r\n");
 	while (!pThread->isNeedExit())
 	{
@@ -909,8 +1057,9 @@ void IFNetCore::processPackSerialize(IFThread* pThread, int nThreadIDX)
 			IFLOG(IFLL_TRACE, "send msg ok!\r\n");
 		}
 	}
-}
 
+}
+#endif
 IFNetCore::UDPSocketInfo::UDPSocketInfo()
 	:IFRefObj(true)
 {

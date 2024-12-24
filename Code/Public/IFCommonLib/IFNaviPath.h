@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NAVI_PATH_H__
+#define __IF_NAVI_PATH_H__
 #include "IFRefObj.h"
 #include "IFArray.h"
 #include "IFTypes.h"
@@ -64,3 +66,4 @@ protected:
 
 };
 
+#endif //__IF_NAVI_PATH_H__

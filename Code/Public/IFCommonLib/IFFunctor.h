@@ -21,7 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
-
+#ifndef __IF_FUNCTOR_H__
+#define __IF_FUNCTOR_H__
 #include "IFRefObj.h"
 #include "IFRefPtr.h"
 
@@ -109,8 +110,8 @@ public:
 	{
 
 	}
-	IFFunctorObj(TOBJ* pObj, RT(TOBJ::*pObjFun)(P0...)) :IFFunctor<RT(P0...)>(0),
-		m_pObjFun(pObjFun), m_pObj(pObj)
+	IFFunctorObj(TOBJ* pObj, RT(TOBJ::*pObjFun)(P0...)) :IFFunctor<RT(P0...)>(0), m_pObj(pObj),
+		m_pObjFun(pObjFun)
 	{
 
 	}
@@ -164,3 +165,5 @@ IFRefPtr<IFFunctor<Fun> > makeIFFunctor(const lambda& lmd)
 }
 
 #endif
+
+#endif //__IF_FUNCTOR_H__

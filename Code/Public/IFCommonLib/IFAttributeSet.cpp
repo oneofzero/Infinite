@@ -24,6 +24,7 @@ THE SOFTWARE.
 #include "IFAttributeSet.h"
 #include "IFAttribute.h"
 #include "IFObjectFactory.h"
+#include "IFLogSystem.h"
 
 IF_DEFINERTTI(IFAttributeSet, IFRefObj)
 
@@ -49,7 +50,7 @@ void IFAttributeSet::setAttribute( IFAttributeList& attlist,bool bEventNeedOldAt
 
 	}
 
-	if(bEventNeedOldAttr && event_AttributeChange.hasHandle())
+	if(bEventNeedOldAttr && eventInstance(event_AttributeChange).hasHandle())
 	{
 
 
@@ -71,25 +72,30 @@ void IFAttributeSet::setAttribute( IFAttributeList& attlist,bool bEventNeedOldAt
 
 		if(oldAttrlist.getAttrCount())
 		{
-			IFREFHOLDTHISCALL(event_AttributeChange(this,&attlist, &oldAttrlist));
+			IFREFHOLDTHISCALL(fireEvent(event_AttributeChange,this,&attlist, &oldAttrlist));
 		}
 	}
 	else
 	{
 		changeAttribute(attlist);
-		IFREFHOLDTHISCALL(event_AttributeChange(this,&attlist, (IFAttributeList*)NULL))
+		IFREFHOLDTHISCALL(fireEvent(event_AttributeChange, this,&attlist, (IFAttributeList*)NULL))
 	}
 
 }
 
-void IFAttributeSet::queryAttribute( IFAttributeList& attlist,const AttibuteNameList* pNameList /*= NULL*/ )
+
+
+void IFAttributeSet::queryAttribute( IFAttributeList& attlist,const IFAttributeNameList* pNameList /*= NULL*/ )
 {
 	attlist.setSuperAttrList(m_sSuperAttrName);
+	attlist.queryAttributeFromObject(GetType(), this, pNameList);
+
 }
 
 IFAttributeSetPtr IFAttributeSet::clone()
 {
-	IFRefPtr<IFAttributeSet> pObj = (IFAttributeSet*)CreateObj();
+	//IFRefPtr<IFAttributeSet> pObj = (IFAttributeSet*)CreateObj();
+	auto pObj = IFObjectFactory::getSingleton().createIFRefObj<IFAttributeSet>(GetType());
 	if(pObj)
 	{
 		assignTo(pObj);
@@ -98,6 +104,7 @@ IFAttributeSetPtr IFAttributeSet::clone()
 
 	else
 	{
+		IFLogError("can't create object:%s\r\n", GetType()->GetTypeName());
 		return NULL;
 	}
 }
@@ -109,9 +116,9 @@ void IFAttributeSet::assignTo( IFAttributeSet* pObj )
 
 void IFAttributeSet::changeAttribute( IFAttributeList& newAttribute )
 {
-
+	newAttribute.setAttributeToObject(GetType(), this);
 }
 
 
-IF_DEFINECREATEOBJ(IFAttributeSet)
 
+const IFEventSlot<void(IFAttributeSet* pObj, IFAttributeList* pNewAttList, IFAttributeList* pOldAttList)>	IFAttributeSet::event_AttributeChange;

@@ -25,8 +25,18 @@ THE SOFTWARE.
 #include "IFSystemAPI.h"
 #include <time.h>
 #if defined(IFPLATFORM_ANDROID)
+#if defined(_X64)
+typedef time_t time64_t;
+#define localtime64 localtime
+#define mktime64 mktime
+#define gmtime64 gmtime
+#	else
 #include <time64.h>
 #endif
+#endif
+
+IF_DEFINERTTIROOT(IFDateTime);
+IF_DEFINERTTIROOT(IFDateTime::Detail);
 
 IFDateTime::IFDateTime(void)
 {
@@ -78,6 +88,15 @@ IFDateTime::IFDateTime( const Detail& dt )
 	m_nDate = tt * 1000000;
 }
 
+#ifdef IFPLATFORM_WINDOWS
+IFDateTime::IFDateTime(FILETIME fileTime)
+{
+	m_nDate = *(IFI64*)&fileTime;
+	m_nDate /= 10;
+	m_nDate -= 11644473600000000LL;	//convert 1601 -> 1970
+}
+#endif
+
 
 IFDateTime::~IFDateTime(void)
 {
@@ -85,10 +104,25 @@ IFDateTime::~IFDateTime(void)
 
 IFString IFDateTime::toString() const
 {
-	Detail dtl = toDetail();
+	return toDetail().toString();
+}
+
+IFString  IFDateTime::Detail::toString() const
+{
 	return IFString().format("%d-%02d-%02d %02d:%02d:%02d %03d",
-		dtl.nYear, dtl.nMonth, dtl.nDay, dtl.nHour, dtl.nMinute, dtl.nSecond, dtl.nMilliSecond
-		);
+		nYear, nMonth, nDay, nHour, nMinute, nSecond, nMilliSecond
+	);
+}
+const char* weekname[] = { "Sun", "Mon", "Tue", "Wen", "Thu", "Fri", "Sat" };
+const char* monthname[] = { "Jan","Feb", "Mar", "Apr", "May", "Jun", "Jul", "Agu", "Sep", "Oct", "Nov", "Dec" };
+
+
+
+IFString IFDateTime::Detail::toWebString() const
+{
+	return IFString().format(
+			"%s, %d %s %d %d:%02d:%02d", 
+			weekname[nWeakDay % 7 ], nDay, monthname[nMonth-1], nYear, nHour, nMinute, nSecond);
 }
 
 void IFDateTime::addByDay( int nDay )
@@ -120,38 +154,50 @@ IFDateTime IFDateTime::now()
 	return IFNativeSystemAPI::getDateTime();
 }
 
+#ifdef IFPLATFORM_WINDOWS
+typedef __time64_t Time64T;
+#define LocalTime64 _localtime64
+#define GMTime64 _gmtime64
+#elif defined(IFPLATFORM_ANDROID)
+typedef time64_t Time64T;
+#define LocalTime64 localtime64
+#define GMTime64 gmtime64
+#else
+typedef time_t Time64T;
+#define LocalTime64 localtime
+#define GMTime64 gmtime
+#endif
 
-IFDateTime::Detail IFDateTime::toDetail() const
+
+static  IFDateTime::Detail todetail_f(IFUI64 date, tm* (*pTimeFun)(const Time64T*))
 {
-	//__time64_t ncut32 = _time64(NULL);
-    int baseyear = 1900;
-#ifdef WIN32
-	__time64_t t64 = m_nDate/1000000;
-	tm* t = _localtime64(&t64);
-#else
-#if defined(IFPLATFORM_ANDROID)
-	time64_t t64 = m_nDate / 1000000;
-	tm* t = localtime64(&t64);
+	int baseyear = 1900;
+	Time64T t64 = date / 1000000;
+	tm* t = (*pTimeFun)(&t64);
 
-#else
-	time_t ts = m_nDate / 1000000;
-	tm* t = localtime(&ts);
-	baseyear = 1970;
-#endif
-#endif
-	Detail dtl;
-	dtl.nYear = t->tm_year+baseyear;
-	dtl.nMonth = t->tm_mon+1;
+	IFDateTime::Detail dtl;
+	dtl.nYear = t->tm_year + baseyear;
+	dtl.nMonth = t->tm_mon + 1;
 	dtl.nDay = t->tm_mday;
 	dtl.nHour = t->tm_hour;
 	dtl.nMinute = t->tm_min;
 	dtl.nSecond = t->tm_sec;
 	dtl.nWeakDay = t->tm_wday;
-	dtl.nMilliSecond = (m_nDate%1000000)/1000;
+	dtl.nMilliSecond = (date % 1000000) / 1000;
 
 	return dtl;
 }
 
+IFDateTime::Detail IFDateTime::toDetail() const
+{
+	return todetail_f(m_nDate, LocalTime64);
+	
+}
+IFDateTime::Detail IFDateTime::toDetailGMT() const
+{
+	return todetail_f(m_nDate, GMTime64);
+
+}
 IFUI32 IFDateTime::toIntTime() const
 {
 	return IFUI32(m_nDate/1000000);

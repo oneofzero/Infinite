@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_STATE_MGR_H__
+#define __IF_STATE_MGR_H__
 #include "IFRefObj.h"
 #include "IFRBTree.h"
 #include "IFArray.h"
@@ -69,7 +71,9 @@ public:
 protected:
 	~IFStateMgr();
 
-	typedef IFRBTree<IFRefPtr<IFState>> StateList;
+	typedef IFSet<IFRefPtr<IFState>> StateList;
 	StateList m_StateList;
 	IFRefPtr<IFState> m_spCurState;
 };
+
+#endif //__IF_STATE_MGR_H__

@@ -38,18 +38,18 @@ class IFCOMMON_API IFAttributeMgr: public IFSingleton<IFAttributeMgr> , public I
 {
 public:
 
-	typedef IFRefPtr<IFFunctor<IFAttribute*()> > AttributeCreateFunPtr;
+	//typedef IFRefPtr<IFFunctor<IFAttribute*()> > AttributeCreateFunPtr;
 	typedef IFMap<IFString,IFUI32> AttriRegisterList;
 
 	struct AtrrCreateInfo
 	{
-		AtrrCreateInfo(const char* name,AttributeCreateFunPtr pFun):
-			sName(name),pCreateFun(pFun)
+		AtrrCreateInfo(const IFRTTI* pRTTI)
+			: pRTTI(pRTTI)
 		{
-
+			sName = pRTTI->GetTypeName();
 		}
 		IFString sName;
-		AttributeCreateFunPtr pCreateFun;
+		const IFRTTI* pRTTI;
 	};
 	static const IFString xml_attnodename;
 	static const IFString xml_atttypindexename;
@@ -62,10 +62,10 @@ public:
 public:
 
 	IFAttributeMgr();
-	void registerAttribute(AttributeCreateFunPtr pCreateFun, const char* sAttributeName);
+	bool registerAttribute(const IFRTTI* pAttrRTTI);
 
 	int getIndexByName(const IFString& sAttTypeName);
-	IFAttribute* createAttributeByIndex(int nIndex);
+	IFAttributePtr createAttributeByIndex(int nIndex);
 	const IFString& getNameByIndex(int nIndex);
 	int getAttributeTypeCount();
 
@@ -107,6 +107,22 @@ private:
 class IFCOMMON_API IFAttributeRemap : public IFRefObj
 {
 public:
+
+	struct IFCOMMON_API Guard
+	{
+		Guard()
+		{
+			spPrev = IFAttributeMgr::getSingleton().getIndexRemap();
+		}
+
+		~Guard()
+		{
+			IFAttributeMgr::getSingleton().setIndexRemap(spPrev);
+		}
+
+		IFRefPtr<IFAttributeRemap> spPrev;
+	};
+
 	IFAttributeRemap();
 
 	bool loadFromJSON(IFJSONNode* pNode);

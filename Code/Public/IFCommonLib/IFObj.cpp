@@ -69,6 +69,11 @@ IF_DEFINERTTIROOT(IFObj);
 #ifndef DEBUG_NEW_NO_FILENAME_COPY
 #include <string.h>
 #endif
+#if (defined(_DEBUG) || defined(DEBUG) ) && !defined(IFPLATFORM_FREE_RTOS)
+#define DEBUG_NEW_ENABLE 1
+#endif
+
+#ifdef DEBUG_NEW_ENABLE
 
 struct new_ptr_list_t
 {
@@ -79,7 +84,7 @@ struct new_ptr_list_t
 	char				file[DEBUG_NEW_FILENAME_LEN];
 #endif
 	int					line;
-	unsigned long		size;
+	unsigned int		size;
 	unsigned int		index;
 };
 
@@ -91,9 +96,11 @@ bool if_new_verbose_flag = false;
 bool if_new_autocheck_flag = true;
 
 static unsigned int sg_NewIndex = 0;
+#endif
 
 bool if_check_leaks()
 {
+#ifdef DEBUG_NEW_ENABLE
 	bool fLeaked = false;
 	for (int i = 0; i < DEBUG_NEW_HASHTABLESIZE; ++i)
 	{
@@ -102,7 +109,7 @@ bool if_check_leaks()
 			continue;
 		fLeaked = true;
 #ifdef WIN32
-		WCHAR buf[256];
+		IFWCHAR buf[256];
 #else
 		char buf[256];
 #endif
@@ -118,9 +125,9 @@ bool if_check_leaks()
 				ptr->index)
 				;
 			ptr = ptr->next;
-#ifdef _DEBUG
+
 			OutputDebugString( buf );
-#endif
+
 #else
 //#	ifdef ANDROID
 			sprintf(buf,"%s(%d) : Leaked object at %p size %u, %d \n",
@@ -144,17 +151,20 @@ bool if_check_leaks()
 		return true;
 	else
 		return false;
+#else
+	return false;
+#endif
 }
 
 void* IFMemObj::operator new(size_t size, const char* file, int line)
 {
-#ifdef _DEBUG
+#ifdef DEBUG_NEW_ENABLE
 	size_t s = size + sizeof(new_ptr_list_t);
 	//new_ptr_list_t* ptr = (new_ptr_list_t*)malloc(s);
 	new_ptr_list_t* ptr = (new_ptr_list_t*)IFAlloc::Alloc((int)s);
 	if (ptr == NULL)
 	{
-		fprintf(stderr, "new:  out of memory when allocating %u bytes\n",
+		fprintf(stderr, "new:  out of memory when allocating %zu bytes\n",
 			size);
 		abort();
 	}
@@ -175,7 +185,7 @@ void* IFMemObj::operator new(size_t size, const char* file, int line)
 	sg_NewIndex ++;
 	new_ptr_list[hash_index] = ptr;
 	if (if_new_verbose_flag)
-		printf("new:  allocated  %p (size %u, %s:%d)\n",
+		printf("new:  allocated  %p (size %zu, %s:%d)\n",
 		pointer, size, file, line);
 	return pointer;
 #else
@@ -218,7 +228,7 @@ void IFMemObj::operator delete(void* pointer)
 
 	if (pointer == NULL)
 		return;
-#ifdef _DEBUG
+#ifdef DEBUG_NEW_ENABLE
 
 	//IFCSLockHelper lh(g_ptrlistlock);
 	g_ptrlistlock.lock();
@@ -265,9 +275,11 @@ void IFMemObj::operator delete[](void* pointer)
 #ifndef NO_PLACEMENT_DELETE
 void IFMemObj::operator delete(void* pointer, const char* file, int line)
 {
+#ifdef DEBUG_NEW_ENABLE
 	if (if_new_verbose_flag)
 		printf("info: exception thrown on initializing object at %p (%s:%d)\n",
 		pointer, file, line);
+#endif
 	operator delete(pointer);
 }
 
@@ -299,6 +311,7 @@ static const char* getfilename(const char* spath)
 
 void IFMemObj::dumpMemoryleak( IFStream* pStream )
 {
+#ifdef DEBUG_NEW_ENABLE
 	bool fLeaked = false;
 	char buf[512]={0};
 	IFUI64 nSize = 0;
@@ -370,6 +383,7 @@ void IFMemObj::dumpMemoryleak( IFStream* pStream )
 		int l = sprintf(buf, "%s(%d) size:%d count:%d \r\n", pr.first.file, pr.first.nline, pr.second.nSize, pr.second.nCount);
 		pStream->write(buf, l);
 	}
+#endif
 
 }
 
@@ -386,12 +400,15 @@ void IFMemObj::dumpMemoryleak( IFStream* pStream )
 
 // Proxy class to automatically call check_leaks if new_autocheck_flag is set
 
-#if defined(_DEBUG)&& defined(IFPLATFORM_WINDOWS)
+#if defined(DEBUG_NEW_ENABLE)&& defined(IFPLATFORM_WINDOWS)
 #include "IFStackDumper.h"
 #include "IFHashMap.h"
 extern IFHashMap<IFStackDumper, IFUI32> g_RefObjAllocStackInfoList;
 extern IFHashMap<IFRefObj*, IFStackDumper> g_RefObjStackInfoMap;
 #endif
+
+#ifdef DEBUG_NEW_ENABLE
+
 class ifobj_check_t
 {
 public:
@@ -420,6 +437,7 @@ public:
 	}
 };
 static ifobj_check_t ifobj_check_object;
+#endif
 
 IFObj::~IFObj()
 {

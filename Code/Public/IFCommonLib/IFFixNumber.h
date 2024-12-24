@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_FIX_NUMBER_H__
+#define __IF_FIX_NUMBER_H__
 #include "IFObj.h"
 #include "IFTypes.h"
 #include "IFCommonLib_API.h"
@@ -32,25 +34,71 @@ struct IFFixNumber : public IFMemObj
 	IFCOMMON_API static const IFFixNumber N_1;
 	IFCOMMON_API static const IFFixNumber N_2;
 
-	enum {PRECISION=10000};
+	enum {PRECISION = 16};
 	IFFixNumber(IFI64 n = 0)
 		:nNum(n)
 	{
 
 	}
-	IFFixNumber(int big,int s = 0)
+	IFFixNumber(int big)
 	{
-		nNum = ((IFI64)big) * PRECISION + s;
+		nNum = ((IFI64)big) << PRECISION;
 	}
+
+	//IFFixNumber(float f)
+	//{
+	//	int fb = *(int*)&f;
+	//	int exp = (fb & 0x7F800000) >> 23;
+	//	exp -= 150 - PRECISION;
+
+	//	IFI64  intpart = fb & 0x7fffff | (1 << 23);
+	//	if (exp > 0)
+	//		nNum = intpart << exp;
+	//	else
+	//		nNum = intpart >> -exp;
+	//	if (fb & (1 << 31))
+	//		nNum = -(int)nNum;
+	//}
 
 	IFFixNumber(float f)
 	{
-		int b = (int)f;
-		int s = int((f - (float)b)*(float(PRECISION)));
-		nNum = b*PRECISION+s;
-
+		nNum = (IFI64)(f * (float)(1 << PRECISION));
 	}
 
+	static IFFixNumber FromFloat1(float f)
+	{
+		IFFixNumber n;
+		int fb = *(int*)&f;
+		int exp = (fb & 0x7F800000) >> 23;
+		exp -= 150 - PRECISION;
+
+		IFI64  intpart = (fb & 0x7fffff) | (1 << 23);
+		if (exp > 0)
+			n.nNum = intpart << exp;
+		else
+			n.nNum = intpart >> -exp;
+		if (fb & (1 << 31))
+			n.nNum = -(int)n.nNum;
+		return n;
+	}
+
+	/*void FromFloat2(float f)
+	{
+		nNum = f * (1 << PRECISION);
+	}*/
+
+	static IFFixNumber FromInt(int i)
+	{
+		IFFixNumber n;
+		n.nNum = i << PRECISION;
+		return n;
+	}
+	static IFFixNumber FromInt64(IFI64 i)
+	{
+		IFFixNumber n;
+		n.nNum = i << PRECISION;
+		return n;
+	}
 	inline IFFixNumber operator + (const IFFixNumber& o) const
 	{
 		IFI64 s = nNum + o.nNum;
@@ -66,13 +114,13 @@ struct IFFixNumber : public IFMemObj
 	inline IFFixNumber operator * (const IFFixNumber& o) const
 	{
 		IFFixNumber s;
-		s.nNum = (nNum * o.nNum)/PRECISION;
+		s.nNum = (nNum * o.nNum)>>PRECISION;
 		return s;
 	}
 
 	inline IFFixNumber operator / (const IFFixNumber& o) const
 	{
-		IFI64 s = (nNum*PRECISION / o.nNum);
+		IFI64 s = (nNum << PRECISION) / o.nNum;
 		return s;
 	}
 
@@ -91,24 +139,24 @@ struct IFFixNumber : public IFMemObj
 	inline IFFixNumber& operator*=(const IFFixNumber& o)
 	{
 		nNum *= o.nNum;
-		nNum/=PRECISION;
+		nNum >>= PRECISION;
 		return *this;
 	}
 
 	inline IFFixNumber& operator/=(const IFFixNumber& o)
 	{
-		nNum *= PRECISION;
+		nNum <<= PRECISION;
 		nNum /= o.nNum;
 		return *this;
 	}
 
 	inline operator int() const
 	{
-		return int(nNum/PRECISION);
+		return int(nNum>>PRECISION);
 	}
 	inline operator float() const
 	{
-		return nNum/float(PRECISION);
+		return (float)nNum/float(1<<PRECISION);
 	}
 
 
@@ -219,3 +267,5 @@ inline IFStream& operator >> (IFStream& s, IFFixVec2& b)
 	s >> b.x >> b.y;
 	return s;
 }
+
+#endif //__IF_FIX_NUMBER_H__

@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_HASH_SET_H__
+#define __IF_HASH_SET_H__
 #include "IFObj.h"
 #include "IFString.h"
 #include "IFRefPtr.h"
@@ -75,8 +77,8 @@ inline bool IFHashEqCmpFun(const T& a, const T& b )
 
 
 
-template<typename T, int maxConflict=4>
-class IFHashSet : public IFMemObj
+template<typename T, class KeyType, int maxConflict=4>
+class IFHashTable : public IFMemObj
 {
 public:
 	class HashNode : public IFMemObj
@@ -146,29 +148,29 @@ public:
 
 		const HashNode* m_pNode;
 
-		friend class IFHashSet;
+		friend class IFHashTable;
 	};
 
 public:
 
 
-	IFHashSet(IFUI32 nCapSize = 0)
-		:m_nSize(0),m_pFirst(NULL),m_pLast(NULL)
+	IFHashTable(IFUI32 nCapSize = 0)
+		:m_pFirst(NULL),m_pLast(NULL),m_nSize(0)
 	{
 		reserve(nCapSize);
 	}
 
 
-	IFHashSet(const IFHashSet& o)
-		:m_nSize(0), m_pFirst(NULL), m_pLast(NULL)
+	IFHashTable(const IFHashTable& o)
+		:m_pFirst(NULL), m_pLast(NULL),m_nSize(0)
 	{
 	
 		reserve(o.m_Buckets.size());
 		operator = (o);
 	}
 
-	IFHashSet(IFHashSet&& o)
-		:m_nSize(o.m_nSize), m_pFirst(o.m_pFirst), m_pLast(o.m_pLast)
+	IFHashTable(IFHashTable&& o)
+		:m_pFirst(o.m_pFirst), m_pLast(o.m_pLast),m_nSize(o.m_nSize)
 	{
 		o.m_nSize = 0;
 		o.m_pLast = o.m_pFirst = NULL;
@@ -177,7 +179,7 @@ public:
 		m_nMask = o.m_nMask;
 	}
 
-	~IFHashSet(void)
+	~IFHashTable(void)
 	{
 		clear();
 	}
@@ -193,7 +195,7 @@ public:
 		return iterator(NULL);
 	}
 
-	inline iterator find(const T& o) const
+	inline iterator find(const KeyType& o) const
 	{
 		if (m_Buckets.size() == 0)
 			return end();
@@ -205,7 +207,7 @@ public:
 		{
 			if ((pNode->m_nHash&m_nMask) == hidx)
 			{
-				if (pNode->m_nHash == nHash && IFHashEqCmpFun(pNode->m_Val , o))
+				if (pNode->m_nHash == nHash && IFHashEqCmpFun((const KeyType&)pNode->m_Val , o))
 					return iterator(pNode);
 			}
 			else
@@ -349,7 +351,7 @@ public:
 	}
 
 
-	IFHashSet& operator = (const IFHashSet& o) 
+	IFHashTable& operator = (const IFHashTable& o)
 	{
 		if (this==&o)
 			return *this;
@@ -417,3 +419,7 @@ private:
 	//HashList* m_pHashList;
 };
 
+template <class NodeValueType>
+using IFHashSet = IFHashTable<NodeValueType, NodeValueType>;
+
+#endif //__IF_HASH_SET_H__

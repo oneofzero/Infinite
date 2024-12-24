@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_GUID_H__
+#define __IF_GUID_H__
 #include "IFObj.h"
 #include "IFString.h"
 #include "IFPlatformDefine.h"
@@ -35,6 +37,7 @@ class IFStream;
 
 class IFCOMMON_API IFGUID : public IFMemObj
 {
+	IF_DECLARERTTI_STATIC;
 public:
 	IFGUID(void);
 	~IFGUID(void);
@@ -75,3 +78,4 @@ inline IFStream& operator >> (IFStream& stream, IFGUID& o)
 	o.deserialize(&stream);
 	return stream;
 }
+#endif //__IF_GUID_H__

@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_TYPES_H__
+#define __IF_TYPES_H__
 //#include "windows.h" 
 #include "IFBaseTypeDefine.h"
 
@@ -30,7 +32,7 @@ THE SOFTWARE.
 #include "IFArray.h"
 #include "IFRect.h"
 
-#ifdef WIN32
+#ifdef IFPLATFORM_WINDOWS
 #include <imm.h>
 #include <intrin.h>
 #define IF_MATH_USE_SEE 1
@@ -72,6 +74,7 @@ enum IFTextureFormat
 	ITF_DXT4,
 	ITF_DXT5,
 	ITF_D24_S8,
+	ITF_R5G6B5,
 	ITF_UNKNOWN,
 };
 
@@ -122,6 +125,9 @@ inline IFUI32 IFGetPixelBits(IFTextureFormat fmt)
 
 	case ITF_DXT5:
 		return 8;
+		break;
+	case ITF_R5G6B5:
+		return 16;
 		break;
 	default:
 		break;
@@ -372,7 +378,7 @@ public:
 
 	}
 
-	inline const IFVector2DT& operator *=(float f )
+	inline const IFVector2DT& operator *=(T f )
 	{
 		x *= f;
 		y *= f;
@@ -411,7 +417,7 @@ public:
 		return x*o.x+y*o.y;
 	}
 
-	inline IFVector2DT perpendicular()
+	inline IFVector2DT perpendicular() const
 	{
 		return IFVector2DT(y, -x);
 	}
@@ -470,6 +476,27 @@ public:
 		this->z = z;
 	}
 
+	IFVector3D(const IFVector2D& v2)
+	{
+		x = v2.x;
+		y = v2.y;
+		z = 0.0f;
+	}
+
+	IFVector3D(const IFVector2D& v2, float z)
+	{
+		this->x = v2.x;
+		this->y = v2.y;
+		this->z = z;
+	}
+	IFVector3D& operator =(const IFVector2D& v)
+	{
+		x = v.x;
+		y = v.y;
+		z = 0.0f;
+		return *this;
+	}
+
 	
 	IFVector3D operator +(const IFVector3D& v ) const
 	{
@@ -522,6 +549,12 @@ public:
 
 	}
 
+	IFVector3D operator -()const
+	{
+		return IFVector3D(-x,-y,-z);
+
+	}
+
 	const IFVector3D& operator *=(float f )
 	{
 		x *= f;
@@ -560,9 +593,22 @@ public:
 
 	float dot(const IFVector3D& o) const;
 
-	IFVector3D normalize() const;
+	IFVector3D& normalize();
+
+	IFVector3D normalized() const;
+	
 
 	IFVector3D cross(const IFVector3D& o ) const;
+
+
+	static const IFVector3D ZERO;
+	static const IFVector3D ONE;
+	static const IFVector3D LEFT;
+	static const IFVector3D RIGHT;
+	static const IFVector3D FORWARD;
+	static const IFVector3D BACK;
+	static const IFVector3D UP;
+	static const IFVector3D DOWN;
 
 };
 class IFCOMMON_API IFVector4D : public IFMemObj
@@ -588,7 +634,10 @@ public:
 };
 
 class IFQuaternion;
-
+#ifdef IF_MATH_USE_SEE
+#pragma pack(push)
+#pragma pack(16)
+#endif
 class IFCOMMON_API IFMatrix4x4 : public IFMemObj
 {
 	IF_DECLARERTTI_STATIC;
@@ -598,6 +647,7 @@ public:
 	union
 	{
 		float m[4][4];
+		float d[16];
 #ifdef IF_MATH_USE_SEE
 		__m128 m128[4];
 #endif
@@ -617,17 +667,27 @@ public:
 
 	void translation(const IFVector3D& trans );
 	void translation(float x, float y, float z);
-	IFVector3D transPoint(float x, float y, float z);
+	IFVector3D transPoint(float x, float y, float z) const;
 
 	void rotationX(float fAngle);
 	void rotationY(float fAngle);
 	void rotationZ(float fAngle);
+	void rotation(const IFQuaternion& r);
 	void scale(const IFVector3D& s);
 	void decompose(IFVector3D* pos, IFVector3D* scale, IFQuaternion* quat) const;
 	void decompose(IFVector3D* pos, IFVector3D* scale, IFVector3D* euler) const;
+	static IFMatrix4x4 TRS(const IFVector3D& pos, const IFQuaternion& rot, const IFVector3D& scale);
 
+	IFMatrix4x4 inverse() const;
+
+	IFVector3D transformCoord(const IFVector3D& v) const;
+	IFVector3D transformNormal(const IFVector3D& v) const;
+	
 	static const IFMatrix4x4 IDENTITY;
 };
+#ifdef IF_MATH_USE_SEE
+#pragma pack(pop)
+#endif
 
 class IFCOMMON_API IFQuaternion : public IFMemObj
 {
@@ -646,6 +706,9 @@ public:
 		q.w = w * f;
 		return q;
 	}
+
+	IFQuaternion operator *(const IFQuaternion& b) const;
+
 	IFQuaternion operator+(const IFQuaternion& o ) const
 	{
 		IFQuaternion quat;
@@ -670,9 +733,20 @@ public:
 		 w /= l;
 	}
 
+	void fromEuler(float x, float y, float z);
+	static IFQuaternion fromEuler(IFVector3D euler)
+	{
+		IFQuaternion q;
+		q.fromEuler(euler.x, euler.y, euler.z);
+		return q;
+	}
+
+
 	IFVector3D toEuler() const;
 
 	IFVector3D rotate(const IFVector3D& v) const;
+
+	IFQuaternion inverse() const;
 
 	static IFQuaternion FromTo(const IFVector3D& a, const IFVector3D& b);
 };
@@ -745,7 +819,7 @@ public:
 
 	inline bool intersect(const IFLine2DT& l, IFVector2DT<T>* pOut) const
 	{
-		double delta,r,u;
+		T delta,r,u;
 		const IFVector2DT<T>& c = l.a;
 		const IFVector2DT<T>& d = l.b;
 		delta = T((b.x-a.x)*(c.y-d.y) - (c.x-d.x)*(b.y-a.y));
@@ -758,8 +832,8 @@ public:
 			{
 				if(pOut)
 				{
-					pOut->x = a.x+(r*(b.x-a.x));
-					pOut->y = a.y+(r*(b.y-a.y));
+					pOut->x = a.x+(T)(r*(b.x-a.x));
+					pOut->y = a.y+(T)(r*(b.y-a.y));
 				}
 				return true;
 			}
@@ -795,7 +869,7 @@ public:
 		return d;
 	}
 
-	float pointDistance2(const IFVector2DT<T>& p) const
+	T pointDistance2(const IFVector2DT<T>& p) const
 	{
 		T x = p.x;
 		T y = p.y;
@@ -884,16 +958,16 @@ public:
 	inline int getA() const
 	{
 
-		return (dwColor &0xff000000)>>24;
+		return (dwColor)>>24;
 	}
 	inline int getR() const
 	{
-		return (dwColor &0x00ff0000)>>16;
+		return (dwColor>>16)&0xff;
 	}
 
 	inline int getG() const
 	{
-		return (dwColor &0x0000ff00)>>8;
+		return (dwColor>>8)&0xff;
 	}
 	inline int getB() const
 	{
@@ -979,6 +1053,10 @@ public:
 		IFUI8* pData = (IFUI8*)&dwColor;
 		return pData[3-nIndex];
 	}
+	operator IFUI32() const
+	{
+		return dwColor;
+	}
 
 	static const IFColor WHITE;
 	static const IFColor BLACK;
@@ -995,11 +1073,25 @@ struct IFCOMMON_API IFColorF : public IFMemObj
 
 	IFColorF(const IFColor& ifc)
 	{
-		a = (float)ifc.getA()/255.0f;
-		r = (float)ifc.getR()/255.0f;
-		g = (float)ifc.getG()/255.0f;
-		b = (float)ifc.getB()/255.0f;
+//#ifndef IFPLATFORM_WINDOWS
+		a = ((float)ifc.getA()) /255.0f;
+		r = ((float)ifc.getR()) / 255.0f;
+		g = ((float)ifc.getG()) / 255.0f;
+		b = ((float)ifc.getB()) / 255.0f;
 
+//#else
+//
+//		const float f = 0.003921568f;
+//		auto p = _mm_load1_ps(&f);
+//		__m128i msrc;
+//		msrc.m128i_i32[0] = ifc.getA();
+//		msrc.m128i_i32[1] = ifc.getR();
+//		msrc.m128i_i32[2] = ifc.getG();
+//		msrc.m128i_i32[3] = ifc.getB();
+//		auto argb = _mm_mul_ps(_mm_cvtepi32_ps(msrc), p);
+//		_mm_store_ps(&a, argb);
+//#endif
+		//_mm_mul_ps();
 	}
 	IFColorF():a(1.0f),r(1.0f),g(1.0f),b(1.0f)
 	{
@@ -1100,50 +1192,50 @@ struct IFCOMMON_API IFColorF : public IFMemObj
 };
 
 
-class IFCOMMON_API IFTime : public IFMemObj
-{
-	IF_DECLARERTTI_STATIC;
-public:
-	IFTime();
-	IFTime(IFUI64 nTime);
-#ifdef WIN32
-	IFTime(const FILETIME& ft);
-	IFTime(const SYSTEMTIME st);
-#endif
-	inline int getYear() const
-	{
-		return m_Year;
-	}
-	inline int getMonth() const
-	{
-		return m_Month;
-	}
-	inline int getDay() const
-	{
-		return m_Day;
-	}
-	inline int getHour() const
-	{
-		return m_Hour;
-	}
-	inline int getMin() const
-	{
-		return m_Minute;
-	}
-	inline int getSec() const
-	{
-		return m_Second;
-	}
-	inline int getMil() const
-	{
-		return m_MS;
-	}
-
-private:
-
-	IFUI64 m_nTime;
-	int m_Year,m_Month,m_Day,m_Hour,m_Minute,m_Second,m_MS;
-};
+//class IFCOMMON_API IFTime : public IFMemObj
+//{
+//	IF_DECLARERTTI_STATIC;
+//public:
+//	IFTime();
+//	IFTime(IFUI64 nTime);
+//#ifdef WIN32
+//	IFTime(const FILETIME& ft);
+//	IFTime(const SYSTEMTIME st);
+//#endif
+//	inline int getYear() const
+//	{
+//		return m_Year;
+//	}
+//	inline int getMonth() const
+//	{
+//		return m_Month;
+//	}
+//	inline int getDay() const
+//	{
+//		return m_Day;
+//	}
+//	inline int getHour() const
+//	{
+//		return m_Hour;
+//	}
+//	inline int getMin() const
+//	{
+//		return m_Minute;
+//	}
+//	inline int getSec() const
+//	{
+//		return m_Second;
+//	}
+//	inline int getMil() const
+//	{
+//		return m_MS;
+//	}
+//
+//private:
+//
+//	IFUI64 m_nTime;
+//	int m_Year,m_Month,m_Day,m_Hour,m_Minute,m_Second,m_MS;
+//};
 
 template<typename T>
 class IFBezierCalcer
@@ -1170,3 +1262,5 @@ public:
 	IFArray<T> m_array2;
 	T* m_pOut;
 };
+
+#endif //__IF_TYPES_H__

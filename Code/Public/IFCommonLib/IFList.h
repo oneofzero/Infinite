@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_LIST_H__
+#define __IF_LIST_H__
 #include <assert.h>
 #include "IFObj.h"
 
@@ -55,7 +57,7 @@ public:
 		m_pFirst = m_pLast;
 		*this = o;
 	}
-	IFList(IFList<T>&& o) :m_nSize(o.m_nSize), m_pLast(o.m_pLast), m_pFirst(o.m_pFirst)
+	IFList(IFList<T>&& o) :m_pFirst(o.m_pFirst), m_pLast(o.m_pLast),  m_nSize(o.m_nSize)
 	{
 
 		o.m_nSize = 0;
@@ -101,9 +103,8 @@ public:
 			return *this;
 
 		}
-		inline iterator operator +(int nStep)
-		{
-
+		inline iterator operator +(int nStep) const
+		{			
 			if( nStep >= 0 )
 			{
 				iterator it = *this;
@@ -120,7 +121,7 @@ public:
 			}
 
 		}
-		inline iterator operator -(int nStep)
+		inline iterator operator -(int nStep) const
 		{
 
 			if( nStep >= 0 )
@@ -137,6 +138,21 @@ public:
 			{
 				return operator +(-nStep);
 			}
+
+		}
+
+		inline int operator -(iterator b) const
+		{
+			iterator it = b;
+			
+			int step = 0;
+			while (it==*this)
+			{
+				++step;
+				++it;
+			}
+			return step;
+			
 
 		}
 
@@ -579,3 +595,5 @@ private:
 	ListNode* m_pLast;
 	int m_nSize;
 };
+
+#endif //__IF_LIST_H__

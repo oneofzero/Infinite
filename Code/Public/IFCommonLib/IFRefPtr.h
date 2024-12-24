@@ -22,11 +22,13 @@ THE SOFTWARE.
 */
 
 #pragma once
+#ifndef __IF_REF_PTR_H__
+#define __IF_REF_PTR_H__
 #include "IFCommonLib_API.h"
 #include "IFRefObj.h"
 
 #ifdef IFREFOBJDEBUG
-#define IFREFPTRDEBUGINFO this,__FILE__,__LINE__
+#define IFREFPTRDEBUGINFO this
 
 #else
 #define IFREFPTRDEBUGINFO
@@ -43,6 +45,9 @@ public:
 	{
 		m_pRefObject = NULL;
 	}
+
+	//inline IFRefPtr(bool) = delete;
+
 	inline ~IFRefPtr(void)
 	{
 		if( m_pRefObject )
@@ -172,3 +177,5 @@ private:
 }
 
 #define IFREFHOLDTHIS() IFRefPtr<IFRefObj> holdThis = getRefCount() > 0?this:NULL;
+
+#endif //__IF_REF_PTR_H__

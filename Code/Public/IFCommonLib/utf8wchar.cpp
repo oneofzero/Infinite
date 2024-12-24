@@ -1,4 +1,4 @@
-/*
+﻿/*
 	Copyright (C) 2004-2005 Cory Nelson
 
 	This software is provided 'as-is', without any express or implied
@@ -135,14 +135,16 @@ inline void utf8_wchar(const IFString &utf8, IFStringW &wide)
 		detail::utf8_wchar(&utf8[0], &utf8[utf8.size()],(wide));
 }
 
-#include "GBKtoUTF8.inl"
-
-inline void wchar_utf8(const IFStringW& wide, IFString &utf8)
+inline void wchar_utf8(const IFStringW& wide, IFString& utf8)
 {
 	utf8.clear();
 	if (wide.size())
-		detail::wchar_utf8(&wide[0], &wide[wide.size()],(utf8));
+		detail::wchar_utf8(&wide[0], &wide[wide.size()], (utf8));
 }
+
+#ifndef IF_STRING_NO_ANSI
+#include "GBKtoUTF8.inl"
+
 
 inline unsigned short one_unicode_to_gbk(unsigned short unicode)
 {
@@ -210,3 +212,4 @@ inline void gbk_wchar(const IFString& gbk, IFStringW& wide)
 		}
 	}
 }
+#endif

@@ -21,7 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
-
+#ifndef __IF_FILE_MAPPING_LIST_H__
+#define __IF_FILE_MAPPING_LIST_H__
 template<class T>
 class IFFileMappingListNode
 {
@@ -31,3 +32,5 @@ public:
 	int _next;
 	int _prev;
 };
+
+#endif //__IF_FILE_MAPPING_LIST_H__

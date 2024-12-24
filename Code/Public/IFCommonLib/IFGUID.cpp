@@ -27,6 +27,9 @@ THE SOFTWARE.
 #include "IFSystemAPI.h"
 #include <math.h>
 #include "IFUtility.h"
+
+IF_DEFINERTTIROOT(IFGUID);
+
 static bool nSrand = false;
 IFGUID::IFGUID(void)
 {
@@ -43,9 +46,7 @@ bool IFGUID::generate()
 	int hr = CoCreateGuid (&m_uuid);
 
 	return hr == 0;
-#elif defined(IFPLATFORM_LINUX) 
-	uuid_generate (m_uuid);
-#elif defined(MAC)
+#elif defined(IFPLATFORM_LINUX) || defined(MAC) || defined(IFPLATFORM_WEB)
     uuid_generate(m_uuid);
     return true;
 #elif defined(IFPLATFORM_ANDROID)
@@ -59,6 +60,7 @@ bool IFGUID::generate()
 	m_uuid.Data3 = rand();
 	for (int i = 0; i < 8; i ++ )
 		m_uuid.Data4[i] = rand();
+	return true;
 #else
 
 #endif // 
@@ -75,12 +77,13 @@ IFString IFGUID::toString() const
 		m_uuid.Data4[6],m_uuid.Data4[7]
 		);
 #else
+	auto uuidb = (IFUI8*)&m_uuid;
     return IFString().format("%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X",
-                             *(IFUI32*)&m_uuid[0],*(IFUI16*)&m_uuid[4],*(IFUI16*)&m_uuid[6],
-                             m_uuid[8],m_uuid[9],
-                             m_uuid[10],m_uuid[11],
-                             m_uuid[12],m_uuid[13],
-                             m_uuid[14],m_uuid[15]
+                             *(IFUI32*)&uuidb[0],*(IFUI16*)&uuidb[4],*(IFUI16*)&uuidb[6],
+		uuidb[8], uuidb[9],
+		uuidb[10], uuidb[11],
+		uuidb[12], uuidb[13],
+		uuidb[14], uuidb[15]
                              );
 #endif
 }
@@ -93,7 +96,7 @@ bool IFGUID::fromString(const IFString& s)
 	IFUI16 Data2,Data3;
 	IFUI8 Data4[8];
 
-	USplitStrings(&sl,s.c_str(), "-");
+	USplitStrings(&sl,s, "-");
 	if (sl.size()!=5)
 		return false;
 	if (sl[0].size()!=8)
@@ -164,14 +167,14 @@ bool IFGUID::operator<( const IFGUID& o ) const
 {
 	IFUI64* pA[2],*pB[2];
 #if defined(MAC)||defined(IFPLATFORM_LINUX)
-	memcmp(m_uuid,o.m_uuid,sizeof(m_uuid));
+	//memcmp(m_uuid,o.m_uuid,sizeof(m_uuid));
 	pA[0] = (IFUI64*)(&((char*)m_uuid)[0]);
 	pB[0] = (IFUI64*)(&((char*)m_uuid)[8]);
 	pA[1] = (IFUI64*)(&((char*)o.m_uuid)[0]);
 	pB[1] = (IFUI64*)(&((char*)o.m_uuid)[8]);
 
 #else
-	memcmp(&m_uuid,&o.m_uuid,sizeof(m_uuid));
+	//memcmp(&m_uuid,&o.m_uuid,sizeof(m_uuid));
 	pA[0] = (IFUI64*)(&((char*)&m_uuid)[0]);
 	pB[0] = (IFUI64*)(&((char*)&m_uuid)[8]);
 	pA[1] = (IFUI64*)(&((char*)&o.m_uuid)[0]);

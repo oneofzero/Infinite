@@ -41,7 +41,7 @@ IFJSONNode::~IFJSONNode(void)
 }
 
 #define SKIP_SPACE(c) 	while (*c==' ' || *c == '\r' || *c == '\n' || *c=='\t')c++;
-#define IS_NAME_FIRST_VALID_CHAR(c) (c>='a'&& c<='z' || c>='A' && c <='Z' || c=='_')
+#define IS_NAME_FIRST_VALID_CHAR(c) ((c>='a'&& c<='z') || (c>='A' && c <='Z') || c=='_')
 #define IS_NAME_VALID_CHAR(c) (IS_NAME_FIRST_VALID_CHAR(c)||(c>='0'&&c<='9'))
 
 static inline void  push_tanslate(IFString& s, const char* sUTF8)
@@ -564,7 +564,13 @@ void IFJSONNode::toString(IFString& sUTF8, IFString& tb, bool bVisibleFormat /*=
 				}
 				if (bKeywordQM)
 					sUTF8 += "\"";
-				sUTF8 += p.first;
+				if(p.first.isUTF8Codeing())
+					sUTF8 += p.first;
+				else
+				{
+					sUTF8 += IFStringW(p.first).toUTF8String();
+				}
+
 				if (bKeywordQM)
 					sUTF8 += "\"";
 				sUTF8 += ":";
@@ -635,15 +641,25 @@ void IFJSONNode::toString(IFString& sUTF8, IFString& tb, bool bVisibleFormat /*=
 		if (m_Value->getType() == IFAnyBasic::T_STRING)
 		{
 			sUTF8 += "\"";
-			auto& s = m_Value->getString();
+			
+			IFString s = m_Value->getString();
+			if (!m_Value->getString().isUTF8Codeing())
+			{
+				s = IFStringW(s).toUTF8String();
+			}
+
 			int nSL = (int)s.length();
 			for (int i = 0; i < nSL; i++)
 			{
-				if (s[i] == '\\' || s[i] == '\"' || s[i] == '\t')
+				if (s[i] == '\\' || s[i] == '\"')
 				{
 					sUTF8.push_back('\\');
 					sUTF8.push_back(s[i]);
 
+				}
+				else if (s[i] == '\t')
+				{
+					sUTF8 += "\\t";
 				}
 				else if (s[i] == '\r')
 				{
@@ -673,7 +689,11 @@ void IFJSONNode::toString(IFString& sUTF8, IFString& tb, bool bVisibleFormat /*=
 		}
 		else
 		{
-			sUTF8 += m_Value->toString().toUTF8String();
+			auto str = m_Value->toString();
+			//if (str.isUTF8Codeing())
+				sUTF8 += str;
+			/*else
+				sUTF8 += IFStringW(str).toUTF8String();*/
 			//return m_Value.toString().toUTF8String();
 		}
 	}
@@ -866,7 +886,7 @@ void IFJSONNode::saveToStream(IFStream* pStream, IFString& tb, bool bVisibleForm
 		else
 		{
 			//sUTF8 += m_Value->toString().toUTF8String();
-			IFString vs = m_Value->toString().toUTF8String();
+			IFString vs = m_Value->toString();
 			pStream->write(vs.c_str(), vs.size());
 		}
 	}
@@ -912,6 +932,8 @@ void IFJSONNode::push_back(const IFAnyBasic& basic)
 void IFJSONNode::insert(const IFString& k, IFRefPtr<IFJSONNode> pNode, bool sortmap)
 {
 	assert(pNode != this);
+	if (!pNode)
+		return;
 	if (sortmap)
 	{
 		if (m_NT != NT_MAP)
@@ -935,6 +957,9 @@ void IFJSONNode::setSubNode(const IFString& sName, IFRefPtr<IFJSONNode> pNode)
 		clear();
 		m_NT = NT_MAP;
 	}
+	if (!pNode)
+		return;
+
 	if (!m_pMapInfo)
 		m_pMapInfo = IFNew MapInfo;
 	auto it = m_pMapInfo->m_ChildMap.find(sName);
@@ -1299,6 +1324,8 @@ IFRefPtr<IFJSONNode> IFJSONNode::clone()
 			spNode->push_back(pVal->clone());
 			return true;
 		});
+		break;
+	default:
 		break;
 	}
 	return spNode;

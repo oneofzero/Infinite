@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+#ifndef __IF_NODE_OBJ_H__
+#define __IF_NODE_OBJ_H__
 #include "IFAttributeSet.h"
 class IFNodeObj;
 typedef IFRefPtr<IFNodeObj> IFNodeObjPtr;
@@ -6,7 +8,7 @@ typedef IFArray<IFNodeObjPtr> IFNodeObjList;
 class IFCOMMON_API IFNodeObj : public IFAttributeSet
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
+	
 public:
 	IFEventSlot<void(IFNodeObj* pObj, IFNodeObj* pSubObj)>							event_SubObjAdd;
 	IFEventSlot<void(IFNodeObj* pObj, IFNodeObj* pSubObj)>							event_SubObjRemove;
@@ -31,9 +33,9 @@ public:
 	}
 	IFNodeObj* getNextSibling();
 	IFNodeObj* getPrevSibling();
-	//Ö»Ö§³Ö´Ó×Ó¶ÔÏóÖĞ²éÕÒ
+	//åªæ”¯æŒä»å­å¯¹è±¡ä¸­æŸ¥æ‰¾
 	IFNodeObj* getSubObj(const IFString& sName, bool bSearchChildNode = false);
-	//Ö§³ÖÍ¨¹ıÂ·¾¶²éÕÒ.  ±ÈÈç window1.button1
+	//æ”¯æŒé€šè¿‡è·¯å¾„æŸ¥æ‰¾.  æ¯”å¦‚ window1.button1
 	IFNodeObj* getObj(const IFString& sName);
 
 	IFNodeObj* getSubObj(int nIndex);
@@ -80,3 +82,4 @@ protected:
 	IFNodeObjList::iterator m_InParentIterator;
 };
 
+#endif //__IF_NODE_OBJ_H__

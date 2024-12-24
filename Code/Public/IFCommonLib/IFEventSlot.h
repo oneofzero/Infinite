@@ -21,14 +21,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_EVENT_SLOT_H__
+#define __IF_EVENT_SLOT_H__
 #include "IFCommonLib_API.h"
 #include "IFFunctor.h"
 #include "IFList.h"
 #include "IFArray.h"
 #include "IFCSLockHelper.h"
 #include "IFString.h"
-
-template<class T> class IFEventSlotBase;
+#include "IFHashMap.h"
+#include <utility>
 
 template<class T> class IFEventSlot;
 
@@ -39,20 +41,17 @@ class IFEventHandle : public IFMemObj
 public:
 	typedef T FunType;
 public:
-	IFEventHandle(IFFunctor<T>* pFunctor):m_pFunctor(pFunctor),m_ConnectedSlotsLock(NULL)
+	IFEventHandle(IFFunctor<T>* pFunctor):m_pFunctor(pFunctor)
 	{
 
 	}
-	IFEventHandle(bool bThreadSafe = false)
+	IFEventHandle()
 
 	{
-		if (bThreadSafe)
-			m_ConnectedSlotsLock = IFNew IFCSLock;
-		else
-			m_ConnectedSlotsLock = NULL;
+
 	}
 
-	IFEventHandle(const IFEventHandle& o):m_pFunctor(o.m_pFunctor),m_ConnectedSlotsLock(NULL)
+	IFEventHandle(const IFEventHandle& o):m_pFunctor(o.m_pFunctor)
 	{
 		//dont copy m_ConnectedSlots;
 	}
@@ -72,18 +71,18 @@ public:
 			m_ConnectedSlots[i]->RemoveEventHandle(this);
 		}
 
-		if (m_ConnectedSlotsLock)
-			delete m_ConnectedSlotsLock;
+		//if (m_ConnectedSlotsLock)
+		//	delete m_ConnectedSlotsLock;
 	}
 
-	virtual void connectSlot( IFEventSlotBase<T>& slot )
+	virtual void connectSlot( IFEventSlot<T>& slot )
 	{
 		//IFCSLockHelper lh(m_ConnectedSlotsLock);
 		assert(m_pFunctor&&"MUST ASSIGN");
 
-		IFCSLockHelper lh(m_ConnectedSlotsLock);
+		//IFCSLockHelper lh(m_ConnectedSlotsLock);
 
-		typename IFArray<IFEventSlotBase<T>*>::iterator it = m_ConnectedSlots.find( &slot );
+		auto it = m_ConnectedSlots.find( &slot );
 		if( it == m_ConnectedSlots.end() )
 		{
 			m_ConnectedSlots.push_back(&slot);
@@ -120,12 +119,12 @@ public:
 		return m_ConnectedSlots.size()?true:false;
 	}
 
-	void disconnectSlot(IFEventSlotBase<T>& slot)
+	void disconnectSlot(IFEventSlot<T>& slot)
 	{
 		//IFCSLockHelper lh(m_ConnectedSlotsLock);
-		IFCSLockHelper lh(m_ConnectedSlotsLock);
+		//IFCSLockHelper lh(m_ConnectedSlotsLock);
 
-		typename IFArray<IFEventSlotBase<T>*>::iterator it = m_ConnectedSlots.find( &slot );
+		auto it = m_ConnectedSlots.find( &slot );
 		if(it!=m_ConnectedSlots.end())
 		{
 			slot.RemoveEventHandle(this);
@@ -138,7 +137,7 @@ public:
 	//	IFCSLockHelper lh(m_ConnectedSlotsLock);
 
 		//IFArray<IFEventSlot<T>*>::iterator it = m_ConnectedSlots.begin( &slot );
-		IFCSLockHelper lh(m_ConnectedSlotsLock);
+		//IFCSLockHelper lh(m_ConnectedSlotsLock);
 
 		while(m_ConnectedSlots.size())
 		{
@@ -164,45 +163,47 @@ protected:
 	virtual void onRemoveBySlotDelete(){};
 private:
 	IFRefPtr<IFFunctor<T> > m_pFunctor;
-	IFArray<IFEventSlotBase<T>*> m_ConnectedSlots;
-	IFCSLock* m_ConnectedSlotsLock;
+	IFArray<IFEventSlot<T>*> m_ConnectedSlots;
+	//IFCSLock* m_ConnectedSlotsLock;
 	friend class IFEventSlot<T>;
-	friend class IFEventSlotBase<T>;
+	//friend class IFEventSlotBase<T>;
 
 };
 
 
-template<typename FunType>
-class  IFEventSlotBase  : public IFMemObj
+template<typename... ARGS>
+class  IFEventSlot<void(ARGS...)>  : public IFMemObj
 {
 public:
-	typedef FunType functionType ;
+	typedef void(functionType)(ARGS...)  ;
 
-	IFEventSlotBase( const IFEventSlotBase& o)
-		: m_FunctionList(NULL),m_FunctionListLock(NULL)
+	IFEventSlot( const IFEventSlot& o)
+		: m_FunctionList(NULL)
+		//,m_FunctionListLock(NULL)
 	  
 	{
 		//dont copy m_FunctionList
 
 	}
 
-	IFEventSlotBase& operator=(const IFEventSlotBase& o)
+	IFEventSlot& operator=(const IFEventSlot& o)
 	{		
 		//dont copy m_FunctionList
 		return *this;
 	}
 
-	IFEventSlotBase(bool bThreadSafe=false)
-		:m_FunctionList(NULL)
+	IFEventSlot()
+		:m_FunctionList(nullptr)
 	{
-		if (bThreadSafe)
+
+	/*	if (bThreadSafe)
 			m_FunctionListLock = IFNew IFCSLock;
 		else
-			m_FunctionListLock = NULL;
+			m_FunctionListLock = NULL;*/
 	};
 
 
-	~IFEventSlotBase()
+	virtual ~IFEventSlot()
 	{
 		
 		removeAllHandle();
@@ -211,6 +212,8 @@ public:
 
 	void removeAllHandle()
 	{
+		//IFCSLockHelper locker(getFunctionListLock());
+
 		if(m_FunctionList)
 		{
 			IFRefPtr<EventHandleList> funlist = m_FunctionList;
@@ -231,7 +234,7 @@ public:
 	{
 		assert(pHandle);
 		
-		IFCSLockHelper locker(m_FunctionListLock);
+		//IFCSLockHelper locker(getFunctionListLock());
 
 		if(!m_FunctionList)
 		{
@@ -260,19 +263,13 @@ public:
 
 		spHandle->m.connectSlot(*this);
 
-		IFCSLockHelper locker(m_FunctionListLock);
+		//IFCSLockHelper locker(getFunctionListLock());
 
 		if(name.length() == 0)
 		{
-			char c[64];
-#ifdef WIN32
-			_snprintf_s(c, _TRUNCATE, "handle:%p", pFunctor );
-
-#else
-			sprintf(c,"handle:%p", pFunctor );
-
-#endif
-			m_FunctionList->m_SelfHoldHandlers[c] = spHandle;
+			IFString handleName;
+			handleName.format("handle:%p", pFunctor);
+			m_FunctionList->m_SelfHoldHandlers[handleName] = spHandle;
 		}
 		else
 		{
@@ -297,7 +294,7 @@ public:
 
 	void RemoveEventHandle(IFEventHandle<functionType>* pHandle)
 	{
-		IFCSLockHelper locker(m_FunctionListLock);
+		//IFCSLockHelper locker(getFunctionListLock());
 
 		if(!m_FunctionList)
 			return;
@@ -317,18 +314,61 @@ public:
 		}
 	}
 
-	IFArray<IFEventHandle<functionType>*>& getHandleList()
+	IFList<IFEventHandle<functionType>*>* getHandleList()
 	{
-		assert(m_FunctionList);
-		return *m_FunctionList;
+		//assert(m_FunctionList);
+		return m_FunctionList;
 	}
 
-	bool hasHandle()
+	bool hasHandle() const
 	{
 		return m_FunctionList&&m_FunctionList->size();
 	}
 
+	int getHandleCount() const
+	{
+		return m_FunctionList?m_FunctionList->size():0;
+	}
+
+	void operator()(ARGS... p0)
+	{
+		//IFCSLockHelper locker(IFEventSlotBase<void(P0...)>::getFunctionListLock());
+		if (!m_FunctionList)
+			return;
+
+		
+		typename IFEventSlot<void(ARGS...)>::EventHandleListHolder holder(m_FunctionList);
+
+		holder.m_pList->m_CurIter = m_FunctionList->begin();
+		auto lastit = m_FunctionList->end();
+		--lastit;
+		if (m_FunctionList->size())
+		{
+			do
+			{
+				auto pFun = (*holder.m_pList->m_CurIter);
+
+				if (holder.m_pList->m_CurIter == lastit)
+				{
+					(*pFun->m_pFunctor)(p0...);
+					return;
+				}
+				else
+				{
+					++holder.m_pList->m_CurIter;
+					(*pFun->m_pFunctor)(p0...);
+				}
+
+			} while (holder.m_pList->m_CurIter != holder.m_pList->end());
+
+		}
+
+
+	}
+
 protected:
+
+
 	//IFString m_Name;
 	class EventHandleList :public IFRefObj, public IFList<IFEventHandle<functionType>*>
 	{
@@ -365,132 +405,57 @@ protected:
 	};
 		
 	IFRefPtr<EventHandleList>	m_FunctionList;
-	IFCSLock* m_FunctionListLock;
+	//IFCSLock* m_FunctionListLock;
 };
 
-template<typename T>
-class IFEventSlot;
-
-/*
-#define IF_FUNCTION_PARAM_NUM 0 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 1 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 2 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 3 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 4 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 5 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 6 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 7 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 8 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 9 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-
-#define IF_FUNCTION_PARAM_NUM 10 
-#include "IFEventSlotSpec.h"
-#undef	IF_FUNCTION_PARAM_NUM
-*/
-
-#ifdef IFFUNCTOR_LEGACY
-
-#define IF_REPEAT_INCLUDE_NUM 9
-#define IF_REPEAT_INCLUDE_FILE0 "IFEventSlotSpec.h"
-#include "IFRepeatInclude.h"
-#undef IF_REPEAT_INCLUDE_NUM
-#undef IF_REPEAT_INCLUDE_FILE0
-
-#else
-
-template<typename... P0>
-class IFEventSlot<void(P0...)> : public IFEventSlotBase<void(P0...)>
+class IFCOMMON_API IFEventSlotStaticHost
 {
 public:
-	using IFEventSlotBase<void(P0...)>::m_FunctionList;
 
-	IFEventSlot(bool bThreadSafe = false)
-		:IFEventSlotBase<void(P0...)>(bThreadSafe)
+
+protected:
+	IFEventSlotStaticHost()
 	{
+
+	}
+	~IFEventSlotStaticHost()
+	{
+
 	}
 
-	void operator()(P0... p0)
+
+	template<typename FUNTYPE>
+	class EventSlotInstnace : public IFRefObj
 	{
-		IFCSLockHelper locker(IFEventSlotBase<void(P0...)>::m_FunctionListLock);
+	public:
+		IFEventSlot<FUNTYPE> eventSlot;
+	};
+	IFHashMap<const void*, IFRefPtr<IFRefObj>> m_instanceEvents;
 
-		if (m_FunctionList)
-		{
-//#ifndef WIN32
-			typename IFEventSlotBase<void(P0...)>::EventHandleListHolder holder(m_FunctionList);
-//#else
-//			EventHandleListHolder holder(m_FunctionList);
+public:
+	template<typename FUNTYPE, typename... PARAM>
+	void fireEvent(const IFEventSlot<FUNTYPE>& global, PARAM&&... param)
+	{
+		//global(param...);
+		auto it = m_instanceEvents.find(&global);
+		if (it == m_instanceEvents.end())
+			return;
+		((EventSlotInstnace<FUNTYPE>*)(IFRefObj*)(it->second))->eventSlot(std::forward<PARAM>(param)...);
 
-//#endif
-			holder.m_pList->m_CurIter = m_FunctionList->begin();
-			auto lastit = m_FunctionList->end();
-			--lastit;
-			if (m_FunctionList->size())
-			{
-				do
-				{
-					IFEventHandle<typename IFEventSlotBase<void(P0...)>::functionType>* pFun = (*holder.m_pList->m_CurIter);
+	}
 
-					if (holder.m_pList->m_CurIter == lastit)
-					{
-						(*pFun->m_pFunctor)(p0...);
-						return;
-					}
-					else
-					{
-						++holder.m_pList->m_CurIter;
-						(*pFun->m_pFunctor)(p0...);
-					}
+	template<typename FUNTYPE>
+	IFEventSlot<FUNTYPE>& eventInstance(const IFEventSlot<FUNTYPE>& global)
+	{
+		auto it = m_instanceEvents.find(&global);
+		if (it != m_instanceEvents.end())
+			return ((EventSlotInstnace<FUNTYPE>*)(IFRefObj*)(it->second))->eventSlot;
 
-				} while (holder.m_pList->m_CurIter != holder.m_pList->end());
-
-			}
-
-		}
+		auto spInstance = NewIFRefObj<EventSlotInstnace<FUNTYPE>>();
+		m_instanceEvents[&global] = spInstance;
+		return spInstance->eventSlot;
 	}
 
 };
 
-
-#endif
-template<class FunType>
-class IFEventSlotMT : public IFEventSlot<FunType>
-{
-
-private:
-	virtual IFCSLock* getLock()
-	{
-		return &m_Lock;
-	}
-
-	IFCSLock m_Lock;
-
-};
+#endif //__IF_EVENT_SLOT_H__

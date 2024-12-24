@@ -28,6 +28,8 @@ THE SOFTWARE.
 #include "IFUtility.h"
 #include "IFAttributeMgr.h"
 #include "IFJSON.h"
+#include "IFAttributeAccessor.h"
+
 #include <stdio.h>
 #include <wchar.h>
 
@@ -56,6 +58,8 @@ IF_DEFINERTTI( IFAttrENUM, IFAttribute );
 IF_DEFINERTTI( IFAttrCombine, IFAttrENUM );
 
 IF_DEFINERTTI( IFAttrSubAttr, IFAttribute);
+IF_DEFINERTTI(IFAttrArrayAttr, IFAttribute);
+
 IF_DEFINERTTI( IFAttrRECT, IFAttrSubAttr );
 
 
@@ -73,35 +77,46 @@ IF_DEFINERTTI(IFAttrFixNumber,IFAttribute);
 
 
 
-IF_DEFINECREATEOBJ(IFAttrINT			)
-IF_DEFINECREATEOBJ(IFAttrFLOAT			)
-IF_DEFINECREATEOBJ(IFAttrSTR			)
-IF_DEFINECREATEOBJ(IFAttrSTRFileName	)
-IF_DEFINECREATEOBJ(IFAttrLongStr	)
-IF_DEFINECREATEOBJ(IFAttrBOOL			)
-IF_DEFINECREATEOBJ(IFAttrCOLOR			)
-IF_DEFINECREATEOBJ(IFAttrENUM			)
-IF_DEFINECREATEOBJ(IFAttrCombine		)
-IF_DEFINECREATEOBJ(IFAttrSubAttr		)
-IF_DEFINECREATEOBJ(IFAttrRECT			)
-
-
-IF_DEFINECREATEOBJ(IFAttrSTRRefObj			)
-
-
-IF_DEFINECREATEOBJ(IFAttrENUMSTR)
-IF_DEFINECREATEOBJ(IFAttrFixNumber)
-
-
-IFObj* IFAttribute::CreateObjStatic()
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
+void IFAttribute::setGroup(const IFString& sGroupName)
 {
+
+}
+
+const IFString& IFAttribute::getGroup()
+{
+	return IFString::Empty;
+}
+#endif
+
+IFAttributePtr IFAttribute::clone()
+{
+	//IFObj* pObj = CreateObj();
+	if (auto pAttr = IFObjectFactory::getSingleton().createIFRefObj<IFAttribute>(GetType()))
+	{
+		assignTo(pAttr);
+		return pAttr;
+	}
+	else
+	{
+		IFLogError("FAttribute::clone can't create object:%s\r\n", GetType()->GetTypeName());
+	}
 	return NULL;
+}
+
+void IFAttribute::assignTo(IFAttribute* pAttribute)
+{
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
+	pAttribute->m_nIndex = m_nIndex;
+	pAttribute->m_bReadOnly = m_bReadOnly;
+	pAttribute->m_sHelpString = m_sHelpString;
+	pAttribute->m_sAliasName = m_sAliasName;
+#endif
 }
 
 
 
-
-IFAttributePtr IFAttributeList::getAttribute(const IFString& attrName)
+IFAttributePtr IFAttributeList::getAttribute(const IFString& attrName) const
 {
 	AttributeList::iterator it = m_AttrList.find( attrName );
 	if( it != m_AttrList.end() )
@@ -122,8 +137,10 @@ void IFAttributeList::removeAttribute(const IFString& attrName )
 void IFAttributeList::setAttribute(const IFString& attrName,IFAttributePtr pAttribute )
 {
 	m_AttrList[attrName] = pAttribute;
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
 	pAttribute->setIndex(m_nCurIndex);
 	m_nCurIndex ++;
+#endif
 }
 
 IFI32 IFAttributeList::getAttrCount() const
@@ -152,12 +169,25 @@ IFI32 IFAttributeList::saveToBinary(char* pBuf, IFI32 nSize ) const
 }
 
 
-const IFAttributeList::AttributeList& IFAttributeList::getAttrList() const
+static IFRefPtr<IFAttribute> CreateAttributeFromJsonNode(IFJSONNode* pValue, int& nAttID)
 {
+	nAttID = -1;
 
-	return m_AttrList;
+	if (IFJSONNode* pVN = pValue->getSubNode(IFAttributeMgr::xml_atttypindexename))
+	{
+		nAttID = pVN->getValue().getInt();
+	}
+	else
+		return NULL;
+	IFRefPtr<IFAttribute> pAtt = IFAttributeMgr::getSingleton().createAttributeByIndex(nAttID);
+	if (pAtt)
+	{
+		pAtt->loadFromJSON(pValue);
+		return pAtt;
+	}
+	else
+		return NULL;
 }
-
 
 bool IFAttributeList::loadFromJSON( IFJSONNode* pNode )
 {
@@ -172,22 +202,26 @@ bool IFAttributeList::loadFromJSON( IFJSONNode* pNode )
 		{
 			int nAttID = -1;
 
-			if ( IFJSONNode* pVN = pValue->getSubNode(IFAttributeMgr::xml_atttypindexename))
+			//if ( IFJSONNode* pVN = pValue->getSubNode(IFAttributeMgr::xml_atttypindexename))
+			//{
+			//	nAttID = pVN->getValue().getInt();
+			//}
+			//else
+			//	return false;
+			//IFRefPtr<IFAttribute> pAtt = IFAttributeMgr::getSingleton().createAttributeByIndex(nAttID);
+			if (IFRefPtr<IFAttribute> pAtt = CreateAttributeFromJsonNode(pValue, nAttID))
 			{
-				nAttID = pVN->getValue().getInt();
-			}
-			else
-				return false;
-			IFRefPtr<IFAttribute> pAtt = IFAttributeMgr::getSingleton().createAttributeByIndex(nAttID);
-			if (pAtt)
-			{
-				pAtt->loadFromJSON(pValue);
+				//pAtt->loadFromJSON(pValue);
 				m_AttrList[k] = pAtt;
-				return true;
+				//return true;
 			}
 			else
-				return false;
-
+			{
+				IFLogWarning("Unknown Attr ID:%d\r\n", nAttID);
+			}
+			//else
+			//	return false;
+			return true;
 
 		});
 	}
@@ -202,6 +236,56 @@ void IFAttributeList::simplify()
 		removeSameAttr(	*pSuperAttList);
 }
 
+void IFAttributeList::queryAttributeFromObject(const IFRTTI* pType, IFObj* pObj, const  IFAttributeNameList* pNameList)
+{
+	auto pSuperType = pType->GetSuperType();
+	if (pSuperType)
+		queryAttributeFromObject(pSuperType, pObj,  pNameList);
+
+	int attrCount;
+	auto pAttribute = pType->gettAttributeAccessor(attrCount);
+
+	for (int i = 0; i < attrCount; i++)
+	{
+		pAttribute[i]->queryAttribute(pObj, *this, pNameList);
+	}
+}
+
+void IFAttributeList::setAttributeToObject(const IFRTTI* pType, IFObj* pObj)
+{
+	auto pSuperType = pType->GetSuperType();
+	if (pSuperType)
+		setAttributeToObject(pSuperType, pObj);
+
+	int attrCount;
+	auto pAttribute = pType->gettAttributeAccessor(attrCount);
+
+	for (int i = 0; i < attrCount; i++)
+	{
+		pAttribute[i]->setAttribute(pObj, *this);
+	}
+}
+
+void IFAttributeList::lerp(const IFAttributeList& dest, IFAttributeList& out, float f) const
+{
+	for (auto kv : m_AttrList)
+	{
+		
+		auto pDestAttr = dest.getAttribute(kv.first);
+		auto pOutAttr = out.getAttribute(kv.first);
+		if (!pDestAttr)
+			continue;
+		if (!pOutAttr)
+		{
+			pOutAttr = pDestAttr->clone();
+			out.setAttribute(kv.first, pOutAttr);
+		}
+		
+		kv.second->lerp(pDestAttr, pOutAttr, f);
+		
+	}
+}
+
 
 bool IFAttributeList::saveToJSON( IFJSONNode* pNode ) const
 {
@@ -209,7 +293,7 @@ bool IFAttributeList::saveToJSON( IFJSONNode* pNode ) const
 	if(m_sSuperAttrName.size())
 	{
 		IFRefPtr<IFJSONNode> spSA = IFNew IFJSONNode;
-		spSA->setValue(m_sSuperAttrName.toUTF8String());
+		spSA->setValue(m_sSuperAttrName);
 		pNode->insert(IFAttributeMgr::xml_superattname, spSA);
 	}
 
@@ -223,7 +307,7 @@ bool IFAttributeList::saveToJSON( IFJSONNode* pNode ) const
 			continue;
 		}
 
-		IFStringW sValue;
+		//IFString sValue;
 
 		int nAttID = IFAttributeMgr::getSingleton().getIndexByName(it->second->GetTypeName());
 
@@ -242,10 +326,10 @@ bool IFAttributeList::saveToJSON( IFJSONNode* pNode ) const
 	return true;
 }
 
-void IFAttributeList::queryAttsByThisNameList(IFAttributeSet* pAttSet, IFAttributeList& attlist )
+void IFAttributeList::queryAttsByThisNameList(IFAttributeSet* pAttSet, IFAttributeList& attlist ) const
 {
 	AttributeList::iterator it = m_AttrList.begin();
-	IFAttributeSet::AttibuteNameList nameList;
+	IFAttributeNameList nameList;
 	while(it!=m_AttrList.end())
 	{
 		nameList.insert(it->first);
@@ -255,13 +339,13 @@ void IFAttributeList::queryAttsByThisNameList(IFAttributeSet* pAttSet, IFAttribu
 	pAttSet->queryAttribute(attlist, &nameList);
 }
 
-bool IFAttributeList::setSuperAttrList( const IFStringW& sSuperAttrName )
+bool IFAttributeList::setSuperAttrList( const IFString& sSuperAttrName )
 {
 	m_sSuperAttrName = sSuperAttrName;
 	return true;
 }
 //
-IFAttributeList* IFAttributeList::getSuperAttrList()
+IFAttributeList* IFAttributeList::getSuperAttrList() const
 {
 	if(IFSuperAttrMgr::getSingletonPtr())
 	{
@@ -333,30 +417,35 @@ IFAttributeList& IFAttributeList::operator=( const IFAttributeList& ot )
 	return *this;
 }
 
+static void RemoveSameAttr(IFAttributeList& thisList, const IFHashPair<IFString, IFAttributePtr>& pr)
+{
+	if (IFAttribute* pAtt = thisList.getAttribute(pr.first))
+	{
+		IFAttrSubAttr* pSubA = IFDynamicCast<IFAttrSubAttr>(pAtt);
+		IFAttrSubAttr* pSubB = IFDynamicCast<IFAttrSubAttr>(pr.second);
+		if (pSubA && pSubB && !pSubA->isWhole() && !pSubB->isWhole())
+		{
+			pSubA->m_AttList.removeSameAttr(pSubB->m_AttList);
+			if (pSubA->m_AttList.getAttrList().size() == 0)
+			{
+				thisList.removeAttribute(pr.first);
+			}
+			return;
+		}
+
+		if (pAtt->isEqual(pr.second))
+		{
+			thisList.removeAttribute(pr.first);
+		}
+	}
+}
+
 void IFAttributeList::removeSameAttr(const IFAttributeList& other)
 {
 	const AttributeList& attsother = other.getAttrList();
 	for (auto pr:attsother)
 	{
-		if (IFAttribute* pAtt = getAttribute(pr.first))
-		{
-			IFAttrSubAttr* pSubA = IFDynamicCast<IFAttrSubAttr>(pAtt);
-			IFAttrSubAttr* pSubB = IFDynamicCast<IFAttrSubAttr>(pr.second);
-			if (pSubA&&pSubB)
-			{
-				pSubA->m_AttList.removeSameAttr(pSubB->m_AttList);
-				if (pSubA->m_AttList.m_AttrList.size()==0)
-				{
-					removeAttribute(pr.first);
-				}
-				continue;
-			}
-
-			if (pAtt->isEqual(pr.second))
-			{
-				removeAttribute(pr.first);
-			}
-		}
+		RemoveSameAttr(*this, pr);
 	}
 }
 
@@ -426,9 +515,9 @@ IFAttrSubAttr::~IFAttrSubAttr()
 }
 
 
-IFStringW IFAttrSubAttr::getDisplayString()
+IFString IFAttrSubAttr::getDisplayString()
 {
-	return L"[...]";
+	return "[...]";
 }
 
 
@@ -461,8 +550,126 @@ bool IFAttrSubAttr::isEqual( IFAttribute* pOther )
 
 	return false;
 }
+void IFAttrSubAttr::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	auto pDestSub = IFDynamicCast<IFAttrSubAttr>(pDest);
+	auto pOutSub = IFDynamicCast<IFAttrSubAttr>(pOut);
+	if (!pDestSub || !pOutSub)
+		return;
+
+	m_AttList.lerp(pDestSub->m_AttList, pOutSub->m_AttList, f);
+	
+}
+//////////////////////////////////////////////////////////////////////////
+IFAttrArrayAttr::IFAttrArrayAttr(const IFArray<IFAttributePtr>& attrList)
+	:m_AttributeArray(attrList)
+{
+}
+IFAttrArrayAttr:: ~IFAttrArrayAttr()
+{
+
+}
+
+IFString IFAttrArrayAttr::getDisplayString()
+{
+	return "[...]";
+}
 
 
+bool IFAttrArrayAttr::loadFromJSON(IFJSONNode* pNode)
+{
+
+
+	if (IFJSONNode* pVal = pNode->getSubNode(IFAttributeMgr::xml_attvaluename))
+	{
+		if (!pVal->isArray())
+			return false;
+
+		int nodeCount = pVal->getSubNodeNum();
+		m_AttributeArray.reserve(nodeCount);
+		m_AttributeArray.clear();
+		int nAttID;
+		for (int i = 0; i < nodeCount; i++)
+		{
+			auto pAttr = CreateAttributeFromJsonNode(pVal->getSubNode(i), nAttID);
+			if (pAttr)
+				m_AttributeArray.push_back(pAttr);
+		}
+	}
+	
+	return true;
+}
+
+bool IFAttrArrayAttr::saveToJSON(IFJSONNode* pNode)
+{
+	auto spVal = NewIFRefObj<IFJSONNode>();
+	
+	for (int i = 0; i < m_AttributeArray.size(); i++)
+	{
+		auto spSubNode = IFNew IFJSONNode();
+		int nAttID = IFAttributeMgr::getSingleton().getIndexByName(m_AttributeArray[i]->GetTypeName());
+
+		//IFRefPtr<IFJSONNode> spAtt = IFNew IFJSONNode;
+		IFRefPtr<IFJSONNode> spAttID = IFNew IFJSONNode;
+		spAttID->setValue(nAttID);
+		spSubNode->insert(IFAttributeMgr::xml_atttypindexename, spAttID);
+
+		//spSubNode->insert(it->first, spAtt);
+
+		m_AttributeArray[i]->saveToJSON(spSubNode);
+		spVal->push_back(spSubNode);
+	}
+	pNode->insert(IFAttributeMgr::xml_attvaluename, spVal);
+	return true;
+}
+
+
+void IFAttrArrayAttr::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	auto pDestAttr = IFDynamicCast<IFAttrArrayAttr>(pDest);
+	auto pOutAttr = IFDynamicCast<IFAttrArrayAttr>(pOut);
+	if (!pDestAttr || !pOutAttr)
+		return;
+
+	int count = IFMin(pDestAttr->m_AttributeArray.size(), m_AttributeArray.size());
+	count = IFMin(count, pOutAttr->m_AttributeArray.size());
+	for (int i = 0; i < count; i++)
+	{
+		m_AttributeArray[i]->lerp(pDestAttr->m_AttributeArray[i], pOutAttr->m_AttributeArray[i], f);
+	}
+	
+}
+
+void IFAttrArrayAttr::assignTo(IFAttribute* pAttribute)
+{
+	IFAttribute::assignTo(pAttribute);
+	//IFAttributeList::AttributeList ls = m_AttList.getAttrList()
+	IFAttrArrayAttr* pAttr = (IFAttrArrayAttr*)pAttribute;
+	pAttr->m_AttributeArray = m_AttributeArray;
+}
+
+bool IFAttrArrayAttr::isEqual(IFAttribute* pOther)
+{
+	if (pOther->GetType() == &IFAttrArrayAttr::m_Type)
+	{
+		IFAttrArrayAttr* pSubAttr = (IFAttrArrayAttr*)pOther;
+		if (pSubAttr->m_AttributeArray.size() == m_AttributeArray.size())
+		{
+			for (int i = 0; i < m_AttributeArray.size(); i++)
+			{
+				if (!pSubAttr->m_AttributeArray[i]->isEqual(m_AttributeArray[i]))
+				{
+					return false;
+				}
+			}
+
+			return true;
+		}
+		
+	}
+
+	return false;
+}
 //////////////////////////////////////////////////////////////////////////
 
 IFAttrCOLOR::IFAttrCOLOR(IFUI32 dwColor):m_dwColor(dwColor)
@@ -473,10 +680,10 @@ IFAttrCOLOR::IFAttrCOLOR(IFUI32 dwColor):m_dwColor(dwColor)
 }
 
 
-IFStringW IFAttrCOLOR::getDisplayString()
+IFString IFAttrCOLOR::getDisplayString()
 {
 
-	return IFStringW().format(L"%08X", m_dwColor );
+	return IFString().format("%08X", m_dwColor );
 
 }
 
@@ -615,17 +822,12 @@ IFAttrRECT::~IFAttrRECT()
 
 
 
-IFStringW IFAttrRECT::getDisplayString()
+IFString IFAttrRECT::getDisplayString()
 {
-	WCHAR buf[128];
+	//IFWCHAR buf[128];
 	fromSubAttList();
-	//sprintf_s(buf,128,"%d,%d,%d,%d", m_RECT.left, m_RECT.top, m_RECT.right, m_RECT.bottom );
-#ifdef WIN32
-	_snwprintf_s(buf, 128, _TRUNCATE, L"%d,%d,%d,%d", m_RECT.left, m_RECT.top, m_RECT.right, m_RECT.bottom );
-#else
-	swprintf(buf,sizeof(buf)/2, L"%d,%d,%d,%d", m_RECT.left, m_RECT.top, m_RECT.right, m_RECT.bottom );
-#endif
-	return buf;
+
+	return IFString().format("%d,%d,%d,%d", m_RECT.left, m_RECT.top, m_RECT.right, m_RECT.bottom );
 }
 
 void IFAttrRECT::set(const RECT&  rect)
@@ -707,7 +909,7 @@ bool IFAttrRECT::loadFromJSON( IFJSONNode* pNode )
 	if(IFJSONNode* pVal = pNode->getSubNode(IFAttributeMgr::xml_attvaluename))
 	{
 		StringList sl;
-		USplitStrings( &sl, pVal->getValue().getString().c_str(), "," );
+		USplitStrings( &sl, pVal->getValue().getString(), "," );
 		if( sl.size() != 4)
 			return false;
 		m_RECT.left = atoi(sl[0].c_str());
@@ -760,15 +962,10 @@ bool IFAttrINT::saveToJSON( IFJSONNode* pNode )
 }
 
 
-IFStringW IFAttrINT::getDisplayString()
+IFString IFAttrINT::getDisplayString()
 {
-	WCHAR buf[16];
-#ifdef WIN32
-	_snwprintf_s(buf,_TRUNCATE, L"%d", m_nN );
-#else
-	swprintf(buf, 16, L"%d", m_nN );
-#endif
-	return buf;
+
+	return IFString().format("%d",m_nN);
 }
 
 void IFAttrINT::set( const int& n )
@@ -799,6 +996,11 @@ bool IFAttrINT::isEqual( IFAttribute* pOther )
 	return false;
 }
 
+void IFAttrINT::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	IFAttributeLerp(this, pDest, pOut, f);
+}
+
 
 
 bool IFAttrFLOAT::loadFromJSON( IFJSONNode* pNode )
@@ -819,9 +1021,9 @@ bool IFAttrFLOAT::saveToJSON( IFJSONNode* pNode )
 	return true;
 }
 
-IFStringW IFAttrFLOAT::getDisplayString()
+IFString IFAttrFLOAT::getDisplayString()
 {
-	return IFStringW().format(L"%f", m_fF);
+	return IFString().format("%f", m_fF);
 }
 
 void IFAttrFLOAT::assignTo(IFAttribute* pAttribute)
@@ -840,6 +1042,11 @@ bool IFAttrFLOAT::isEqual( IFAttribute* pOther )
 	return false;
 }
 
+void IFAttrFLOAT::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	IFAttributeLerp(this, pDest, pOut, f);
+}
+
 void IFAttrSTR::assignTo(IFAttribute* pAttribute)
 {
 	IFAttribute::assignTo(pAttribute);
@@ -851,13 +1058,23 @@ bool IFAttrSTR::isEqual( IFAttribute* pOther )
 {
 	if(pOther->GetType() == &IFAttrSTR::m_Type )
 	{
-		return ((IFAttrSTR*)pOther)->m_sS == m_sS;
+		if (m_sS.getEncoding() != ((IFAttrSTR*)pOther)->m_sS.getEncoding())
+		{
+			return IFStringW(((IFAttrSTR*)pOther)->m_sS) == IFStringW(m_sS);
+		}
+		else
+			return ((IFAttrSTR*)pOther)->m_sS == m_sS;
 	}
 
 	return false;
 }
 
-IFStringW IFAttrSTR::getDisplayString()
+void IFAttrSTR::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	IFAttributeCantLerp(this, pDest, pOut, f);
+}
+
+IFString IFAttrSTR::getDisplayString()
 {
 	return m_sS;
 }
@@ -866,7 +1083,7 @@ bool IFAttrSTR::loadFromJSON( IFJSONNode* pNode )
 {
 	if ( IFJSONNode* pVal = pNode->getSubNode(IFAttributeMgr::xml_attvaluename))
 	{
-		m_sS = pVal->getValue().getString();
+		m_sS = pVal->isNil()?IFString::Empty:pVal->getValue().getString();
 		return true;
 	}
 	return false;
@@ -875,7 +1092,7 @@ bool IFAttrSTR::loadFromJSON( IFJSONNode* pNode )
 bool IFAttrSTR::saveToJSON( IFJSONNode* pNode )
 {
 	IFRefPtr<IFJSONNode> spVal = IFNew IFJSONNode;
-	spVal->setValue(m_sS.toUTF8String());
+	spVal->setValue(m_sS);
 	pNode->insert(IFAttributeMgr::xml_attvaluename, spVal);
 	return true;
 }
@@ -982,44 +1199,15 @@ bool IFAttrCombine::isEqual( IFAttribute* pOther )
 	return false;
 }
 
-void IFAttribute::setGroup(const IFStringW& sGroupName)
-{
-
-}
-
-const IFStringW& IFAttribute::getGroup()
-{
-	return IFStringW::Empty;
-}
-
-IFAttributePtr IFAttribute::clone()
-{
-	IFObj* pObj = CreateObj();
-	if(IFRefPtr<IFAttribute> pAttr = IFDynamicCast<IFAttribute>(pObj) )
-	{
-		assignTo(pAttr);
-		return pAttr;
-	}
-	delete pObj;
-	return NULL;
-}
-
-void IFAttribute::assignTo( IFAttribute* pAttribute )
-{
-	pAttribute->m_nIndex = m_nIndex;
-	pAttribute->m_bReadOnly = m_bReadOnly;
-	pAttribute->m_sHelpString = m_sHelpString;
-	pAttribute->m_sAliasName = m_sAliasName;
-}
 
 
 
 //////////////////////////////////////////////////////////////////////////
 
 
-IFStringW IFAttrENUMSTR::get()
+IFString IFAttrENUMSTR::get()
 {
-	IFStringW s;
+	IFString s;
 	for(int i = 0; i < m_EnumList.size(); i ++ )
 	{
 		if(m_EnumList[i].nValue == m_nValue)
@@ -1030,7 +1218,7 @@ IFStringW IFAttrENUMSTR::get()
 	}
 
 
-	return IFStringW::Empty;
+	return IFString::Empty;
 }
 
 bool IFAttrENUMSTR::isEqual(IFAttribute* pOther)
@@ -1063,7 +1251,7 @@ bool IFAttrENUMSTR::saveToJSON( IFJSONNode* pNode )
 
 
 	IFRefPtr<IFJSONNode> spVal = IFNew IFJSONNode;
-	spVal->setValue(get().toUTF8String());
+	spVal->setValue(get());
 	pNode->insert("str", spVal);
 	return true;
 }
@@ -1086,7 +1274,7 @@ bool IFAttrFixNumber::saveToJSON(IFJSONNode* pNode)
 	return true;
 }
 
-IFStringW IFAttrFixNumber::getDisplayString()
+IFString IFAttrFixNumber::getDisplayString()
 {
 	return m_nN.toString();
 }
@@ -1105,6 +1293,12 @@ bool IFAttrFixNumber::isEqual(IFAttribute* pOther)
 {
 	IFAttrFixNumber* pF = IFDynamicCast<IFAttrFixNumber>(pOther);
 	return pF && pF->m_nN == m_nN;
+}
+
+void IFAttrFixNumber::lerp(IFAttribute* pDest, IFAttribute* pOut, float f)
+{
+	IFAttributeLerp<IFFixNumber>(this, pDest, pOut, f);
+
 }
 
 void IFAttrFixNumber::assignTo(IFAttribute* pAttribute)

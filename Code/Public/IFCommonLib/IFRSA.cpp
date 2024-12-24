@@ -52,11 +52,12 @@ bool IFRSA::generateKey(IFRefPtr<IFMemStream> pPublicKey, IFRefPtr<IFMemStream> 
 	//if (IFNativeSystemAPI::getSingletonPtr())
 	srand(IFNativeSystemAPI::getTickCount());
 	R_RandomInit(&randomstruct);
-	for (int  i = 0; i < 64; i ++ )
+	for (int  i = 0; i < nBits/8; i ++ )
 	{
 		int ndata = rand();
 		R_RandomUpdate(&randomstruct, (unsigned char*)&ndata, 4);
 	}
+	R_RandomFinal(&randomstruct);
 
 	R_RSA_PUBLIC_KEY pubk;
 	R_RSA_PRIVATE_KEY prik;

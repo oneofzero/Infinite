@@ -1,4 +1,4 @@
-/*
+﻿/*
 The MIT License (MIT)
 Copyright © 2014 Huang Cong
 
@@ -42,6 +42,8 @@ THE SOFTWARE.
 #include <netinet/tcp.h>
 #endif
 
+
+
 IFNetCoreSelect::IFNetCoreSelect()
 	:m_bExitWorkThread(false)
 	,m_Listener(INVALID_SOCKET)
@@ -65,26 +67,7 @@ bool IFNetCoreSelect::onServiceStart()
 
 	if (m_nPort)
 	{
-		m_Listener= socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-
-		sockaddr_in addr;
-
-		ZeroMemory(&(addr.sin_zero), 8);
-
-		addr.sin_family      = AF_INET;
-		addr.sin_port        = htons(m_nPort);
-		addr.sin_addr.s_addr = htonl(INADDR_ANY);
-
-		if (bind(m_Listener, (struct sockaddr *)&addr, sizeof(addr)) != 0)
-		{
-			return false;
-		}
-
-		if (listen(m_Listener, SOMAXCONN) != 0)
-		{
-			return false;
-		}
+		startListen(m_nPort, false, m_bPackageMode);
 	}
 
 	m_spWorkThread = IFNew IFThread;
@@ -165,14 +148,14 @@ IFNetConnectionPtr IFNetCoreSelect::createConnection( const IFString& sAddress, 
 #endif
                 
             }
-            else 
-            {
-                if (!syncconnect)
-                {
-                    IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, true );
-                    pushEvent(pEvent);
-                }
-            }
+            //else 
+            //{
+            //    if (!syncconnect)
+            //    {
+            //        IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, true );
+            //        pushEvent(pEvent);
+            //    }
+            //}
            
        }));
         
@@ -183,25 +166,7 @@ IFNetConnectionPtr IFNetCoreSelect::createConnection( const IFString& sAddress, 
 	if (!IFNetCore::getHostAddress(sAddress, nPort, &addressinfo))
 		return NULL;
 	pConnection->m_Socket = socket(addressinfo.family, SOCK_STREAM, IPPROTO_TCP);
- //   sockaddr_in address;
- //   ZeroMemory(&address, sizeof(address));
-	//address.sin_family = AF_INET;
-	//address.sin_addr.s_addr = inet_addr( sAddress.c_str() );
-	//if(address.sin_addr.s_addr == 0xffffffff)
-	//{
-	//	hostent* pHostent = gethostbyname(sAddress.c_str());
-	//	if(pHostent)
-	//	{
-	//		address.sin_addr = *((in_addr*)pHostent->h_addr_list[0]);
-	//	}
-	//	else
-	//	{
-	//		return NULL;
-	//	}
-	//}
-	////sk =  WSASocket( AF_INET, SOCK_STREAM, IPPROTO_TCP, 0 , 0, WSA_FLAG_OVERLAPPED);
-
-	//address.sin_port = htons( nPort );
+ 
 	
 	pConnection->setNoDelay();
 	pConnection->m_nRemotePort = nPort;
@@ -266,6 +231,60 @@ IFNetConnectionPtr IFNetCoreSelect::createConnection( const IFString& sAddress, 
 	return pConnection;
 }
 
+bool IFNetCoreSelect::startListen(int nPort, bool enableSSL /*= false*/, bool packagemode /*= false*/)
+{
+	auto listenSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+	int enable_reuseaddr = 1;
+	if (setsockopt(listenSocket, SOL_SOCKET, SO_REUSEADDR, (char*)&enable_reuseaddr, sizeof(enable_reuseaddr)) != 0)
+	{
+#if defined(IFPLATFORM_WEB)
+		IFLOG(IFLL_ERROR, "set socket addr reuse error\r\n");
+#else
+		IFLOG(IFLL_ERROR, "set socket addr reuse error:%d\r\n", errno);
+#endif
+	}
+
+	sockaddr_in addr;
+
+	ZeroMemory(&(addr.sin_zero), 8);
+
+	addr.sin_family = AF_INET;
+	addr.sin_port = htons(nPort);
+	addr.sin_addr.s_addr = htonl(INADDR_ANY);
+
+	if (bind(listenSocket, (struct sockaddr*)&addr, sizeof(addr)) != 0)
+	{
+		closesocket(listenSocket);
+		return false;
+	}
+
+	if (listen(listenSocket, SOMAXCONN) != 0)
+	{
+		closesocket(listenSocket);
+		return false;
+	}
+	IFCSLockHelper lh(m_ListenersLock);
+	SocketInfo si;
+	si.socket = listenSocket;
+	si.usePackageMode = packagemode;
+	si.useSSL = enableSSL;
+	si.localPort = nPort;
+	m_Listener.insert(makeIFPair(nPort, si));
+	return true;
+}
+
+bool IFNetCoreSelect::stopListen(int nPort)
+{
+	IFCSLockHelper lh(m_ListenersLock);
+	auto it = m_Listener.find(nPort);
+	if (it == m_Listener.end())
+		return false;
+	closesocket(it->second.socket);
+	m_Listener.erase(it);
+	return true;
+}
+
 void IFNetCoreSelect::workThread()
 {
 	int maxfd = 0;
@@ -273,12 +292,15 @@ void IFNetCoreSelect::workThread()
 	timeval tv;
 	tv.tv_sec = 0;
 	tv.tv_usec = 100000;
-	char buf[1024*32];
+	//char buf[1024*32];
+	IFSimpleArray<char> buf(1024 * 32);
+	IFLogDebug("IFNetCoreSelect::workThread Start!");
+
 	while (!m_spWorkThread->isNeedExit())
 	{
 
 
-		if (m_ConnectingList.size() == 0 && m_Connections.size() == 0 && m_Listener == INVALID_SOCKET)
+		if (m_ConnectingList.size() == 0 && m_Connections.size() == 0 && m_Listener.size()==0)
 		{
 			if (m_bExitWorkThread)
 				break;
@@ -296,14 +318,19 @@ void IFNetCoreSelect::workThread()
 			IFCSLockHelper lh(m_ConnectionListLock);
 
 			ConnectionList::iterator it = m_Connections.begin();
-			for (; it != m_Connections.end();++it)
+			while ( it != m_Connections.end())
 			{
 				IFNetCoreSelectConnection* pCon = (IFNetCoreSelectConnection*)(IFNetConnection*)(*it);
+				if (!pCon || pCon->m_Socket == INVALID_SOCKET)
+				{					
+					it = m_Connections.erase(it);
+					continue;
+				}
 				FD_SET(pCon->m_Socket, &readfds);
 				FD_SET(pCon->m_Socket, &errorfds);
 				if (pCon->m_Socket>maxfd)
 					maxfd = pCon->m_Socket;
-
+				++it;
 			}
 		}
 		{
@@ -319,21 +346,38 @@ void IFNetCoreSelect::workThread()
 				++it;
 			}
 		}
-		if(m_Listener!=INVALID_SOCKET)
+		if(m_Listener.size())
 		{
-			FD_SET(m_Listener,&readfds);
-            if(m_Listener>maxfd)
-                maxfd=m_Listener;
+			for (auto& lser : m_Listener)
+			{
+				FD_SET(lser.second.socket, &readfds);
+				if (lser.second.socket > maxfd)
+					maxfd = lser.second.socket;
+			}
 		}
 
 
 		int ret = select(maxfd+1,&readfds,  &writefds, &errorfds, &tv);
 		if (ret>0)
 		{
-			IFLOG(IFLL_DEBUG, "SELECT RESULT %d\r\n", ret);
+			IFLogTrace("SELECT RESULT %d\r\n", ret);
+			IFCSLockHelper llh(m_ListenersLock);
+			SocketInfo* pSockInfo = NULL;
+			if (m_Listener.size())
+			{
+				for (auto& lser : m_Listener)
+				{
+					if (FD_ISSET(lser.second.socket, &readfds))
+					{
+						pSockInfo = &lser.second;
+						break;
+					}
+					
+				}				
+			}
 
 			//accept select
-			if (m_Listener != INVALID_SOCKET && FD_ISSET(m_Listener, &readfds))
+			if (pSockInfo)
 			{
 				sockaddr_in remoteAddress;
 #ifndef WIN32
@@ -344,19 +388,24 @@ void IFNetCoreSelect::workThread()
 
 				ADDSIZE = sizeof(remoteAddress);
 
-				SOCKET newClient = accept(m_Listener, (sockaddr*)&remoteAddress, &ADDSIZE);
+				SOCKET newClient = accept(pSockInfo->socket, (sockaddr*)&remoteAddress, &ADDSIZE);
 				//FD_SET(newClient, &m_Readfds);
-				IFRefPtr<IFNetCoreSelectConnection> spConnection = IFNew IFNetCoreSelectConnection(this, m_bPackageMode, m_bSyncEvent, newClient);
+				IFRefPtr<IFNetCoreSelectConnection> spConnection = IFNew IFNetCoreSelectConnection(this, pSockInfo->usePackageMode, m_bSyncEvent, newClient);
 				char ip[128];
 				inet_ntop(AF_INET, &(remoteAddress.sin_addr), ip, sizeof(ip));
 				spConnection->m_sRemoteIP = ip;
 				spConnection->m_nRemotePort = ntohs(remoteAddress.sin_port);
-				spConnection->m_nLocalPort = m_nPort;
+				spConnection->m_nLocalPort = pSockInfo->localPort;
 				spConnection->m_eConnectionState = IFNCS_CONNECTED;
+				{
+					IFCSLockHelper lh2(m_ConnectionListLock);
+					m_Connections.insert(spConnection);
+				}
 
-				m_Connections.insert(spConnection);
 				IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(spConnection, IFNetCoreEvent::ET_NEW_CONNECTION);
 				pushEvent(pEvent);
+				if (pSockInfo->useSSL)
+					spConnection->waitEstablishSSL();
 			}
 			else
 			{
@@ -369,7 +418,7 @@ void IFNetCoreSelect::workThread()
 						IFNetCoreSelectConnection* pCon = (IFNetCoreSelectConnection*)(IFNetConnection*)(*it);
 						if (FD_ISSET(pCon->m_Socket, &readfds))
 						{
-							int nLen = recv(pCon->m_Socket, buf, sizeof(buf), 0);
+							int nLen = recv(pCon->m_Socket, buf, buf.size(), 0);
 							if (nLen > 0)
 							{
 								pCon->setLastCommunicateTime();
@@ -391,6 +440,7 @@ void IFNetCoreSelect::workThread()
 							pCon->disconnect();
 							IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pCon, IFNetCoreEvent::ET_CONNECT, false );
 							pushEvent(pEvent);
+							IFCSLockHelper lh(m_ConnectingListLock);
 							it  = m_ConnectingList.erase(it);
 							continue;
 						}
@@ -469,6 +519,9 @@ IFUI64 IFNetCoreSelectConnection::sendPack( IFRefPtr<IFMemStream> pStream, IFUI6
 #ifdef WIN32
 		r = GetLastError();
 		IFLOG(IFLL_ERROR, "send error!%d\r\n", r);
+#elif defined(IFPLATFORM_WEB)
+		IFLOG(IFLL_ERROR, "send error!send size:%d\r\n", pStream->size());
+
 #else
 		IFLOG(IFLL_ERROR, "send error!%d send size:%d\r\n", errno, pStream->size());
 
@@ -548,4 +601,9 @@ void IFNetCoreSelectConnection::setNoDelay()
 	int bOptLen = sizeof(int);
 	int br = setsockopt(m_Socket,IPPROTO_TCP, TCP_NODELAY , (char*)&bOptVal, bOptLen);
 
+}
+
+IFRefPtr<IFNetCore> IFNetCore::createNetCore()
+{
+	return IFNew IFNetCoreSelect;
 }

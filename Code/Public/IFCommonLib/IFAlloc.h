@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_ALLOC_H__
+#define __IF_ALLOC_H__
 #include "IFCommonLib_API.h"
 #include "IFBaseTypeDefine.h"
 #include <stdlib.h>
@@ -28,11 +30,18 @@ THE SOFTWARE.
 struct IFAllocStatisticsInfo
 {
 	IFUI64 nAllocNum;
-	IFUI64 nFreeNum;
+	//IFUI64 nFreeNum;
 	IFUI64 nAllocSize;
-	IFUI64 nFreeSize;
+	//IFUI64 nFreeSize;
 };
 class IFStream;
+
+class IFExternalAlloc
+{
+public:
+	virtual void* alloc(int nsize) = 0;
+	virtual void dealloc(void* p) = 0;
+};
 
 class IFCOMMON_API IFAlloc
 {	// generic allocator for objects of class _Ty
@@ -45,7 +54,7 @@ public:
 
 	static void Dealloc(void* pData);
 
-	static void SetExternalAlloc(IFAlloc* pAlloc);
+	static void SetExternalAlloc(IFExternalAlloc* pAlloc);
 
 	static IFI64 GetCurrentMemorySize();
 
@@ -78,8 +87,6 @@ protected:
 	virtual void extDealloc(void* pData) = 0;
 
 private:
-
-	static IFAlloc* m_pExternalAlloc;
 	static IFAllocStatisticsInfo m_StaInfo;
 };
 
@@ -89,7 +96,7 @@ class IFSystemAllocSA
 public:
 
 	IFSystemAllocSA(int nInitSize = 0)
-		:m_nSize(nInitSize),m_nCap(nInitSize),m_pBuf(0)
+		:m_nCap(nInitSize),m_nSize(nInitSize),m_pBuf(0)
 	{
 		if (m_nSize)
 		{
@@ -155,3 +162,35 @@ public:
 	int m_nSize;
 	T* m_pBuf;
 };
+#ifdef _MSC_VER
+#pragma warning(disable:4200)
+#endif
+
+class IFCOMMON_API IFSmallBuffAlloc
+{
+public:
+	const int BUFF_SIZE;
+	const int BLOCK_COUNT;
+	/*enum
+	{
+		BUFF_SIZE = 64,
+		BLOCK_COUNT = 512,
+	};*/
+	struct SmallBuff
+	{
+		SmallBuff* pNext;
+		char buff[0];
+	};
+public:
+
+	IFSmallBuffAlloc(int buffSize, int blockCount, void*(*pSystemAlloc)(int size, void* ud), void* ud);
+	~IFSmallBuffAlloc();
+	void* Alloc();
+	void Free(void* p);
+private:
+	SmallBuff* m_pFirstFreed;
+	void* (*m_pSystemAlloc)(int, void* ud);
+	void* m_SystemAllocUserData;
+};
+
+#endif //__IF_ALLOC_H__

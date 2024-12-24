@@ -21,67 +21,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
-#include <stdio.h>
+#ifndef __IF_FILE_STREAM_H__
+#define __IF_FILE_STREAM_H__
 #include "IFStream.h"
 #include "IFString.h"
-class IFCOMMON_API IFFileStream :	public IFStream
+class IFCOMMON_API IFFileStream : public IFStream
 {
 	IF_DECLARERTTI;
-protected:
-	virtual ~IFFileStream(void);
 
 public:
-	IFFileStream(const IFStringW& sName, const char* sMode = "rb" );
-	
-	bool open(const IFStringW& sName, const char* sMode = "rb");
-	bool close();
+	IFFileStream(const IFString& sName, const char* sMode = "rb")
+		:m_sFileName(sName)
+	{
 
-	IFUI32 read(void* pDestData, IFUI32 nSize );
-	IFUI32 write(const void* pSourceData, IFUI32 nSize );
-	IFI64 seek(IFI64 nSeek, IFUI32 nFrom );
-	IFI64 tell()const;
-	bool isEnd()const;
+	}
+	virtual bool close() = 0; 
+	virtual void flush() = 0;
 
-	bool isVaild()const;
-
-	const IFStringW& getName();
-	void flush();
+	const IFString& getName() override
+	{
+		return m_sFileName;
+	}
 protected:
 
-	FILE* m_pFile;
-	IFStringW m_sFileName;
+	IFString m_sFileName;
+
 };
+
 
 #ifdef WIN32
 
 
-class IFCOMMON_API IFWIN32FileStream :	public IFStream
-{
-	IF_DECLARERTTI;
-protected:
-	virtual ~IFWIN32FileStream(void);
-
-public:
-	IFWIN32FileStream();
-
-	bool open(const IFStringW& sName, int nFlag);
-	bool close();
-
-	IFUI32 read(void* pDestData, IFUI32 nSize );
-	IFUI32 write(const void* pSourceData, IFUI32 nSize );
-	IFI64 seek(IFI64 nSeek, IFUI32 nFrom );
-	IFI64 tell()const;
-	bool isEnd()const;
-
-	bool isVaild()const;
-
-	const IFStringW& getName();
-	void flush();
-protected:
-
-	HANDLE m_hFile;
-	int m_nFlag;
-	IFStringW m_sFileName;
-};
-
 #endif
+
+#endif //__IF_FILE_STREAM_H__

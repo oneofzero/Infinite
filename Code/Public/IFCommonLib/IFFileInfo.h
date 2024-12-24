@@ -21,10 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_FILE_INFO_H__
+#define __IF_FILE_INFO_H__
 #include "IFCommonLib_API.h"
 #include "IFRefObj.h"
 #include "IFString.h"
 #include "IFTypes.h"
+#include "IFDateTime.h"
 class IFStream;
 
 class IFCOMMON_API IFFileInfo : public IFRefObj
@@ -33,6 +36,7 @@ class IFCOMMON_API IFFileInfo : public IFRefObj
 public:
 	enum FileType
 	{
+		FT_INVALID,
 		FT_DIR,
 		FT_FILE,
 		FT_ZIP_DIR,
@@ -40,49 +44,44 @@ public:
 		FT_DRIVER,
 	};
 public:
-	virtual const IFStringW& getFileName();
-	virtual const IFStringW& getPath();
-	virtual IFUI64 getSize();
-	virtual FileType getType();
+	IFFileInfo();
+	IFFileInfo(const IFString& path);
+	const IFString& getFileName();
+	const IFString& getPath();
+	IFUI64 getSize();
+	FileType getType();
 
-	virtual const IFStringW& getFileTypeName();
-	virtual const IFStringW& getIconLocation();
-	virtual IFRefPtr<IFStream> loadIcon();
+	IFString getFileTypeName();
+	const IFString& getIconLocation();
+	IFRefPtr<IFStream> loadIcon();
 
-	virtual const IFTime& getLastModifyTime();
-	virtual const IFTime& getCreateTime();
+	const IFDateTime& getLastModifyTime();
+	const IFDateTime& getCreateTime();
 
 	bool isDir()
 	{
 		return getType() == FT_DIR;
 	}
+	bool isValid()
+	{
+		return m_eType != FT_INVALID;
+	}
+	bool isFile()
+	{
+		return m_eType == FT_FILE;
+	}
 protected:
-	IFStringW m_sFileName;
-	IFStringW m_sFilePath;
+	IFString m_sFileName;
+	IFString m_sFilePath;
+	IFString m_sIconLocation;
+
 	IFUI64	m_nSize;
+
+	IFDateTime m_ModifyTime;
+	IFDateTime m_CreateTime;
 	FileType m_eType;
 
-	IFTime m_ModifyTime;
-	IFTime m_CreateTime;
-
 };
 
-#ifdef WIN32
 
-//#if WINAPI_FAMILY!=WINAPI_FAMILY_PHONE_APP
-class IFCOMMON_API IFWin32FileInfo : public IFFileInfo
-{
-public:
-	IFWin32FileInfo();
-	void setWin32Data(const WIN32_FIND_DATA& info, const IFStringW& pParentPath);
-
-	virtual const IFStringW& getIconLocation();
-	virtual IFRefPtr<IFStream> loadIcon();
-
-protected:
-	IFStringW m_sIconLocation;
-
-};
-//#endif
-
-#endif
+#endif //__IF_FILE_INFO_H__

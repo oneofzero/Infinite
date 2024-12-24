@@ -35,6 +35,7 @@ THE SOFTWARE.
 #include "IFHashSet.h"
 #include "IFMemStream.h"
 #include "IFNumParse.h"
+#include "IFUtility.h"
 //#ifdef ANDROID
 #include "androidwcs.h"
 void utf8_wchar(const IFString &utf8, IFStringW &wide);
@@ -48,9 +49,9 @@ void wchar_utf8(const IFStringW& wide, IFString &utf8);
 //////////////////////////////////////////////////////////////////////////
 
 //#endif
-#if defined(ANDROID) || defined(MAC) || defined(LINUX)
+//#if defined(ANDROID) || defined(MAC) || defined(LINUX) || defined(IFPLATFORM_WEB) || defined(IFPLATFORM_FREE_RTOS)
 #include "utf8wchar.cpp"
-#endif
+//#endif
 
 #ifdef IFSTRING_STANDALONE
 const IFString IFString::Empty;
@@ -76,18 +77,18 @@ inline static IFUI32 rshash(const CHART* s, IFUI32& nLen)
 inline static IFUI32 rshash2(const char* s, IFUI32 nLen)
 {
 	if (nLen == -1)
-		nLen = strlen(s);
-	register IFUI32 b = 378551;
-	register IFUI32 a = 63689;
-	register IFUI32 hash = 0;
+		nLen = (int)strlen(s);
+	IFUI32 b = 378551;
+	IFUI32 a = 63689;
+	IFUI32 hash = 0;
 
 	int nBlockLen = nLen / sizeof(size_t);
 	int nBlockMod = nLen % sizeof(size_t);
-	register size_t* pS = (size_t*)s;
-	register size_t* pEnd = pS + nBlockLen;
+	size_t* pS = (size_t*)s;
+	size_t* pEnd = pS + nBlockLen;
 	for (; pS < pEnd; pS++)
 	{
-		hash = hash * a + *pS;
+		hash = hash * a + (int)*pS;
 		a *= b;
 
 	}
@@ -100,9 +101,9 @@ inline static IFUI32 rshash2(const char* s, IFUI32 nLen)
 }
 
 
-static IFHashSet<IFString>* g_pShortStringPool = NULL;
+//static IFHashSet<IFString>* g_pShortStringPool = NULL;
 
-static inline const WCHAR* t_strstr(const WCHAR* p1, const WCHAR* p2)
+static inline const IFWCHAR* t_strstr(const IFWCHAR* p1, const IFWCHAR* p2)
 {
 	return wcsstr(p1, p2);
 }
@@ -111,7 +112,7 @@ static inline const char* t_strstr(const char* p1, const char* p2)
 	return strstr(p1, p2);
 }
 
-static inline const int t_strlen(const WCHAR* p1)
+static inline const int t_strlen(const IFWCHAR* p1)
 {
 	return (int)wcslen(p1);
 }
@@ -131,21 +132,6 @@ static inline void StrMove(T* pDest, const T* pSrc, int nLen)
 	memmove(pDest, pSrc, nLen*sizeof(T));
 }
 
-const IFString& getShortString(const char* s, int nLen, IFUI32 hashv)
-{
-	if (!g_pShortStringPool)
-		g_pShortStringPool = IFNew IFHashSet<IFString>();
-
-	auto it = g_pShortStringPool->find(hashv, [&](const IFString& o) 
-	{
-		return o == s;
-	});
-	if (it != g_pShortStringPool->end())
-		return *it;
-	;
-	it = g_pShortStringPool->insert(IFString(s, nLen), hashv);
-	return *it;
-}
 
 
 template<typename STRINGT>
@@ -216,9 +202,11 @@ void IFString_push_back(STRINGT& o, typename STRINGT::THIS_CHAR_TYPE c)
 
 IFString::IFString()
 	:m_nSize(0)
-	,m_eEncoding(LOCAL_CHAR_ENCODING)
-	,m_nRSHash(0)
 	,m_nCap(0)
+	,m_nRSHash(0)
+	,m_eEncoding(LOCAL_CHAR_ENCODING)
+	
+	
 
 {
 	m_SmallBuff[0] = 0;
@@ -228,9 +216,9 @@ IFString::IFString()
 
 IFString::IFString(ENCODING coding)
 	:m_nSize(0)
-	,m_eEncoding(coding)
-	,m_nRSHash(0)
 	,m_nCap(0)
+	,m_nRSHash(0)	
+	,m_eEncoding(coding)
 {
 	m_SmallBuff[0] = 0;
 	//makeSureSelfBuffer(8);
@@ -250,9 +238,10 @@ IFString::IFString(const IFString& o)
 
 IFString::IFString(const IFStringW& o,ENCODING coding )	
 	:m_nSize(0)
-	,m_eEncoding(coding)
-	,m_nRSHash(0)
 	,m_nCap(0)
+	,m_nRSHash(0)
+	,m_eEncoding(coding)
+	
 {
 	m_SmallBuff[0] = 0;
 	operator = (o);
@@ -260,9 +249,11 @@ IFString::IFString(const IFStringW& o,ENCODING coding )
 
 IFString::IFString(const char* sStr, ENCODING coding /*= LOCAL_CHAR_ENCODING*/)
 	:m_nSize(0)
-	, m_eEncoding(coding)
-	, m_nRSHash(0)
 	,m_nCap(0)
+	, m_nRSHash(0)
+	, m_eEncoding(coding)
+	
+	
 
 {
 	m_SmallBuff[0] = 0;
@@ -271,17 +262,19 @@ IFString::IFString(const char* sStr, ENCODING coding /*= LOCAL_CHAR_ENCODING*/)
 
 IFString::IFString(const char* sStr, int nLen,ENCODING coding)	
 	:m_nSize(0)
-	,m_eEncoding(coding)
-	,m_nRSHash(0)
 	,m_nCap(0)
+	,m_nRSHash(0)
+	,m_eEncoding(coding)
+	
+	
 {
 	IFString_assign(*this, sStr, nLen);
 }
 IFString::IFString(const char* sStr, const char* sEnd,ENCODING coding)	
 	:m_nSize(0)
-	,m_eEncoding(coding)
-	,m_nRSHash(0)
 	,m_nCap(0)
+	,m_nRSHash(0)
+	,m_eEncoding(coding)	
 {
 
 	IFString_assign(*this, sStr, int(sEnd - sStr));
@@ -300,49 +293,17 @@ IFString& IFString::operator =(const IFString& o)
 IFString& IFString::operator =(const IFStringW& o)
 {
 
-#if defined(ANDROID) || defined(MAC) || defined(LINUX)
 	clear();
-	wchar_utf8(o,*this);
-	return *this;
+#ifdef  IF_STRING_NO_ANSI
+	wchar_utf8(o, *this);
 #else
-	char buf[1024 * 4];
-
-	char* pBuffer = buf;
-	int nBufSize = sizeof(buf);
-	int nOutBufLen = 0;
-	if(isUTF8Codeing())
-	{
-		nBufSize = o.length()*4+1;
-		if(nBufSize>sizeof(buf))
-			pBuffer = (char*)IFAlloc::Alloc((int)nBufSize);
-#ifdef WIN32
-		nOutBufLen = WideCharToMultiByte(CP_UTF8, 0, o.c_str(), o.length(), pBuffer,nBufSize,NULL, NULL );
-#else
-
-		setlocale(LC_ALL,"zh_CN.utf8");
-		nOutBufLen = wcstombs(pBuffer, o.c_str(),nBufSize );
-
-		//wcstombs()
-#endif
-	}
+	if (m_eEncoding == EC_UTF8)
+		wchar_utf8(o, *this);
 	else
-	{
-		nBufSize = o.length()*2+1;
-		if (nBufSize > sizeof(buf))
-			pBuffer = (char*)IFAlloc::Alloc((int)nBufSize);
+		wchar_gbk(o, *this);
+#endif //  IF_STRING_NO_ANSI
 
-#ifdef WIN32
-		nOutBufLen = WideCharToMultiByte(CP_ACP, 0, o.c_str(), o.length(), pBuffer,nBufSize,NULL, NULL );
-#else
-		setlocale(LC_ALL,"zh_CN.gbk");
-		nOutBufLen = wcstombs(pBuffer, o.c_str(),nBufSize );
-#endif
-	}
-	IFString_assign(*this, pBuffer, nOutBufLen);
-	//operator=(pBuffer);
-	if(pBuffer!=buf)
-		IFAlloc::Dealloc(pBuffer);
-#endif
+
 	return *this;
 }
 
@@ -470,6 +431,40 @@ void IFString::clear()
 {
 	//operator = ("");
 	IFString_clear(*this);
+}
+
+#define IS_WRITE_SPACE(c) ( (c)==' ' || (c) == '\r' || (c)=='\n' || (c)=='\t')
+
+
+IFString IFString::trimStart(char c) const
+{
+	auto p = c_str();
+
+	int  i = 0;
+	for (; i < (int)size(); i++)
+	{
+		if ( c && c == p[i] || IS_WRITE_SPACE(p[i]) )
+			continue;
+		break;
+	}
+	
+	return IFString(p + i, size() - i, m_eEncoding);
+	
+}
+
+IFString IFString::trimEnd(char c) const
+{
+	auto p = c_str();
+
+	int  i = size()-1;
+	for (; i >=0; i--)
+	{
+		if (c && c == p[i] || IS_WRITE_SPACE(p[i]))
+			continue;
+		break;
+	}
+
+	return IFString(p , i+1, m_eEncoding);
 }
 
 template<typename STRINGT>
@@ -624,19 +619,38 @@ IFString IFString::operator-( const IFString& o ) const
 	return IFString();
 }
 
+IFString IFString::convertEncoding(ENCODING encoding) const
+{
+	if (encoding == m_eEncoding)
+		return *this;
+	IFStringW  ws = *this;
+#ifndef IF_STRING_NO_ANSI
+	if (encoding == ENCODING::EC_ANSI)
+		return ws.toANSIString();		
+	else
+#endif
+		return ws.toUTF8String();
+	
+}
+
 IFString& IFString::format( const char* sFormat, ... )
 {
-	char buf[32*1024];
+#ifdef IFPLATFORM_FREE_RTOS
+	char buf[512];
+#else
+	char buf[32 * 1024];
+#endif
+
 #ifdef WIN32
 	va_list vlist;
 	va_start(vlist, sFormat );
 	int n = _vsnprintf_s(buf, _TRUNCATE, sFormat,  vlist );
 	va_end(vlist);
 #else
-#if defined(LINUX) || defined(MAC) || defined(IFPLATFORM_WEB)
+#if defined(LINUX) || defined(MAC) || defined(IFPLATFORM_WEB) || defined(IFPLATFORM_FREE_RTOS) ||defined(IFPLATFORM_EMBED_NOSYS)
 	va_list vlist;
 	va_start(vlist, sFormat );
-	int n = vsnprintf(buf,32*1024, sFormat, vlist  );
+	int n = vsnprintf(buf,sizeof(buf), sFormat, vlist  );
 	va_end(vlist);
 #endif
 #endif
@@ -665,7 +679,34 @@ void IFString_upper(STRINGT& o)
 	}
 }
 
+template<typename STRINGT>
+void IFString_lower(STRINGT& o)
+{
+	if (o.m_nSize)
+	{
+		auto p = o.makeSureSelfBuffer(o.m_nSize + 1);
+
+		while (*p)
+		{
+			if (*p >= 'A' && *p <= 'Z')
+			{
+				*p += 'a' - 'A';
+			}
+			p++;
+		}
+
+		o.m_nRSHash = 0;
+
+	}
+}
+
 void IFString::upper()
+{
+	IFString_upper(*this);
+
+}
+
+void IFString::lower()
 {
 	IFString_upper(*this);
 
@@ -713,8 +754,28 @@ int IFString::find_last_of( char c , int noffset) const
 
 }
 
+bool IFString::endsWith(const IFString& ends) const
+{
+	if (length() < ends.length())
+		return false;
+
+	auto c = memcmp(c_str() + length() - ends.length(), ends.c_str(), ends.length());
+	return c == 0;
+}
+
+bool IFString::startsWith(const IFString& starts) const
+{
+	if (length() < starts.length())
+		return false;
+	
+	return memcmp(c_str(), starts.c_str(), starts.length()) == 0;
+}
+
 IFString IFString::convertTo( ENCODING cd ) const
 {
+#ifdef IF_STRING_NO_ANSI
+	return *this;
+#else
 	if (cd == m_eEncoding)
 		return *this;
 	else if (cd == EC_UTF8)
@@ -725,6 +786,7 @@ IFString IFString::convertTo( ENCODING cd ) const
 	{
 		return IFStringW(*this).toANSIString();
 	}
+#endif
 }
 
 const char IFString::UTF8Flag[3]={(char)-17,(char)-69,(char)-65};
@@ -765,47 +827,48 @@ IFI64 IFString::toInt64( int nRadix /*= 10*/ ) const
 #endif
 }
 
-bool IFString::LoadInt(int n)
+IFString& IFString::loadInt(int n)
 {
 	char* end = IFNumParse::int32buf(n, m_SmallBuff);
 	*end = 0;
-	m_nSize = end - m_SmallBuff;
+	m_nSize = (int)(end - m_SmallBuff);
 	m_spBuffer = NULL;
-	return true;
+	return *this;
 
 }
-bool IFString::LoadInt64(IFI64 n)
+IFString& IFString::loadInt64(IFI64 n)
 {
 	char* end = IFNumParse::int64buf(n, m_SmallBuff);
 	*end = 0;
-	m_nSize = end - m_SmallBuff;
+	m_nSize = (int)(end - m_SmallBuff);
 	m_spBuffer = NULL;
-	return true;
+	return *this;
 
 }
-bool IFString::LoadFloat(float f)
+IFString& IFString::loadFloat(float f)
 {
 	char* end = IFNumParse::float2buf(f, m_SmallBuff);
 	*end = 0;
-	m_nSize = end - m_SmallBuff;
+	m_nSize = (int)(end - m_SmallBuff);
 	m_spBuffer = NULL;
-	return true;
+	return *this;
 
 }
-bool IFString::LoadDouble(double f)
+IFString& IFString::loadDouble(double f)
 {
 	char* end = IFNumParse::double2buf(f, m_SmallBuff);
 	*end = 0;
-	m_nSize = end - m_SmallBuff;
+	m_nSize = (int)(end - m_SmallBuff);
 	m_spBuffer = NULL;
-	return true;
+	return *this;
 }
 //IFUI32 IFString::toRSHash() const
 
-IFUI32 IFString::RSHash(const char* s, int nLen)
+IFUI32 IFString::RSHash(const char* s, int nLen) 
 {
-	IFUI32 nlen = 0;
-	return ::rshash(s, nlen);
+	//IFUI32 nlen = 0;
+	//return ::rshash(s, nlen);
+	return ::rshash2(s, nLen);
 }
 
 
@@ -923,14 +986,21 @@ void IFString::replace(const IFString& oldVal, const IFString& newVal, IFUI32 nB
 
 }
 
+IFString IFString::replace(char oldVal, char newVal, IFUI32 nBegin, IFUI32 nEnd) const
+{
+	IFString newS;
+	IFString_replace(newS, oldVal, newVal, nBegin, nEnd);
+	return newS;
+}
+
 IFString IFString::toURLString() const
 {
 	IFString curl;
 	for (const char* p = c_str(); *p; p++)
 	{
 		unsigned char c = *p;
-		if (c>='a'&& c<='z' || c>='A'&& c<='Z' ||
-			c>='0' && c<='9' ||
+		if ( (c>='a'&& c<='z') || (c>='A'&& c<='Z') ||
+			(c>='0' && c<='9') ||
 			//!#$&'()*+,/:;=?@-._~
 			c=='!' || c=='#' || c=='$' || c=='&' || c=='\'' || c=='(' || c==')' || c=='*'||c=='+'||c==','||c=='/'||c==':'||c==';'||c=='='||
 			c=='?'||c=='@'||c=='-'||c=='.'||c=='_'||c=='~')
@@ -949,15 +1019,17 @@ IFString IFString::toURLString() const
 IFString IFString::FromURLString(const IFString& s)
 {
 	IFString o(EC_UTF8);
-	for (int i = 0; i < s.size(); i++)
+	for (int i = 0; i < (int)s.size(); i++)
 	{
-		if (s[i] == '%' && i+2 < s.size())
+		if (s[i] == '%' && i + 2 < (int)s.size())
 		{
-			auto c= IFString(&s[i] + 1, &s[i] + 3).toInt32(16);
+			auto c = IFString(&s[i] + 1, &s[i] + 3).toInt32(16);
 			o.push_back(c);
 			i += 2;
 
 		}
+		else if (s[i] == '+')
+			o.push_back(' ');
 		else
 		{
 			o.push_back(s[i]);
@@ -1007,10 +1079,10 @@ IFString& IFString::encodeBase64(const char* pData, int nLen)
 	clear();
 	for (;n>2;n-=3)
 	{
-		char a = (p[0]&0xFC)>>2;
-		char b = (p[0]&0x3)<<4|((p[1]&0xf0)>>4);
-		char c = ((p[1]&0xf)<<2)|((p[2]&0xc0)>>6);
-		char d = p[2]&0x3f;
+		auto a = (IFUI8)(p[0]&0xFC)>>2;
+		auto b = (IFUI8)(p[0]&0x3)<<4|((p[1]&0xf0)>>4);
+		auto c = (IFUI8)((p[1]&0xf)<<2)|((p[2]&0xc0)>>6);
+		auto d = (IFUI8)p[2]&0x3f;
 		p+=3;
 		push_back(base64enctable[a]);
 		push_back(base64enctable[b]);
@@ -1025,9 +1097,9 @@ IFString& IFString::encodeBase64(const char* pData, int nLen)
 			buf[i]=*p;p++;
 		}
 		p=buf;
-		char a = (p[0]&0xFC)>>2;
-		char b = (p[0]&0x3)<<4|((p[1]&0xf0)>>4);
-		char c = ((p[1]&0xf)<<2)|((p[2]&0xc0)>>6);
+		auto a = (IFUI8)(p[0]&0xFC)>>2;
+		auto b = (IFUI8)(p[0]&0x3)<<4|((p[1]&0xf0)>>4);
+		auto c = (IFUI8)((p[1]&0xf)<<2)|((p[2]&0xc0)>>6);
 		push_back(base64enctable[a]);
 		push_back(base64enctable[b]);
 		if (n==2)
@@ -1053,6 +1125,17 @@ IFString IFString::encodeBase64() const
 	return s;
 }
 
+IFString IFString::encodeHEX(bool upper) const
+{
+	IFString r;
+	r.reserve(length() * 2);
+	for (int i = 0; i < (int)length(); i++)
+	{
+		r += IFString().format(upper ? "%02X":"%02x", (IFUI8)(*this)[i]);
+	}
+	return r;
+}
+
 IFString& IFString::encodeBase64(const IFString& s)
 {
 	return encodeBase64(s.c_str(), s.length());
@@ -1063,7 +1146,7 @@ bool IFString::decodeBase64(IFSimpleArray<char>& buf) const
 	int nLen = length();
 	if (nLen%4!=0 || nLen < 4)
 		return false;
-	const char* p = c_str();
+	auto p = (const IFUI8*)c_str();
 	int nOutLen = nLen/4*3;
 	if ((*this)[length()-1]=='=')
 		nOutLen--;
@@ -1110,10 +1193,24 @@ IFRefPtr<IFMemStream> IFString::decodeBase64() const
 	return spStream;
 }
 
+IFArray<IFString> IFString::split(const IFString& sep) const
+{
+	StringList sl;
+	USplitStrings(&sl, *this, sep.c_str());
+	return sl;
+}
+
 IFString IFString::toUpper() const
 {
 	IFString s = *this;
 	s.upper();
+	return s;
+}
+
+IFString IFString::toLower() const
+{
+	IFString s = *this;
+	s.lower();
 	return s;
 }
 
@@ -1124,13 +1221,13 @@ IFString IFString::toUpper() const
 //////////////////////////////////////////////////////////////////////////
 
 
-IFStringW::IFStringW() :m_nSize(0), m_nRSHash(0),m_nCap(0)
+IFStringW::IFStringW() :m_nSize(0),m_nCap(0), m_nRSHash(0)
 {
 	m_SmallBuff[0] = 0;
 	//makeSureSelfBuffer(8);
 	//m_spBuffer->m[0] = 0;
 }
-IFStringW::IFStringW(const WCHAR* sStr) : m_nSize(0), m_nRSHash(0), m_nCap(0)
+IFStringW::IFStringW(const IFWCHAR* sStr) : m_nSize(0), m_nCap(0), m_nRSHash(0)
 {
 	operator = (sStr);
 }
@@ -1141,19 +1238,19 @@ IFStringW::IFStringW(const IFStringW& o)
 	IFString_assign(*this, o);
 }
 
-IFStringW::IFStringW(const IFString& o) :m_nSize(0), m_nRSHash(0), m_nCap(0)
+IFStringW::IFStringW(const IFString& o) :m_nSize(0), m_nCap(0), m_nRSHash(0)
 {
 	operator=(o);
 }
 
 
 
-IFStringW::IFStringW(const WCHAR* sStr, int nLen) :m_nSize(0), m_nRSHash(0), m_nCap(0)
+IFStringW::IFStringW(const IFWCHAR* sStr, int nLen) :m_nSize(0), m_nCap(0), m_nRSHash(0)
 {
 	IFString_assign(*this, sStr, nLen);
 
 }
-IFStringW::IFStringW(const WCHAR* sStr, const WCHAR* sEnd) :m_nSize(0), m_nRSHash(0), m_nCap(0)
+IFStringW::IFStringW(const IFWCHAR* sStr, const IFWCHAR* sEnd) :m_nSize(0), m_nCap(0), m_nRSHash(0)
 {
 	IFString_assign(*this, sStr, int(sEnd - sStr));
 }
@@ -1172,64 +1269,19 @@ IFStringW& IFStringW::operator =(const IFStringW& o)
 IFStringW& IFStringW::operator =(const IFString& o)
 {
 	m_nRSHash = 0;
-#if defined(ANDROID) || defined(MAC) || defined(LINUX)
 	clear();
+#ifdef IF_STRING_NO_ANSI
+	utf8_wchar(o, *this);
+#else
     if (o.isUTF8Codeing())
         utf8_wchar(o,*this);
     else
         gbk_wchar(o, *this);
-    
-#else
-	WCHAR tempbuf[4 * 1024];
-	//if(o.length())
-	size_t nBuffSize = 0;
-	if(o.isUTF8Codeing())
-	{
-		nBuffSize = (o.length()+1)*sizeof(WCHAR);
-		
-		WCHAR* pBuffer = tempbuf;
-		if (nBuffSize>sizeof(tempbuf))
-			pBuffer = (WCHAR*)IFAlloc::Alloc((int)nBuffSize);
-#ifdef WIN32
-		int nLen = MultiByteToWideChar(CP_UTF8, 0, o.c_str(), o.length(), pBuffer, nBuffSize);
-#else
-
-		setlocale(LC_ALL,"zh_CN.utf8");
-		int nLen = mbstowcs(pBuffer, o.c_str(),nBuffSize );
-
-
-
-#endif
-		IFString_assign(*this, pBuffer, nLen);
-		//operator = (pBuffer);
-		//delete[] pBuffer;
-		if(pBuffer!=tempbuf)
-			IFAlloc::Dealloc(pBuffer);
-	}
-	else
-	{
-		nBuffSize = (o.length()+1)*sizeof(WCHAR);
-		WCHAR* pBuffer = tempbuf;
-		if (nBuffSize > sizeof(tempbuf))
-			pBuffer = (WCHAR*)IFAlloc::Alloc((int)nBuffSize);
-#ifdef WIN32
-		int nLen = MultiByteToWideChar(CP_ACP, 0, o.c_str(), o.length(), pBuffer, nBuffSize);
-#else
-		setlocale(LC_ALL,"zh_CN.gbk");
-		int nLen = mbstowcs(pBuffer, o.c_str(),nBuffSize );
-#endif
-		IFString_assign(*this, pBuffer, nLen);
-		//operator = (pBuffer);
-		//delete[] pBuffer;
-		if (pBuffer != tempbuf)
-			IFAlloc::Dealloc(pBuffer);
-
-	}
 #endif
 	return *this;
 }
 
-IFStringW& IFStringW::operator =(const WCHAR* sStr)
+IFStringW& IFStringW::operator =(const IFWCHAR* sStr)
 {
 	IFString_assign(*this, sStr,-1);
 	return *this;
@@ -1244,8 +1296,8 @@ bool IFStringW::operator ==(const IFStringW& o) const
 	if(o.length() == length())
 	{
 
-		const WCHAR* pMe = c_str();
-		const WCHAR* pOt = o.c_str();
+		const IFWCHAR* pMe = c_str();
+		const IFWCHAR* pOt = o.c_str();
 
 		while ((*pMe && *pOt) && (*pMe == *pOt))
 		{
@@ -1266,10 +1318,10 @@ bool IFStringW::operator ==(const IFStringW& o) const
 #endif
 }
 
-bool IFStringW::operator ==(const WCHAR* o) const
+bool IFStringW::operator ==(const IFWCHAR* o) const
 {
 #ifdef ANDROID
-	const WCHAR* pMe = c_str();
+	const IFWCHAR* pMe = c_str();
 	while ((*pMe && *o) && (*pMe == *o))
 	{
 		pMe++,o++;
@@ -1285,8 +1337,8 @@ bool IFStringW::operator ==(const WCHAR* o) const
 }
 bool IFStringW::operator <(const IFStringW& o) const
 {
-	const WCHAR* pMe = c_str();
-	const WCHAR* pOther = o.c_str();
+	const IFWCHAR* pMe = c_str();
+	const IFWCHAR* pOther = o.c_str();
 	while( *pMe && *pOther )
 	{
 		if( *pMe > *pOther )
@@ -1308,10 +1360,10 @@ IFStringW IFStringW::operator +(const IFStringW& o)const
 	str += o;
 	return str;
 	
-	//return operator +((const WCHAR*)o.m_MemStr.getBuffer());
+	//return operator +((const IFWCHAR*)o.m_MemStr.getBuffer());
 }
 
-IFStringW IFStringW::operator +(const WCHAR* sStr)const
+IFStringW IFStringW::operator +(const IFWCHAR* sStr)const
 {
 	IFStringW str(*this);
 	str += sStr;
@@ -1325,7 +1377,7 @@ IFStringW& IFStringW::operator +=(const IFStringW& o)
 	return *this;
 }
 
-IFStringW& IFStringW::operator +=(WCHAR c)
+IFStringW& IFStringW::operator +=(IFWCHAR c)
 {
 
 	push_back(c);
@@ -1334,20 +1386,20 @@ IFStringW& IFStringW::operator +=(WCHAR c)
 }
 
 
-IFStringW& IFStringW::operator +=(const  WCHAR* sStr)
+IFStringW& IFStringW::operator +=(const  IFWCHAR* sStr)
 {
 	IFString_append(*this, sStr, -1);
 	return *this;
 }
 
-//WCHAR& IFStringW::operator [](int nIndex)
+//IFWCHAR& IFStringW::operator [](int nIndex)
 //{
-//	return  ((WCHAR*)m_MemStr.getBuffer())[nIndex];
+//	return  ((IFWCHAR*)m_MemStr.getBuffer())[nIndex];
 //}
 //
-//const WCHAR& IFStringW::operator [](int nIndex) const
+//const IFWCHAR& IFStringW::operator [](int nIndex) const
 //{
-//	return  ((const WCHAR*)m_MemStr.getBuffer())[nIndex];
+//	return  ((const IFWCHAR*)m_MemStr.getBuffer())[nIndex];
 //}
 
 void IFStringW::reserve(int nSize)
@@ -1361,7 +1413,7 @@ void IFStringW::clear()
 	IFString_clear(*this);
 }
 
-void IFStringW::push_back(WCHAR c)
+void IFStringW::push_back(IFWCHAR c)
 {
 
 	IFString_push_back(*this, c);
@@ -1376,7 +1428,7 @@ void IFStringW::erase(int nPos,int nSize)
 
 IFStringW& IFStringW::insert(int nPos, const IFStringW& s)
 {
-	return IFString_insert<WCHAR>(*this, nPos, s);
+	return IFString_insert<IFWCHAR>(*this, nPos, s);
 	//if (!s.size())
 	//	return;
 	//int nNewSize = m_nSize + s.size();
@@ -1397,13 +1449,13 @@ int IFStringW::find(const IFStringW& other, int nOffset, bool nocase) const
 
 }
 
-int IFStringW::find_first_of( WCHAR c, int noffset) const
+int IFStringW::find_first_of( IFWCHAR c, int noffset) const
 {
 	return IFString_find_first_of(*this, c, noffset);
 }
 
 
-int IFStringW::find_last_of( WCHAR c,int noffset ) const
+int IFStringW::find_last_of( IFWCHAR c,int noffset ) const
 {
 	return IFString_find_last_of(*this, c, noffset);
 }
@@ -1413,58 +1465,25 @@ int IFStringW::find_last_of( WCHAR c,int noffset ) const
 
 IFString IFStringW::toUTF8String() const
 {
-#if defined(ANDROID) || defined(MAC) || defined(LINUX)
 	IFString sutf8;
+	sutf8.setUTF8Codeing(true);
 	wchar_utf8(*this, sutf8);
 	return sutf8;
-#else
-	IFSimpleArray<char> buf;
-	buf.resize(length()*4+4);
-#ifdef WIN32
-	int nL = WideCharToMultiByte(CP_UTF8, 0, c_str(), length(), &buf[0], buf.size(), NULL, NULL );
-	buf[nL] = 0;
-
-#else
-	setlocale(LC_ALL,"zh_CN.utf8");
-	wcstombs(&buf[0], c_str(),buf.size() );
-#endif
-	IFString s(&buf[0]);
-	s.setUTF8Codeing(true);
-	return s;
-
-#endif
-
 
 }
 
+#ifndef IF_STRING_NO_ANSI
 IFString IFStringW::toANSIString() const
 {
 
-#ifdef WIN32
-    IFSimpleArray<char> buf;
-	buf.resize(length()*2+2);
-	int nL = WideCharToMultiByte(CP_ACP, 0, c_str(), length(), &buf[0], buf.size(), NULL, NULL );
-	buf[nL] = 0;
-    IFString s(&buf[0]);
-	return s;
-#else
-
-#if defined(MAC) || defined(ANDROID) || defined(LINUX)
     IFString ansi;
 	ansi.reserve(size() * 2 + 2);
+	ansi.setUTF8Codeing(false);
     wchar_gbk(*this, ansi);
     return ansi;
-#else
-    IFSimpleArray<char> buf;
-	buf.resize(length()*2+2);
-	setlocale(LC_ALL,"zh_CN.gbk");
-	wcstombs(&buf[0], c_str(),buf.size() );
-    IFString s(&buf[0]);
-	return s;
-#endif
-#endif
 
 }
+#endif
 
 void IFStringW::resize( int nSize )
 {
@@ -1480,9 +1499,13 @@ void IFStringW::upper()
 }
 
 
-IFStringW& IFStringW::format( const WCHAR* sFormat, ... )
+IFStringW& IFStringW::format( const IFWCHAR* sFormat, ... )
 {
-	WCHAR buf[32*1024];
+#ifdef IFPLATFORM_FREE_RTOS
+	IFWCHAR buf[512];
+#else
+	IFWCHAR buf[32*1024];
+#endif
 	va_list vlist;
 	va_start(vlist, sFormat );
 	//vswprintf(buf,32*1024, sFormat, vlist  );
@@ -1492,7 +1515,7 @@ IFStringW& IFStringW::format( const WCHAR* sFormat, ... )
 	//*this= buf;
 	/*
 #ifdef WIN32
-	WCHAR buf[32*1024];
+	IFWCHAR buf[32*1024];
 	va_list vlist;
 	va_start(vlist, sFormat );
 	_vsnwprintf_s(buf, _TRUNCATE, sFormat,  vlist );
@@ -1501,7 +1524,7 @@ IFStringW& IFStringW::format( const WCHAR* sFormat, ... )
 
 #else
 #ifdef ANDROID
-	WCHAR buf[32*1024];
+	IFWCHAR buf[32*1024];
 	__va_list vlist;
 	va_start(vlist, sFormat );
 	//vswprintf(buf,32*1024, sFormat, vlist  );
@@ -1509,8 +1532,8 @@ IFStringW& IFStringW::format( const WCHAR* sFormat, ... )
 	va_end(vlist);
 	*this= buf;
 #else
-    WCHAR buf[32*1024];
-    WCHAR convbuf[32*1024];
+    IFWCHAR buf[32*1024];
+    IFWCHAR convbuf[32*1024];
     va_list vlist;
 	va_start(vlist, sFormat );
     int n = 0;
@@ -1612,18 +1635,18 @@ IFStringW IFStringW::toUpper() const
 
 
 
-IFUI32 IFStringW::RSHash(const WCHAR	* s, int nLen /*= -1*/)
+IFUI32 IFStringW::RSHash(const IFWCHAR	* s, int nLen /*= -1*/)
 {
 	IFUI32 nlen = 0;
 	return ::rshash(s, nlen);
 }
 
-WCHAR* IFStringW::makeSureSelfBuffer(int nBufInitialSize)
+IFWCHAR* IFStringW::makeSureSelfBuffer(int nBufInitialSize)
 {
-	return IFString_makeSureSelfBuffer<WCHAR>(*this, nBufInitialSize);
+	return IFString_makeSureSelfBuffer<IFWCHAR>(*this, nBufInitialSize);
 }
 
-void IFStringW::replace(WCHAR oldVal, WCHAR newVal, IFUI32 nBegin /*= 0*/, IFUI32 nEnd/*=-1*/)
+void IFStringW::replace(IFWCHAR oldVal, IFWCHAR newVal, IFUI32 nBegin /*= 0*/, IFUI32 nEnd/*=-1*/)
 {
 	IFString_replace(*this, oldVal, newVal, nBegin, nEnd);
 }
@@ -1634,5 +1657,3 @@ void IFStringW::replace(const IFStringW& oldVal, const IFStringW& newVal, IFUI32
 
 }
 
-IF_DEFINERTTI(IFString, IFObj);
-IF_DEFINERTTI(IFStringW, IFObj);

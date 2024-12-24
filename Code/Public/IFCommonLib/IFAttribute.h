@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "IFArray.h"
 #include "IFFixNumber.h"//#include "IFUITypes.h"
 #include "IFHashMap.h"
+
 class IFAttributeSet;
 
 #define STRTRUEFALSE(v) (v)?"TRUE":"FALSE"
@@ -38,9 +39,10 @@ class IFAttributeSet;
 
 
 #define IF_REGISTER_ATTRIBTE(attname) \
-	IFObjectFactory::getSingleton().registerObject(#attname, &attname::CreateObjStatic); \
-	IFAttributeMgr::getSingleton().registerAttribute(makeIFFunctor((IFAttribute*(*)())attname::CreateObjStatic), #attname );\
+	IFObjectFactory::getSingleton().registerObject<attname>(); \
+	IFAttributeMgr::getSingleton().registerAttribute(&attname::m_Type );\
 
+typedef IFHashSet<IFString> IFAttributeNameList;
 
 
 
@@ -49,13 +51,24 @@ class IFAttribute;
 class IFJSONNode;
 
 typedef IFRefPtr<IFAttribute> IFAttributePtr;
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
+#define IF_ATTRIBUTE_SET_HELP_STRING(pAttr, str) pAttr->setHelpString(str)
+#define IF_ATTRIBUTE_SET_ALIAS_NAME(pAttr, str) pAttr->setAliasName(str)
+#define IF_ATTRIBUTE_SET_READ_ONLY(pAttr, b) pAttr->setReadOnly(b)
+#else
+#define IF_ATTRIBUTE_SET_HELP_STRING(pAttr, str)
+#define IF_ATTRIBUTE_SET_ALIAS_NAME(pAttr, str)
+#define IF_ATTRIBUTE_SET_READ_ONLY(pAttr, str)
+#endif
 
 class IFCOMMON_API IFAttribute : public IFRefObj
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 public:
-	IFAttribute():m_bReadOnly(false)
+	IFAttribute()
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
+	:m_bReadOnly(false)
+#endif
 	{
 
 	}
@@ -67,10 +80,11 @@ public:
 	virtual bool loadFromJSON(IFJSONNode* pNode) = 0;
 	virtual bool saveToJSON(IFJSONNode* pNode) = 0;
 
-	virtual IFStringW getDisplayString() = 0;
+	virtual IFString getDisplayString() = 0;
 
-	void setGroup(const IFStringW& sGroupName);
-	const IFStringW& getGroup();
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
+	void setGroup(const IFString& sGroupName);
+	const IFString& getGroup();
 
 	int getIndex()
 	{
@@ -91,27 +105,32 @@ public:
 		return m_bReadOnly;
 	}
 
-	void setHelpString(const IFStringW& s)
+	void setHelpString(const IFString& s)
 	{
 		m_sHelpString = s;
 	}
 	
-	void setAliasName(const IFStringW& s)
+	void setAliasName(const IFString& s)
 	{
 		m_sAliasName = s;
 	}
 
-	const IFStringW& getAliasName()
+	const IFString& getAliasName()
 	{
 		return m_sAliasName;
 	}
 
-	const IFStringW& getHelpString()
+	const IFString& getHelpString()
 	{
 		return m_sHelpString;
 	}
+#else
+
+#endif
 
 	virtual bool isEqual(IFAttribute* pOther) = 0;
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) = 0;
 
 	IFAttributePtr clone();
 
@@ -120,17 +139,62 @@ public:
 protected:
 
 	virtual void assignTo(IFAttribute* pAttribute);
+#ifndef IF_ATTRIBUTE_NO_EDITOR_SUPPORT
 
 	int m_nIndex;
 
-	IFStringW m_sHelpString;
-	IFStringW m_sAliasName;
+	IFString m_sHelpString;
+	IFString m_sAliasName;
 
 	bool m_bReadOnly;
+#endif
 	
 };
 
+template<typename FT, typename VT>
+inline VT IFAttributeGenericLerp(const VT& fromV, const VT& toV, FT f)
+{
+	return fromV + (VT)((toV - fromV) * f);
+}
 
+
+
+template<>
+inline RECT IFAttributeGenericLerp(const RECT& fromV, const RECT& toV, float f)
+{
+
+	RECT rc = {
+		IFAttributeGenericLerp(fromV.left, toV.left, f),
+		IFAttributeGenericLerp(fromV.top, toV.top, f),
+		IFAttributeGenericLerp(fromV.right, toV.right, f),
+		IFAttributeGenericLerp(fromV.bottom, toV.bottom, f),
+	};
+	return rc;
+}
+
+template<typename FT = float, typename AttrT>
+inline void IFAttributeLerp(AttrT* pFrom, IFAttribute* pTo, IFAttribute* pOut, FT f)
+{
+	auto pTTo = IFDynamicCast<AttrT>(pFrom);
+	auto pTOut = IFDynamicCast< AttrT>(pTo);
+	if (!pTTo || !pTOut)
+		return;
+	
+	pTOut->set(IFAttributeGenericLerp(pFrom->get(), pTTo->get(), f));
+}
+
+template<typename FT = float, typename AttrT>
+inline void IFAttributeCantLerp(AttrT* pFrom, IFAttribute* pTo, IFAttribute* pOut, FT f)
+{
+	auto pTTo = IFDynamicCast<AttrT>(pFrom);
+	auto pTOut = IFDynamicCast< AttrT>(pTo);
+	if (!pTTo || !pTOut)
+		return;
+	if (f == 1)
+		pTOut->set(pTTo->get());
+	else
+		pTOut->set(pFrom->get());
+}
 
 
 class IFCOMMON_API IFAttributeList : public IFObj
@@ -146,7 +210,7 @@ public:
 
 	IFAttributeList& operator = (const IFAttributeList& ot);
 
-	IFAttributePtr getAttribute(const IFString& attrName);
+	IFAttributePtr getAttribute(const IFString& attrName) const;
 	void setAttribute(const IFString& attrName,IFAttributePtr pAttribute );
 
 	void removeAttribute(const IFString& attrName );
@@ -164,14 +228,17 @@ public:
 	IFI32 saveToBinary(char* pBuf, IFI32 nSize ) const;
 
 
-	const AttributeList& getAttrList() const;
+	const AttributeList& getAttrList() const
+	{
+		return m_AttrList;
+	}
 
-	void queryAttsByThisNameList(IFAttributeSet* pAttSet, IFAttributeList& attlist);
+	void queryAttsByThisNameList(IFAttributeSet* pAttSet, IFAttributeList& attlist) const;
 
-	IFAttributeList* getSuperAttrList();
+	IFAttributeList* getSuperAttrList() const;
 
-	bool setSuperAttrList(const IFStringW& sSuperAttrName);
-	const IFStringW& getSuperAttrListName()
+	bool setSuperAttrList(const IFString& sSuperAttrName);
+	const IFString& getSuperAttrListName()
 	{
 		return m_sSuperAttrName;
 	}
@@ -186,13 +253,20 @@ public:
 
 
 
+
+
+	void queryAttributeFromObject(const IFRTTI* pType, IFObj* pObj, const IFAttributeNameList* pNameList);
+	void setAttributeToObject(const IFRTTI* pType, IFObj* pObj);
+
+	void lerp(const IFAttributeList& dest, IFAttributeList& out, float f) const;
+
 protected:
 
 
 
 	AttributeList m_AttrList;
 	int m_nCurIndex;
-	IFStringW m_sSuperAttrName;
+	IFString m_sSuperAttrName;
 
 
 };
@@ -201,20 +275,59 @@ class IFCOMMON_API IFAttrSubAttr : public IFAttribute
 {
 public:
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 
 	IFAttrSubAttr(){};
 	IFAttrSubAttr(IFAttributeList& attrList);
-	virtual ~IFAttrSubAttr();
+	
 
+	virtual bool isWhole() { return false; }
 
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 	virtual bool isEqual(IFAttribute* pOther);
 	IFAttributeList m_AttList;
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
+
+protected:
+	virtual ~IFAttrSubAttr();
+	virtual void assignTo(IFAttribute* pAttribute);
+
+};
+
+class IFCOMMON_API IFAttrArrayAttr : public IFAttribute
+{
+public:
+	IF_DECLARERTTI;
+
+
+	IFAttrArrayAttr() {};
+	IFAttrArrayAttr(const IFArray<IFAttributePtr>& attrList);
+	virtual ~IFAttrArrayAttr();
+
+	
+	bool loadFromJSON(IFJSONNode* pNode);
+	bool saveToJSON(IFJSONNode* pNode);
+
+	virtual IFString getDisplayString();
+	virtual bool isEqual(IFAttribute* pOther);
+
+	IFAttributePtr m_spElementTemplate;
+	IFArray<IFAttributePtr> m_AttributeArray;
+
+	void set(const IFArray<IFAttributePtr>& o)
+	{
+		m_AttributeArray = o;
+	}
+
+	const IFArray<IFAttributePtr>& get()
+	{
+		return m_AttributeArray;
+	}
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
 
 protected:
 	virtual void assignTo(IFAttribute* pAttribute);
@@ -224,7 +337,6 @@ protected:
 class IFCOMMON_API IFAttrINT : public IFAttribute
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrINT():m_nN(0){};
@@ -240,7 +352,7 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 	virtual void set( const int& n);
 
 	virtual const int& get();
@@ -248,6 +360,7 @@ public:
 
 	virtual bool isEqual(IFAttribute* pOther);
 
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
 protected:
 	virtual void assignTo(IFAttribute* pAttribute);
 
@@ -257,7 +370,6 @@ protected:
 class IFCOMMON_API IFAttrFixNumber : public IFAttribute
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrFixNumber():m_nN(0){};
@@ -273,13 +385,15 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 	virtual void set( const IFFixNumber& n);
 
 	virtual const IFFixNumber& get();
 
 
 	virtual bool isEqual(IFAttribute* pOther);
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
 
 protected:
 	virtual void assignTo(IFAttribute* pAttribute);
@@ -290,7 +404,6 @@ protected:
 class IFCOMMON_API IFAttrFLOAT : public IFAttribute
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrFLOAT(){};
@@ -307,7 +420,7 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 
 	virtual void set( const float f)
 	{
@@ -320,6 +433,8 @@ public:
 
 
 	virtual bool isEqual(IFAttribute* pOther);
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
 protected:
 	virtual void assignTo(IFAttribute* pAttribute);
 
@@ -329,11 +444,10 @@ protected:
 class IFCOMMON_API IFAttrSTR : public IFAttribute
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrSTR(){}
-	IFAttrSTR( const IFStringW& s):m_sS(s)
+	IFAttrSTR( const IFString& s):m_sS(s)
 	{
 
 	}
@@ -345,34 +459,35 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 
-	virtual void set( const IFStringW& s)
+	virtual void set( const IFString& s)
 	{		
 		m_sS = s;
 	}
-	virtual const IFStringW& get( )
+	virtual const IFString& get( )
 	{	
 		return m_sS;
 	}
 
 	virtual bool isEqual(IFAttribute* pOther);
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override;
 protected:
 
 	virtual void assignTo(IFAttribute* pAttribute);
 
-	IFStringW m_sS;
+	IFString m_sS;
 };
 
 class IFCOMMON_API IFAttrLongStr : public IFAttrSTR
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
-	virtual IFStringW getDisplayString()
+	virtual IFString getDisplayString()
 	{
-		return L"[RAWDATA]";
+		return "[RAWDATA]";
 	}
 
 	virtual bool isEqual(IFAttribute* pOther);
@@ -382,7 +497,6 @@ public:
 class IFCOMMON_API IFAttrSTRRefObj : public IFAttrSTR
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 
@@ -391,11 +505,10 @@ public:
 class IFCOMMON_API IFAttrSTRFileName : public IFAttrSTR
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrSTRFileName():m_bIsDirectory(false){}
-	IFAttrSTRFileName( const IFStringW& s):IFAttrSTR(s)
+	IFAttrSTRFileName( const IFString& s):IFAttrSTR(s), m_bIsDirectory(false)
 	{
 
 	}
@@ -411,7 +524,6 @@ public:
 class IFCOMMON_API IFAttrCOLOR : public IFAttrSubAttr
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrCOLOR(){}
@@ -424,7 +536,7 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 	virtual void set( const IFUI32& color);
 	virtual IFUI32 get();
 	void toSubAttList();
@@ -441,7 +553,6 @@ protected:
 class IFCOMMON_API IFAttrRECT:public IFAttrSubAttr
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrRECT();
@@ -451,12 +562,17 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString();
+	virtual IFString getDisplayString();
 	virtual void set(const RECT&  rect);
 	virtual const RECT& get();
 	void toSubAttList();
 	void fromSubAttList();
 	virtual bool isEqual(IFAttribute* pOther);
+
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override
+	{
+		IFAttributeLerp(this, pDest, pOut, f);
+	}
 
 protected:
 	virtual void assignTo(IFAttribute* pAttribute);
@@ -469,16 +585,15 @@ protected:
 class IFCOMMON_API IFAttrENUM : public IFAttribute
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 	struct IFCOMMON_API IFENUM
 	{
 	public:
-		IFENUM(const IFStringW& s, int nV):sName(s),nValue(nV)
+		IFENUM(const IFString& s, int nV):sName(s),nValue(nV)
 		{
 
 		}
-		IFStringW sName;
+		IFString sName;
 		int nValue;
 	};
 	typedef IFArray<IFENUM> IFENUMLIST;
@@ -498,9 +613,9 @@ public:
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	virtual IFStringW getDisplayString()
+	virtual IFString getDisplayString()
 	{
-		IFStringW str;
+		IFString str;
 		for( int i = 0; i < (int)m_EnumList.size(); i ++ )
 		{
 			if(m_EnumList[i].nValue == m_nValue )
@@ -524,6 +639,11 @@ public:
 	virtual bool isEqual(IFAttribute* pOther);
 	IFENUMLIST m_EnumList;
 
+	virtual void lerp(IFAttribute* pDest, IFAttribute* pOut, float f) override
+	{
+		IFAttributeLerp(this, pDest, pOut, f);
+	}
+
 protected:
 
 	virtual void assignTo(IFAttribute* pAttribute);
@@ -533,18 +653,17 @@ protected:
 class IFCOMMON_API IFAttrBOOL : public IFAttrENUM
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 public:
 	IFAttrBOOL()
 	{
-		m_EnumList.push_back( IFENUM(L"FALSE",0) );
-		m_EnumList.push_back( IFENUM(L"TRUE",1) );
+		m_EnumList.push_back( IFENUM("FALSE",0) );
+		m_EnumList.push_back( IFENUM("TRUE",1) );
 	}
 	IFAttrBOOL( bool b)
 	{
-		m_EnumList.push_back( IFENUM(L"FALSE",0) );
-		m_EnumList.push_back( IFENUM(L"TRUE",1) );
+		m_EnumList.push_back( IFENUM("FALSE",0) );
+		m_EnumList.push_back( IFENUM("TRUE",1) );
 		m_nValue = b?1:0;
 
 	}
@@ -565,19 +684,20 @@ public:
 		return m_nValue?true:false;
 	}
 	virtual bool isEqual(IFAttribute* pOther);
+
+
 	//BOOL m_bB;
 };
 
 class IFCOMMON_API IFAttrENUMSTR: public IFAttrENUM
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 public:
 
 	bool loadFromJSON(IFJSONNode* pNode);
 	bool saveToJSON(IFJSONNode* pNode);
 
-	IFStringW get();
+	IFString get();
 	virtual bool isEqual(IFAttribute* pOther);
 
 };
@@ -585,7 +705,6 @@ public:
 class IFCOMMON_API IFAttrCombine: public IFAttrENUM
 {
 	IF_DECLARERTTI;
-	IF_DECLARECREATEABLE;
 
 	
 public:
@@ -599,9 +718,9 @@ public:
 
 	}
 
-	virtual IFStringW getDisplayString()
+	virtual IFString getDisplayString()
 	{
-		IFStringW str;
+		IFString str;
 		bool bFirst = true;
 		for( int i = 0; i < (int)m_EnumList.size(); i ++ )
 		{
@@ -609,7 +728,7 @@ public:
 			{
 				if( !bFirst )
 				{
-					str += L"|";
+					str += "|";
 				}
 				str += m_EnumList[i].sName;
 
@@ -624,3 +743,33 @@ public:
 
 };
 
+//template<>
+//inline void IFAttributeList::bindAttributeChange(const IFString& name, IFString& attr)
+//{
+//	auto p = IFDynamicCast<IFAttrSTR>(getAttribute(name));
+//	if (p)
+//		attr = p->get();
+//}
+//
+//template<typename T>
+//inline void IFAttributeList::bindAttributeChange(const IFString& name, IFArray<T>& attr)
+//{
+//	IFAttribute* pAttr = getAttribute(name);
+//	if (IFAttrSubAttr* pSubAttr = IFDynamicCast<IFAttrSubAttr>(pAttr))
+//	{
+//		int ncount = IFDynamicCast<IFAttrINT>(pSubAttr->m_AttList.getAttribute("Count"))->get();
+//		if (ncount < 0)
+//			ncount = 0;
+//
+//		attr.resize(ncount);
+//		for (int i = 0; i < ncount; i++)
+//		{
+//			pSubAttr->m_AttList.bindAttributeChange(IFString().format("ITEM%03d", i), attr[i]);
+//			//auto p = IFDynamicCast<IFAttrSTR>(pSubAttr->m_AttList.getAttribute(IFString().format("ITEM%03d", i)));
+//			//if (p)
+//			//	m_ResourceDir[i] = p->get();
+//		}
+//		//setName(pSTR->get());
+//	}
+//}
+//

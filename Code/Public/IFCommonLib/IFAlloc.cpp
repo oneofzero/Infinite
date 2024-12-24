@@ -22,11 +22,14 @@ THE SOFTWARE.
 */
 #include "stdafx.h"
 #include "IFAlloc.h"
-#include "IFMemPool.h"
+#include "IFCSLockHelper.h"
+//#include "IFMemPool.h"
 #include <assert.h>
 #include <vector>
+
 #include "IFPlatformDefine.h"
-#if _DEBUG
+#include "IFAtomicOperation.h"
+#if defined(DEBUG) || defined(_DEBUG)
 #include "IFStackDumper.h"
 #include "IFHashMap.h"
 #include "IFStream.h"
@@ -38,7 +41,11 @@ THE SOFTWARE.
 #pragma init_seg(lib)
 #endif
 
-
+#ifdef IFPLATFORM_EMBED_NOSYS
+#include "IFEmbedMemory.h"
+#define malloc IFEmbedAlloc
+#define free IFEmbedFree
+#endif
 
 //#define USEIFMEMPOOLALLOC
 //#ifdef USEIFMEMPOOLALLOC
@@ -48,28 +55,155 @@ THE SOFTWARE.
 //#ifndef IFPLATFORM_IOS
 //#define SUPPORT_TLS 1
 //#endif
+//#if defined(IFPLATFORM_WINDOWS)
+//#define SUPPORT_TLS 1
+//#endif
 
+
+static IFExternalAlloc* s_pExternalAlloc = NULL;
 
 #ifdef SUPPORT_TLS
 thread_local static IFMemPool* g_pool = NULL;
 IFSystemAllocSA<IFMemPool*>* g_mempools = NULL;
 static IFCSLock* g_mempool_lock = NULL;
-thread_local static bool g_isInAllocDebug = false;
+
 static char lockbuf[sizeof(IFCSLock)];
 
 #else
-IFSystemAllocSA<IFMemPool*>* g_mempools = NULL;
+//IFSystemAllocSA<IFMemPool*>* g_mempools = NULL;
 #endif
 
-#if _DEBUG
-IFHashMap<IFStackDumper, int> g_AllocCountInfo;
-IFHashMap<void*, IFHashMap<IFStackDumper, int>::iterator> g_AllocStackInfo;
+#if defined(DEBUG) || defined(_DEBUG)
+struct AllocInfoCounter
+{
+
+	AllocInfoCounter(int t = 0, int a = 0, int ts=0) :total(t), add(a), totalSize(ts)
+	{
+	}
+	int total;
+	int add;
+	IFUI64 totalSize;
+};
+#ifdef MEM_ALLOC_TRACE
+typedef IFHashMap<IFStackDumper, AllocInfoCounter> AllocInfoMap;
+
+AllocInfoMap g_AllocCountInfo;
+IFHashMap<void*, AllocInfoMap::iterator> g_AllocStackInfo;
 IFCSLock g_AllocStackInfoLock;
 bool g_NoStackInfo = false;
+bool g_isInAllocDebug = false;
 #endif
+#endif
+
+
+
+#if defined(DEBUG) || defined(_DEBUG)
+#define MEM_DEBUG_OVER_TEST_FRONT 32
+#define MEM_DEBUG_OVER_TEST_BACK 32
+#define MEM_DEBUG_OVER_TOTAL (MEM_DEBUG_OVER_TEST_FRONT+MEM_DEBUG_OVER_TEST_BACK)
+#define MEM_DEBUG 1
+#else
+#define MEM_DEBUG_OVER_TEST_FRONT 0
+#define MEM_DEBUG_OVER_TEST_BACK 0
+#define MEM_DEBUG_OVER_TOTAL 0
+#endif
+
+#ifdef IFPLATFORM_FREE_RTOS
+#define MEM_HEADER_SIZE 4
+#else
+#	ifdef MEM_DEBUG
+#		define MEM_HEADER_SIZE 16		
+#	else
+#		define MEM_HEADER_SIZE 16
+#	endif
+#endif
+
+IFSmallBuffAlloc::IFSmallBuffAlloc(int buffSize, int blockCount,
+	void* (*pSystemAlloc)(int, void* ud), void* ud)
+	:BUFF_SIZE(buffSize)
+	, BLOCK_COUNT(blockCount)
+	, m_pFirstFreed(NULL)
+	,m_pSystemAlloc(pSystemAlloc),
+	m_SystemAllocUserData(ud)
+{
+}
+
+IFSmallBuffAlloc::~IFSmallBuffAlloc()
+{
+
+}
+
+void* IFSmallBuffAlloc::Alloc()
+{
+	if (!m_pFirstFreed)
+	{
+		int allocNum = BLOCK_COUNT;
+
+		m_pFirstFreed = (SmallBuff*)(*m_pSystemAlloc)((sizeof(SmallBuff) + BUFF_SIZE) * BLOCK_COUNT, m_SystemAllocUserData);
+
+		auto pBuf = m_pFirstFreed;
+		for (int i = 0; i < BLOCK_COUNT - 1; i++)
+		{
+			//auto pBuf = (SmallBuff*)p;
+			pBuf->pNext = (SmallBuff*)(pBuf->buff + BUFF_SIZE);
+			pBuf = pBuf->pNext;
+			//m_pFirstFreed[i].pNext = m_pFirstFreed + i + 1;
+		}
+		pBuf->pNext = NULL;
+		//m_pFirstFreed[BLOCK_COUNT - 1].pNext = NULL;
+
+	}
+	auto pAlloced = m_pFirstFreed;
+	m_pFirstFreed = m_pFirstFreed->pNext;
+	pAlloced->pNext = NULL;
+	return pAlloced->buff;
+}
+
+void IFSmallBuffAlloc::Free(void* p)
+{
+
+	auto pFree = (SmallBuff*)(((char*)p) - sizeof(SmallBuff*));
+	pFree->pNext = m_pFirstFreed;
+	m_pFirstFreed = pFree;
+}
+//template<int BuffSize, int BLOCK_COUNT>
+class IFSmallBuffAllocThreadSafe : public IFSmallBuffAlloc
+{
+public:
+	IFSmallBuffAllocThreadSafe(int buffSize, int blockCount, void* (*pSystemAlloc)(int, void* ud), void* ud)
+		:IFSmallBuffAlloc(buffSize, blockCount, pSystemAlloc, ud)
+	{
+	}
+
+	void* Alloc()
+	{
+		IFCSLockHelper lh(m_lock);
+		return IFSmallBuffAlloc::Alloc();
+	}
+
+	void Free(void* p)
+	{
+		IFCSLockHelper lh(m_lock);
+		return IFSmallBuffAlloc::Free(p);
+	}
+
+	IFCSLock m_lock;
+
+};
+
+static void* SmallAllocFun(int size, void* ud)
+{
+	if(s_pExternalAlloc)
+		return s_pExternalAlloc->alloc(size);
+	else
+		return malloc(size);
+}
+
+static IFSmallBuffAllocThreadSafe s_SmallAlloc(64, 512, SmallAllocFun, NULL);
 
 void* IFAlloc::Alloc(int nAllocSize)
 {
+
 	
 #ifdef SUPPORT_TLS
 
@@ -103,10 +237,22 @@ void* IFAlloc::Alloc(int nAllocSize)
 
 	
 #else
-    void* p = malloc(nAllocSize);
+	char* p;
+ 	if (nAllocSize + MEM_HEADER_SIZE + MEM_DEBUG_OVER_TOTAL <= s_SmallAlloc.BUFF_SIZE)
+	{
+		p = (char*)s_SmallAlloc.Alloc();
+	}
+	else
+	{
+		if (s_pExternalAlloc)
+			p = (char*)s_pExternalAlloc->alloc(nAllocSize + MEM_HEADER_SIZE + MEM_DEBUG_OVER_TOTAL);
+		else
+			p = (char*)malloc(nAllocSize + MEM_HEADER_SIZE + MEM_DEBUG_OVER_TOTAL);
+	}
 #endif
 
-#if _DEBUG
+#ifdef MEM_DEBUG
+#ifdef MEM_ALLOC_TRACE
 	IFCSLockHelper lh(g_AllocStackInfoLock);
 
 	if (!g_NoStackInfo)
@@ -120,14 +266,15 @@ void* IFAlloc::Alloc(int nAllocSize)
 				auto it = g_AllocCountInfo.find(dmp);
 				if (it != g_AllocCountInfo.end())
 				{
-					it->second++;
+					it->second.total++;
+					it->second.totalSize += nAllocSize;
 				}
 				else
 				{
-					it = g_AllocCountInfo.insert(makeIFPair(dmp, 1));
+					it = g_AllocCountInfo.insert(makeIFPair(dmp, AllocInfoCounter(1,0, nAllocSize)));
 				}
 
-				g_AllocStackInfo.insert(makeIFPair(p, it));
+				g_AllocStackInfo.insert(makeIFPair((void*)p, it));
 			}
 			
 
@@ -136,7 +283,33 @@ void* IFAlloc::Alloc(int nAllocSize)
 		}
 	}
 #endif
-	return p;
+#endif
+	auto pRt = ((char*)p) + MEM_HEADER_SIZE + MEM_DEBUG_OVER_TEST_FRONT;
+#ifdef MEM_DEBUG
+	memset(pRt, 0xdbdbdbdb, nAllocSize);
+	for (int i = 0; i < MEM_DEBUG_OVER_TEST_FRONT; i++)
+	{
+		(p + MEM_HEADER_SIZE)[i] = 0xFD;
+	}
+	for (int i = 0; i < MEM_DEBUG_OVER_TEST_BACK; i++)
+	{
+		(p + MEM_HEADER_SIZE+ MEM_DEBUG_OVER_TEST_FRONT +nAllocSize)[i] = 0xBB;
+	}
+#endif
+	ATOMIC_INC_INT64(&m_StaInfo.nAllocNum);
+	ATOMIC_ADD_INT64(&m_StaInfo.nAllocSize, nAllocSize);
+	*(int*)p = nAllocSize;
+#ifdef MEM_DEBUG
+	((int*)p)[1] = (int)m_StaInfo.nAllocNum;
+#endif
+#ifdef IFMEMORY_WARNING_SIZE
+	
+	if (m_StaInfo.nAllocSize >= IFMEMORY_WARNING_SIZE)
+	{
+		printf("WARNING!used memory size is:%lld\n", m_StaInfo.nAllocSize);
+	}
+#endif
+	return pRt;
 }
 
 void* IFAlloc::AlignAlloc(int nSize)
@@ -146,20 +319,31 @@ void* IFAlloc::AlignAlloc(int nSize)
 
 void IFAlloc::Dealloc(void* pData)
 {
-#if _DEBUG
+	if (pData == NULL)
+		return;
+	char* pOri = ((char*)pData) - MEM_HEADER_SIZE - MEM_DEBUG_OVER_TEST_FRONT;
+	int nAllocSize = ((int*)pOri)[0];
+#ifdef MEM_DEBUG
+	int nAllocNum = ((int*)pOri)[1];
+#ifdef MEM_ALLOC_TRACE
 	if (!g_NoStackInfo)
 	{
 		if (pData == NULL)
 			return;
+		if (g_AllocStackInfoLock.m_deleted)
+			return;
+			
+		IFCSLockHelper lh(g_AllocStackInfoLock);
+
 		if (!g_isInAllocDebug)
 		{
-			IFCSLockHelper lh(g_AllocStackInfoLock);
 
 			g_isInAllocDebug = true;
-			auto it = g_AllocStackInfo.find(pData);
+			auto it = g_AllocStackInfo.find(pOri);
 			assert(it != g_AllocStackInfo.end());
-			it->second->second--;
-			if(it->second->second==0)
+			it->second->second.total--;
+			it->second->second.totalSize -= nAllocSize;
+			if(it->second->second.total==0)
 				g_AllocCountInfo.erase(it->second);
 			g_AllocStackInfo.erase(it);
 
@@ -168,10 +352,10 @@ void IFAlloc::Dealloc(void* pData)
 		}
 	}
 #endif
+#endif
 
 #ifdef SUPPORT_TLS
-	if (pData == NULL)
-		return;
+
 	if(g_pool)
 		g_pool->Free(pData);
 	else
@@ -179,14 +363,42 @@ void IFAlloc::Dealloc(void* pData)
 		IFMemPool::UnkownFree(pData);
 	}
 #else
-    ::free(pData);
+
+#ifdef MEM_DEBUG
+	for (int i = 0; i < MEM_DEBUG_OVER_TEST_FRONT; i++)
+	{
+		assert((((char*)pOri) + MEM_HEADER_SIZE)[i] == (char)0xFD);
+	}
+	for (int i = 0; i < MEM_DEBUG_OVER_TEST_BACK; i++)
+	{
+		assert((((char*)pOri) + MEM_HEADER_SIZE + MEM_DEBUG_OVER_TEST_FRONT + nAllocSize)[i] == (char)0xBB);
+	}
+#endif
+	 
+	if (nAllocSize+ MEM_HEADER_SIZE + MEM_DEBUG_OVER_TOTAL <= s_SmallAlloc.BUFF_SIZE)
+	{
+		s_SmallAlloc.Free(pOri);
+	}
+	else
+	{
+		if (s_pExternalAlloc)
+			s_pExternalAlloc->dealloc(pOri);
+		else
+			::free(pOri);
+	}
+
+    
+
+	ATOMIC_DEC_INT64(&m_StaInfo.nAllocNum);
+	ATOMIC_ADD_INT64(&m_StaInfo.nAllocSize, -nAllocSize);
+
 #endif
 }
 
-void IFAlloc::SetExternalAlloc(IFAlloc* pAlloc)
+void IFAlloc::SetExternalAlloc(IFExternalAlloc* pAlloc)
 {
-	assert(m_pExternalAlloc==NULL&&"IFAlloc only can set once!");
-	m_pExternalAlloc = pAlloc;
+	assert(s_pExternalAlloc ==NULL&&"IFAlloc only can set once!");
+	s_pExternalAlloc = pAlloc;
 }
 
 IFI64 IFAlloc::GetCurrentMemorySize()
@@ -206,7 +418,7 @@ IFI64 IFAlloc::GetCurrentMemorySize()
 
 	return nSize;
 #else
-    return 0;
+    return m_StaInfo.nAllocSize;
 #endif
 	//IFMemPool** pools = malloc
 	//return s_nMemoryAllocSize;
@@ -215,7 +427,7 @@ IFI64 IFAlloc::GetCurrentMemorySize()
 void IFAlloc::ResetStatistics()
 {
 	m_StaInfo.nAllocNum = 0;
-	m_StaInfo.nFreeNum = 0;
+	m_StaInfo.nAllocSize = 0;
 }
 
 IFAllocStatisticsInfo* IFAlloc::GetStatisticsInfo()
@@ -237,12 +449,13 @@ void IFAlloc::FreePool()
 
 void* IFAlloc::GetAllocInfo()
 {
-#ifdef _DEBUG
+#if defined(MEM_DEBUG) && defined(MEM_ALLOC_TRACE)
+
 	IFCSLockHelper lh(g_AllocStackInfoLock);
 	g_NoStackInfo = true;
-	IFHashMap<IFStackDumper, int>* p = new IFHashMap<IFStackDumper, int>(g_AllocCountInfo.size());
+	AllocInfoMap* p = new AllocInfoMap(g_AllocCountInfo.size());
 
-	IFHashMap<IFStackDumper, int>& info = *p;
+	AllocInfoMap& info = *p;
 
 	info = g_AllocCountInfo;
 	g_NoStackInfo = false;
@@ -255,11 +468,11 @@ void* IFAlloc::GetAllocInfo()
 
 void IFAlloc::FreeAllocInfo(void* p)
 {
-#ifdef _DEBUG
+#if defined(MEM_DEBUG) && defined(MEM_ALLOC_TRACE)
 	IFCSLockHelper lh(g_AllocStackInfoLock);
 	g_NoStackInfo = true;
 
-	IFHashMap<IFStackDumper, int>* pAllocInfo = (IFHashMap<IFStackDumper, int>*)p;
+	AllocInfoMap* pAllocInfo = (AllocInfoMap*)p;
 	delete pAllocInfo;
 	g_NoStackInfo = false;
 #endif
@@ -267,29 +480,29 @@ void IFAlloc::FreeAllocInfo(void* p)
 
 void* IFAlloc::DiffAllocInfo(void* a, void* b)
 {
-#ifdef _DEBUG
+#if defined(MEM_DEBUG) && defined(MEM_ALLOC_TRACE)
 	IFCSLockHelper lh(g_AllocStackInfoLock);
 	g_NoStackInfo = true;
-	IFHashMap<IFStackDumper, int>* p;
+	AllocInfoMap* p;
 	{
-		IFHashMap<IFStackDumper, int>& allocA = *(IFHashMap<IFStackDumper, int>*)a;
+		auto& allocA = *(AllocInfoMap*)a;
 
-		IFHashMap<IFStackDumper, int>& allocB = *(IFHashMap<IFStackDumper, int>*)b;
+		auto& allocB = *(AllocInfoMap*)b;
 
-		p = new IFHashMap<IFStackDumper, int>(g_AllocCountInfo.size());
+		p = new AllocInfoMap(g_AllocCountInfo.size());
 
-		IFHashMap<IFStackDumper, int>& info = *p;
+		auto& info = *p;
 
 		for (auto it = allocB.begin(); it != allocB.end(); ++it)
 		{
 			auto itA = allocA.find(it->first);
 			if (itA != allocA.end())
 			{
-				int add = it->second - itA->second;
+				auto add = it->second.totalSize - itA->second.totalSize;
 				if (add > 0)
-					info.insert(makeIFPair(it->first, it->second - itA->second));
+					info.insert(makeIFPair(it->first, AllocInfoCounter(it->second.total, it->second.total - itA->second.total, it->second.totalSize)));
 			}
-			else if(it->second>0)
+			else if(it->second.total>0)
 			{
 				info.insert(makeIFPair(it->first, it->second));
 			}
@@ -305,22 +518,29 @@ void* IFAlloc::DiffAllocInfo(void* a, void* b)
 
 void IFAlloc::DumpAllocInfo(void* p, IFStream* pOut)
 {
-#ifdef _DEBUG
+#if defined(MEM_DEBUG) && defined(MEM_ALLOC_TRACE)
 
 	IFCSLockHelper lh(g_AllocStackInfoLock);
 	g_NoStackInfo = true;
 	{
-		IFHashMap<IFStackDumper, int>& allocinfo = *(IFHashMap<IFStackDumper, int>*)p;
+		auto& allocinfo = *(AllocInfoMap*)p;
 
 		IFString s;
+		IFUI64 nTotalSize = 0;
 		for (auto it = allocinfo.begin(); it != allocinfo.end(); ++it)
 		{
 
-			s.format("count:%d\n", it->second);
+			s.format("add:%d total_alloc_num:%d total_alloc_bytes:%llu\n", it->second.add, it->second.total, it->second.totalSize);
+			nTotalSize += it->second.totalSize;
 			pOut->write(s.c_str(), s.length());
 			s = it->first.toString();
 			pOut->write(s.c_str(), s.length());
+			pOut->write("\r\n", 2);
 		}
+
+		s.format("all:%llu bytes\r\n", nTotalSize);
+		pOut->write(s.c_str(), s.length());
+
 	}
 	
 	g_NoStackInfo = false;
@@ -328,6 +548,4 @@ void IFAlloc::DumpAllocInfo(void* p, IFStream* pOut)
 
 }
 
-IFAlloc* IFAlloc::m_pExternalAlloc = NULL;
-
-IFAllocStatisticsInfo IFAlloc::m_StaInfo = {0,0,0,0};
+IFAllocStatisticsInfo IFAlloc::m_StaInfo = {0,0};

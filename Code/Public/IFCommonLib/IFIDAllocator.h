@@ -21,9 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_ID_ALLOCATOR_H__
+#define __IF_ID_ALLOCATOR_H__
 #include "IFCommonLib_API.h"
 #include "IFTypes.h"
 #include "IFObj.h"
+#include "IFException.h"
 
 class IFCOMMON_API IFIDAllocator : public IFRefObj
 {
@@ -51,7 +54,8 @@ public:
 		{
 			if (m_nCurMaxID > m_nMaxID)
 			{
-				throw IFIDAllocatorMaxIDException();
+				IF_THROW(-1, "IFIDAllocatorMaxIDException");
+				//throw IFIDAllocatorMaxIDException();
 			}
 
 			int nID = m_nCurMaxID;
@@ -73,3 +77,4 @@ private:
 
 };
 
+#endif //__IF_ID_ALLOCATOR_H__

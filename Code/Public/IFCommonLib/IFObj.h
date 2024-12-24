@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_OBJ_H__
+#define __IF_OBJ_H__
 //#include "IFObjectFactory.h"
 #include "IFRTTI.h"
 #include <new>
@@ -88,10 +90,6 @@ public:
 #define IFNew new
 #endif
 
-#define IF_DECLARECREATEABLE \
-	public:\
-	static IFObj* CreateObjStatic(); \
-	virtual IFObj* CreateObj(){return CreateObjStatic();}\
 
 
 //template<class T>
@@ -129,3 +127,5 @@ public:
 //	struct   rebind   {   typedef   IFSTLAllocator<U>   other;   };    
 //	
 //};
+
+#endif //__IF_OBJ_H__

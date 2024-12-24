@@ -25,6 +25,10 @@ THE SOFTWARE.
 #include "IFUtility.h"
 #include "IFPlatformDefine.h"
 #include "IFMemStream.h"
+#ifndef IFPLATFORM_EMBED_NOSYS
+#include <sys/stat.h>
+#endif
+
 #ifdef WIN32
 
 #ifdef IFPLATFORM_WINDOWS
@@ -245,77 +249,58 @@ void SaveIcon(HICON hIconToSave, IFStream* pFile)
 }
 #endif
 
-IFWin32FileInfo::IFWin32FileInfo()
-{
-
-}
-
-void IFWin32FileInfo::setWin32Data( const WIN32_FIND_DATA& info, const IFStringW& parentPath )
-{
-	m_sFileName = info.cFileName;
-	m_sFilePath = UCombinePathW(parentPath, m_sFileName);
-	m_nSize = (IFUI64(info.nFileSizeHigh)<<32) + info.nFileSizeLow;
-	m_eType = (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)?FT_DIR:FT_FILE;
-	m_ModifyTime = info.ftLastWriteTime;
-	m_CreateTime = info.ftCreationTime;
 
 
-}
+//void IFWin32FileInfo::setWin32Data( const WIN32_FIND_DATA& info, const IFString& parentPath )
+//{
+//	m_sFileName = IFStringW(info.cFileName);
+//	m_sFilePath = UCombinePath(parentPath, m_sFileName);
+//	m_nSize = (IFUI64(info.nFileSizeHigh)<<32) + info.nFileSizeLow;
+//	m_eType = (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)?FT_DIR:FT_FILE;
+//	m_ModifyTime = info.ftLastWriteTime;
+//	m_CreateTime = info.ftCreationTime;
+//
+//
+//}
 
-const IFStringW& IFWin32FileInfo::getIconLocation()
-{
-	if (m_sIconLocation.size() == 0)
-	{
-#ifdef IFPLATORM_WINDOWS
-		DWORD dwFileAttr=0;
 
-		SHFILEINFO fileInfo;
-		ZeroMemory(&fileInfo,sizeof(fileInfo));
-		SHGetFileInfo(m_sFilePath.c_str(),dwFileAttr, &fileInfo,sizeof(fileInfo),SHGFI_ICON|SHGFI_ICONLOCATION|SHGFI_TYPENAME);
-		WCHAR iconName[MAX_PATH];
-		_snwprintf_s(iconName,MAX_PATH, _TRUNCATE, L"%s%d", fileInfo.szDisplayName,fileInfo.iIcon);
-		DestroyIcon(fileInfo.hIcon);
-		m_sIconLocation = iconName;
 #endif
-	}
 
-
-	return m_sIconLocation;
-}
-
-IFRefPtr<IFStream> IFWin32FileInfo::loadIcon()
-{
 #ifdef IFPLATFORM_WINDOWS
-	DWORD dwFileAttr=0;
-	SHFILEINFO fileInfo;
-	ZeroMemory(&fileInfo,sizeof(fileInfo));
-	SHGetFileInfo(m_sFilePath.c_str(),dwFileAttr, &fileInfo,sizeof(fileInfo),SHGFI_ICON|SHGFI_ICONLOCATION|SHGFI_TYPENAME);
-	//m_sTypeName = fileInfo.szTypeName;
-	//CUIImage* pImage = NULL;
-
-
-	if( fileInfo.hIcon )
-	{
-		IFRefPtr<IFMemStream> memFile = IFNew IFMemStream;
-		SaveIcon(fileInfo.hIcon,memFile, 32);
-		memFile->seek(0,SEEK_SET);
-		DestroyIcon(fileInfo.hIcon);
-
-		return memFile;
-	}
-
+#define stat64 _stat64
+#elif defined(IFPLATFORM_FREE_RTOS)
+#define stat64 stat
 #endif
-	return NULL;
+
+
+IFFileInfo::IFFileInfo()
+	:m_eType(FT_INVALID)
+{
 }
 
+IFFileInfo::IFFileInfo(const IFString& path)
+	:m_eType(FT_INVALID)
+{
+#ifndef IFPLATFORM_EMBED_NOSYS
+	struct stat64 st;
+	auto err = stat64(path.c_str(), &st);
+	if (err != 0)
+		return;
+	m_sFileName = UGetFileName(path);
+	m_sFilePath = path;
+	m_nSize = st.st_size;
+	m_eType = (S_IFDIR & st.st_mode)? FT_DIR:FT_FILE;
+	m_ModifyTime = IFDateTime( (IFUI64)st.st_mtime* 1000000);
+	m_CreateTime = IFDateTime((IFUI64)st.st_mtime* 1000000);
 #endif
+}
 
-const IFStringW& IFFileInfo::getFileName()
+const IFString& IFFileInfo::getFileName()
 {
 	return m_sFileName;
 }
 
-const IFStringW& IFFileInfo::getPath()
+const IFString& IFFileInfo::getPath()
 {
 	return m_sFilePath;
 }
@@ -329,32 +314,95 @@ IFFileInfo::FileType IFFileInfo::getType()
 {
 	return m_eType;
 }
+#ifdef IFPLATFORM_WINDOWS
+static IFCSLock s_Lock;
+#endif
 
-const IFStringW& IFFileInfo::getIconLocation()
+const IFString& IFFileInfo::getIconLocation()
 {
-	return IFStringW::Empty;
+	if (m_sIconLocation.size() == 0)
+	{
+#ifdef IFPLATFORM_WINDOWS
+		
+		DWORD dwFileAttr = 0;
+
+		SHFILEINFO fileInfo;
+		ZeroMemory(&fileInfo, sizeof(fileInfo));
+		IFStringW sFilePath = UStandardWindowsPath(m_sFilePath);
+		{
+			IFCSLockHelper lh(s_Lock);
+			SHGetFileInfo(sFilePath.c_str(), dwFileAttr, &fileInfo, sizeof(fileInfo), SHGFI_ICONLOCATION);
+		}
+		
+		//IFWCHAR iconName[MAX_PATH];
+		//_snwprintf_s(iconName,MAX_PATH, _TRUNCATE, L"%s%d", fileInfo.szDisplayName,fileInfo.iIcon);
+		//DestroyIcon(fileInfo.hIcon);
+		m_sIconLocation.format("%s%d", IFStringW(fileInfo.szDisplayName).toLocalString().c_str(), fileInfo.iIcon);
+#endif
+	}
+
+
+	return m_sIconLocation;
 }
 
 IFRefPtr<IFStream> IFFileInfo::loadIcon()
 {
-	return 0;
+#ifdef IFPLATFORM_WINDOWS
+	DWORD dwFileAttr = 0;
+	SHFILEINFO fileInfo;
+	ZeroMemory(&fileInfo, sizeof(fileInfo));
+	IFStringW sFilePath = UStandardWindowsPath(m_sFilePath);
+
+	IFCSLockHelper lh(s_Lock);
+	{
+		SHGetFileInfo(sFilePath.c_str(), dwFileAttr, &fileInfo, sizeof(fileInfo), SHGFI_ICON | SHGFI_ICONLOCATION | SHGFI_TYPENAME);
+	}
+	
+	//m_sTypeName = fileInfo.szTypeName;
+	//CUIImage* pImage = NULL;
+
+
+	if (fileInfo.hIcon)
+	{
+		IFRefPtr<IFMemStream> memFile = IFNew IFMemStream;
+		SaveIcon(fileInfo.hIcon, memFile, 32);
+		memFile->seek(0, SEEK_SET);
+		DestroyIcon(fileInfo.hIcon);
+
+		return memFile;
+	}
+
+#endif
+	return NULL;
 
 }
 
-const IFTime& IFFileInfo::getLastModifyTime()
+const IFDateTime& IFFileInfo::getLastModifyTime()
 {
 	return m_ModifyTime;
 
 }
 
-const IFTime& IFFileInfo::getCreateTime()
+const IFDateTime& IFFileInfo::getCreateTime()
 {
 	return m_CreateTime;
 }
 
-const IFStringW& IFFileInfo::getFileTypeName()
+IFString IFFileInfo::getFileTypeName()
 {
-	return IFStringW::Empty;
+#ifdef IFPLATFORM_WINDOWS
+	DWORD dwFileAttr = 0;
+
+	SHFILEINFO fileInfo;
+	ZeroMemory(&fileInfo, sizeof(fileInfo));
+	IFStringW sFilePath = UStandardWindowsPath(m_sFilePath);
+
+	SHGetFileInfo(sFilePath.c_str(), dwFileAttr, &fileInfo, sizeof(fileInfo), SHGFI_TYPENAME);
+	return IFStringW(fileInfo.szTypeName).toLocalString();
+#else
+	return IFString::Empty;
+#endif
+	
 }
 
 IF_DEFINERTTI(IFFileInfo, IFRefObj);

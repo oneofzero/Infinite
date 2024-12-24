@@ -21,12 +21,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_RANDOM_H__
+#define __IF_RANDOM_H__
 #include "IFObj.h"
 #include "IFCommonLib_API.h"
 #include "IFTypes.h"
 
 class IFCOMMON_API IFRandom : public IFMemObj
 {
+	IF_DECLARERTTI;
 public:
 	IFRandom(IFUI32 nSeed = 0);
 	~IFRandom(void);
@@ -43,3 +46,4 @@ private:
 	int m_nIndex;
 };
 
+#endif //__IF_RANDOM_H__

@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_NUM_ARRAY_H__
+#define __IF_NUM_ARRAY_H__
 #include "IFObj.h"
 #include "IFArray.h"
 #include "IFString.h"
@@ -105,3 +107,5 @@ public:
 	//IFArray<NumType>& m_data;
 	IFRefPtr<IFRefContainer<IFArray<NumType>>> m_spData;
 };
+
+#endif //__IF_NUM_ARRAY_H__

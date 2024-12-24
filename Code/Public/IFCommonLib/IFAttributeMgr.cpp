@@ -24,6 +24,8 @@ THE SOFTWARE.
 #include "IFAttributeMgr.h"
 #include "IFJSON.h"
 #include "IFAttributeSet.h"
+#include "IFLogSystem.h"
+#include "IFAttribute.h"
 
 IF_DEFINESINGLETON(IFAttributeMgr);
 
@@ -36,31 +38,65 @@ const IFString IFAttributeMgr::xml_superattname = "sa";
 
 IFAttributeMgr::IFAttributeMgr():m_nAttrCount(0)
 {
+	IF_REGISTER_ATTRIBTE(IFAttrSubAttr);
+	IF_REGISTER_ATTRIBTE(IFAttrArrayAttr);
+	IF_REGISTER_ATTRIBTE(IFAttrINT);
+	IF_REGISTER_ATTRIBTE(IFAttrFixNumber);
+	IF_REGISTER_ATTRIBTE(IFAttrFLOAT);
+	IF_REGISTER_ATTRIBTE(IFAttrSTR);
+	IF_REGISTER_ATTRIBTE(IFAttrLongStr);
+	IF_REGISTER_ATTRIBTE(IFAttrSTRFileName);
+	IF_REGISTER_ATTRIBTE(IFAttrCOLOR);
+	IF_REGISTER_ATTRIBTE(IFAttrRECT);
+	IF_REGISTER_ATTRIBTE(IFAttrArrayAttr);
+	IF_REGISTER_ATTRIBTE(IFAttrENUM);
+	IF_REGISTER_ATTRIBTE(IFAttrBOOL);
+	IF_REGISTER_ATTRIBTE(IFAttrENUMSTR);
+	IF_REGISTER_ATTRIBTE(IFAttrCombine);
+	IF_REGISTER_ATTRIBTE(IFAttrENUMSTR);
+
+
 
 }
 
-void IFAttributeMgr::registerAttribute( AttributeCreateFunPtr pCreateFun, const char* sAttributeName )
+bool IFAttributeMgr::registerAttribute(const IFRTTI* pAttrRTTI)
 {
+	if (!pAttrRTTI->IsKindOf(&IFAttribute::m_Type))
+	{
+		IFLogError("IFAttributeMgr::registerAttribute error!%s is not kind of IFAttribute\r\n", pAttrRTTI->GetTypeName());
+		return false;
+	}
 
-	AttriRegisterList::iterator it = m_RegisterList.find(sAttributeName);
-	if(it!=m_RegisterList.end())
-		return;
+	
+	AttriRegisterList::iterator it = m_RegisterList.find(pAttrRTTI->GetTypeName());
+	if (it != m_RegisterList.end())
+	{
+		IFLogError("IFAttributeMgr::registerAttribute error!%s is registerd\r\n", pAttrRTTI->GetTypeName());
 
-	m_RegisterList[sAttributeName] = m_nAttrCount;
-	m_AttrCreateInfo.push_back(AtrrCreateInfo(sAttributeName,pCreateFun));
+		return false;
+	}
+
+	m_RegisterList[pAttrRTTI->GetTypeName()] = m_nAttrCount;
+	m_AttrCreateInfo.push_back(pAttrRTTI);
+	//m_AttrCreateInfo.push_back(AtrrCreateInfo(sAttributeName,pCreateFun));
 	//	m_AttrIndexRemap[m_nAttrCount] = m_nAttrCount;
 	m_nAttrCount ++;
+
+	return true;
 }
 
-IFAttribute* IFAttributeMgr::createAttributeByIndex( int nIndex )
+IFAttributePtr IFAttributeMgr::createAttributeByIndex( int nIndex )
 {
 	if(m_spRemap)
 	{
 		nIndex = m_spRemap->getIndex(nIndex);
 	}
 	
-	if(nIndex>-1&&nIndex<m_nAttrCount)
-		return (*m_AttrCreateInfo[nIndex].pCreateFun)();
+	if (nIndex > -1 && nIndex < m_nAttrCount)
+	{
+		return IFObjectFactory::getSingleton().createIFRefObj<IFAttribute>(m_AttrCreateInfo[nIndex].pRTTI);
+		//return (*m_AttrCreateInfo[nIndex].pCreateFun)();
+	}
 	return NULL;
 }
 

@@ -20,6 +20,8 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN 
 THE SOFTWARE.
 */
+#ifndef __IF_ARRAY_H__
+#define __IF_ARRAY_H__
 #pragma once
 #include <stdio.h>
 #include <string.h>
@@ -133,6 +135,12 @@ public:
 		erase(m_nSize-1,1);
 	}
 
+	void swap_erase(int idx)
+	{
+		(*this)[idx] = back();
+		pop_back();
+	}
+
 	//inline T& operator[](int index)
 	//{
 	//	assert( index < m_nSize && "index error");
@@ -140,13 +148,18 @@ public:
 	//	return m_pElements[index];
 	//}
 
-	inline T& operator[](int index) const
+	inline T& operator[](int index)
 	{
-		assert( index < m_nSize && "index error");
+		assert(index >=0 && index < m_nSize && "index error");
 
 		return m_pElements[index];
 	}
+	inline const T& operator[](int index) const
+	{
+		assert(index >= 0 && index < m_nSize && "index error");
 
+		return m_pElements[index];
+	}
 	inline void clear()
 	{
 		for( int i = 0 ; i < m_nSize; i ++ )
@@ -177,6 +190,16 @@ public:
 	inline void reserve(int nCount)
 	{
 		surespace(nCount);
+	}
+
+	T* buffer()
+	{
+		return m_pElements;
+	}
+
+	const T* buffer() const
+	{
+		return m_pElements;
 	}
 
 	void growspace(int nCount)
@@ -243,11 +266,17 @@ public:
 		{
 
 		}
+		inline iterator(const iterator& it)
+			: nIndex(it.nIndex), pArray(it.pArray)
+		{
+
+		}
+
 		inline iterator():nIndex(-1)
 		{
 
 		}
-		inline iterator(int n,const IFArray<T>* pArr):nIndex(n),pArray(pArr)
+		inline iterator(int n,IFArray<T>* pArr):nIndex(n),pArray(pArr)
 		{
 
 		}
@@ -322,21 +351,112 @@ public:
 		}
 
 		int nIndex;
+		IFArray<T>* pArray;
+	};
+
+	class const_iterator
+	{
+	public:
+
+		inline const_iterator(const const_iterator& it)
+			:nIndex(it.nIndex), pArray(it.pArray)
+		{
+
+		}
+
+		inline const_iterator(const iterator& it)
+			: nIndex(it.nIndex), pArray(it.pArray)
+		{
+
+		}
+		inline const_iterator() : nIndex(-1)
+		{
+
+		}
+		inline const_iterator(int n, const IFArray<T>* pArr) : nIndex(n), pArray(pArr)
+		{
+
+		}
+
+		inline ~const_iterator()
+		{
+
+		}
+
+		inline const_iterator& operator ++()
+		{
+
+			if (nIndex < pArray->size())
+			{
+				nIndex++;
+			}
+
+			return *this;
+		}
+
+		inline const_iterator& operator --()
+		{
+			nIndex--;
+			if (nIndex < 0)
+			{
+				nIndex = pArray->size();
+			}
+			return *this;
+		}
+
+		inline const_iterator operator + (int c) const
+		{
+			return const_iterator(nIndex + c, pArray);
+		}
+
+		inline const_iterator operator -(int c) const
+		{
+			return const_iterator(nIndex - c, pArray);
+		}
+
+		inline int operator - (const const_iterator& c) const
+		{
+			return nIndex - c.nIndex;
+		}
+
+		inline const T& operator *() const
+		{
+			return (*pArray)[nIndex];
+		}
+
+		inline const T* operator->() const
+		{ 
+			return &(*pArray)[nIndex];
+		}
+		inline bool operator ==(const const_iterator& o) const
+		{
+			return nIndex == o.nIndex && pArray == o.pArray;
+
+		}
+
+		inline bool operator !=(const const_iterator& o) const
+		{
+			return nIndex != o.nIndex || pArray != o.pArray;
+
+		}
+
+
+		int nIndex;
 		const IFArray<T>* pArray;
 	};
 
 	class reverse_iterator
 	{
 	public:
-		inline reverse_iterator(const iterator& it) :nIndex(it.nIndex)
+		inline reverse_iterator( iterator& it) :nIndex(it.nIndex), pArray(it.pArray)
 		{
 
 		}
-		inline reverse_iterator() :nIndex(-1)
+		inline reverse_iterator() :nIndex(-1), pArray(NULL)
 		{
 
 		}
-		inline reverse_iterator(int n, const IFArray<T>* pArr) : nIndex(n), pArray(pArr)
+		inline reverse_iterator(int n, IFArray<T>* pArr) : nIndex(n), pArray(pArr)
 		{
 
 		}
@@ -398,33 +518,54 @@ public:
 		}
 
 		int nIndex;
-		const IFArray<T>* pArray;
+		IFArray<T>* pArray;
 	};
 
 	
 
-	inline T& back() const
+	inline T& back()
 	{
 		return (*this)[size()-1];
 	}
-	
+	inline T& back(int offset)
+	{
+		return (*this)[size() - 1 - offset];
+	}
+	inline const T& back() const
+	{
+		return (*this)[size() - 1];
+	}
+	inline const T& back(int offset) const
+	{
+		return (*this)[size() - 1 - offset];
+	}
 
-	inline iterator begin() const
+	inline iterator begin() 
 	{
 		return iterator(0,this);
 	}
 
-	inline iterator end() const
+	inline iterator end() 
 	{
 		return iterator(size(),this);
 	}
 
-	inline reverse_iterator rbegin() const
+	inline const_iterator begin() const
+	{
+		return const_iterator(0, this);
+	}
+
+	inline const_iterator end() const
+	{
+		return const_iterator(size(), this);
+	}
+
+	inline reverse_iterator rbegin()
 	{
 		return reverse_iterator(size()-1, this);
 	}
 
-	inline reverse_iterator rend() const
+	inline reverse_iterator rend() 
 	{
 		return reverse_iterator(-1, this);
 	}
@@ -438,6 +579,7 @@ public:
 	//{
 	//	return const_iterator(size(),this);
 	//}
+
 
 	inline int erase(int nIndex, int nCount)
 	{
@@ -472,7 +614,8 @@ public:
 
 	inline int insert(int nIndex, const T& o)
 	{
-
+		if (nIndex > m_nSize)
+			nIndex = m_nSize;
 		surespace(m_nSize+1);
 		for(int i = m_nSize ; i > nIndex; i -- )
 		{
@@ -489,10 +632,10 @@ public:
 		return iterator(insert(it.nIndex, o),this);
 	}
 
-	inline iterator insert( iterator it, const iterator& b, const iterator& e)
+	inline iterator insert( iterator it, const const_iterator& b, const const_iterator& e)
 	{
 		//int nIndex = it.nIndex;
-		for( iterator i = b; i != e; ++ i )
+		for( auto i = b; i != e; ++ i )
 		{
 			insert(it, *i);
 			++it  ;
@@ -503,17 +646,28 @@ public:
 
 
 	template<class COMP>
-	inline iterator find_by_cmp(const COMP& cmp) const
+	inline const_iterator find_by_cmp(const COMP& cmp) const
 	{
 		for( int i = 0; i < m_nSize; i ++ )
 		{
 			if( cmp((*this)[i]) )
-				return iterator(i,this);
+				return const_iterator(i,this);
 		}
-		return iterator(m_nSize,this);
+		return const_iterator(m_nSize,this);
 	}
 
-	inline iterator find(const T& o) const
+	template<class COMP>
+	inline iterator find_by_cmp(const COMP& cmp)
+	{
+		for (int i = 0; i < m_nSize; i++)
+		{
+			if (cmp((*this)[i]))
+				return iterator(i, this);
+		}
+		return iterator(m_nSize, this);
+	}
+
+	inline iterator find(const T& o)
 	{
 		for( int i = 0; i < m_nSize; i ++ )
 		{
@@ -522,7 +676,15 @@ public:
 		}
 		return iterator(m_nSize,this);
 	}
-
+	inline const_iterator find(const T& o) const
+	{
+		for (int i = 0; i < m_nSize; i++)
+		{
+			if ((*this)[i] == o)
+				return const_iterator(i, this);
+		}
+		return const_iterator(m_nSize, this);
+	}
 
 	template<class COMP>
 	iterator binary_find(const COMP& cmp)
@@ -532,33 +694,60 @@ public:
 			
 		return iterator(size(),this);
 	}
+	template<class COMP>
+	const_iterator binary_find(const COMP& cmp) const
+	{
+		if (T* p = IFBinSearch(m_pElements, m_nSize, cmp))
+			return const_iterator(p - m_pElements, this);
 
+		return const_iterator(size(), this);
+	}
 	//template<>
 	iterator binary_find(const T& o)
+	{
+		return iterator(binary_find_index(o));
+	}
+
+	const_iterator binary_find(const T& o) const
+	{
+		return const_iterator(binary_find_index(o));
+	}
+
+	int binary_find_index(const T& o) const
 	{
 		int nStartIndex = 0;
 		int nEndIndex = size() - 1;
 		int nCurIndex = 0;
-		while(  nEndIndex -nStartIndex >= 0 )
+		while (nEndIndex - nStartIndex >= 0)
 		{
 			nCurIndex = (nEndIndex - nStartIndex + 1) / 2 + nStartIndex;
-			if( o < (*this)[nCurIndex] )
+			if (o < (*this)[nCurIndex])
 			{
 				nEndIndex = nCurIndex;
 			}
-			else if( (*this)[nCurIndex] < o)
+			else if ((*this)[nCurIndex] < o)
 			{
 				nStartIndex = nCurIndex;
 			}
 			else
-				return iterator(nCurIndex,this);
+				return nCurIndex;
 		}
 
-		return iterator(size(),this);
+		return size();
+	}
+	template<typename COMP>
+	iterator binary_find_nearestsmaller(const COMP& cmp)
+	{
+		return iterator(binary_find_nearestsmaller_index(cmp), this);
+	}
+	template<typename COMP>
+	const_iterator binary_find_nearestsmaller(const COMP& cmp) const
+	{
+		return const_iterator(binary_find_nearestsmaller_index(cmp), this);
 	}
 
 	template<typename COMP>
-	iterator binary_find_nearestsmaller(const COMP& cmp)
+	int binary_find_nearestsmaller_index(const COMP& cmp) const
 	{
 		int nNearestSmallerIndex = 0;
 		int nStartIndex = 0;
@@ -578,36 +767,39 @@ public:
 				nNearestSmallerIndex = nStartIndex;
 			}
 			else
-				return iterator(nCurIndex,this);
+				return nCurIndex;
 		}
 
-		return iterator(nNearestSmallerIndex,this);
+		return nNearestSmallerIndex;
 	}
 
 	iterator binary_find_nearestsmaller(const T& o)
 	{
-		int nNearestSmallerIndex = 0;
-		int nStartIndex = 0;
-		int nEndIndex = size();
-		int nCurIndex = 0;
-		while(  nEndIndex -nStartIndex > 0 )
-		{
-			nCurIndex = (nEndIndex - nStartIndex ) / 2 + nStartIndex;
-			if( o < (*this)[nCurIndex])
+		return iterator(binary_find_nearestsmaller_index([&](const T& a)
 			{
-				nEndIndex = nCurIndex;
-			}
-			else if((*this)[nCurIndex] < o)
-			{
-				nStartIndex = nCurIndex+1;
-				nNearestSmallerIndex = nStartIndex;
-			}
-			else
-				return iterator(nCurIndex,this);
-		}
+				if (o < a)
+					return -1;
+				else if (a < o)
+					return 1;
+				else
+					return 0;
 
-		return iterator(nNearestSmallerIndex,this);
+			}), this);
 	}
+	const_iterator binary_find_nearestsmaller(const T& o) const
+	{
+		return const_iterator(binary_find_nearestsmaller_index([&](const T& a)
+			{
+				if (o < a)
+					return -1;
+				else if (a < o)
+					return 1;
+				else
+					return 0;
+
+			}), this);
+	}
+	
 
 	IFArray(const iterator& b, const iterator& e ):m_nSize(0),m_nCap(4)
 	{
@@ -756,3 +948,4 @@ private:
 	T* m_pBuf;
 };
 
+#endif //IFPH_IF_ARRAY_H

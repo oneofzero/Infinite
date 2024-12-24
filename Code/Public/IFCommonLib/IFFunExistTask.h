@@ -1,8 +1,2 @@
-#pragma once
+﻿#pragma once
 
-class IFFunExitTask
-{
-public:
-
-
-};

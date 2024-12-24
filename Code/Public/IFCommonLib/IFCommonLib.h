@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_COMMON_LIB_H__
+#define __IF_COMMON_LIB_H__
 #include <stdlib.h>
 #include <stdio.h>
 #include "IFPlatformDefine.h"
@@ -45,3 +47,4 @@ IFCOMMON_API bool IFCommonLibInit(
 );
 
 IFCOMMON_API bool IFCommonLibShutdown();
+#endif //__IF_COMMON_LIB_H__

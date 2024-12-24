@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_CORE_SELECT_H__
+#define __IF_NET_CORE_SELECT_H__
 #include "IFCommonLib_API.h"
 #include "IFNetCore.h"
 
@@ -31,8 +33,11 @@ public:
 	IFNetCoreSelect();
 	virtual IFNetConnectionPtr createConnection(const IFString& sAddress, int nPort, bool syncconnect = true, bool bPackagemode = true, bool bSyncEvent = true);
 
+	virtual bool startListen(int nPort, bool enableSSL = false, bool packagemode = false) override;
+	virtual bool stopListen(int nPort) override;
 protected:
 	~IFNetCoreSelect();
+
 
 	virtual bool onServiceStart();
 	virtual bool onServiceStop();
@@ -41,11 +46,21 @@ protected:
 	IFRefPtr<IFThread> m_spWorkThread;
 
 	bool m_bExitWorkThread;
-	SOCKET m_Listener;
+
+	struct SocketInfo
+	{
+		SOCKET socket;
+		int localPort;
+		bool usePackageMode;
+		bool useSSL;
+
+	};
+	IFHashMap<int, SocketInfo> m_Listener;
 
 
 	ConnectionList m_ConnectingList;
 	IFCSLock m_ConnectingListLock;
+	IFCSLock m_ListenersLock;
 
 	friend class IFNetCoreSelectConnection;
 };
@@ -76,3 +91,5 @@ private:
 
 	friend class IFNetCoreSelect;
 };
+
+#endif //__IF_NET_CORE_SELECT_H__

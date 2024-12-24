@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_SYSTEM_API_H__
+#define __IF_SYSTEM_API_H__
 #include "IFCommonLib_API.h"
 #include "IFTypes.h"
 #include "ifsingleton.h"
@@ -97,7 +99,7 @@ public:
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFUI64, getDateTime);
 
 	//void* loadDLL(const IFStringW& sDllName);
-	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void* , loadDLL,const IFStringW& sDllName);
+	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void* , loadDLL,const IFString& sDllName);
 
 	//void* getProcAddress(void* pDLL, const IFString& sProcName);
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void* , getProcAddress,void* pDLL, const IFString& sProcName);
@@ -118,13 +120,13 @@ public:
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void, setClipboardData,IFUI32 nFormat, IFRefPtr<IFStream> spStreamData);
 
 	//IFStringW getModuleFileName(IFNativeModule module);
-	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFStringW, getModuleFileName,IFNativeModule module);
+	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFString, getModuleFileName,IFNativeModule module);
 
 	//IFStringW getSystemDirectory();
-	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFStringW, getSystemDirectory);
+	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFString, getSystemDirectory);
 
 	//IFStringW getWriteableDirectory();
-	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFStringW, getWriteableDirectory);
+	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFString, getWriteableDirectory);
 
 	//int getKeyState(int nKey);
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(int, getKeyState,int nKey);
@@ -136,7 +138,7 @@ public:
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(bool, isShowKeyboard);
 
 	//void openURL(const IFStringW& sulr);
-	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void, openURL,const IFStringW& sulr);
+	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(void, openURL,const IFString& sulr);
 
 	//IFNetworkType getNetworkType();
 	IF_NATIVESYSTEM_IMPFUN_DEFCLARE(IFNetworkType, getNetworkType);
@@ -175,8 +177,11 @@ public:
 		IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,openURL) \
 		IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,getPackagePath)
 
-		//IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,getNetworkType)\
-		//IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,sleepToNextTime)\
+		//IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,getNetworkType)
+		//IF_NATIVESYSTEMAPI_MAP_FUN(nativesysclass,sleepToNextTime)
 
 
 
+
+
+#endif //__IF_SYSTEM_API_H__

@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_DATE_TIME_H__
+#define __IF_DATE_TIME_H__
 #include "IFObj.h"
 #include "IFTypes.h"
 #include "IFCommonLib_API.h"
@@ -30,10 +32,12 @@ class IFStream;
 
 class IFCOMMON_API IFDateTime : public IFMemObj
 {
+	IF_DECLARERTTI_STATIC;
 public:
 
 	struct IFCOMMON_API Detail
 	{
+		IF_DECLARERTTI_STATIC;
 		Detail()
 		{
 
@@ -52,6 +56,9 @@ public:
 		IFUI16 nSecond;
 		IFUI16 nMilliSecond;
 		IFUI16 nWeakDay;
+
+		IFString toString() const;
+		IFString toWebString() const;
 	};
 public:
 	IFDateTime(void);
@@ -59,6 +66,10 @@ public:
 	IFDateTime(const Detail& dt);
 	IFDateTime(IFUI64 nDate); // microsend
 	IFDateTime(IFUI32 nSeconds);// second
+#ifdef IFPLATFORM_WINDOWS
+	IFDateTime(FILETIME fileTime);
+#endif // IFPLATFORM_WINDOWS
+
 	
 	~IFDateTime(void);
 
@@ -70,10 +81,16 @@ public:
 	void addBySecond(int nSecond);
 	
 	Detail toDetail() const;
+	Detail toDetailGMT() const;
+
 
 	IFString toString() const;
 
 	IFUI32 toIntTime() const;
+	IFI64 toInt64Time()
+	{
+		return m_nDate;
+	}
 
 	void serialize(IFStream* pStream) const;
 	void deserialize(IFStream* pStream);
@@ -85,3 +102,4 @@ private:
 
 };
 
+#endif//__IF_DATE_TIME_H__

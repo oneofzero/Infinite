@@ -21,6 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_UTILITY_H__
+#define __IF_UTILITY_H__
+
 #include "IFCommonLib_API.h"
 //#include <vector>
 //#include <string>
@@ -38,46 +41,34 @@ THE SOFTWARE.
 typedef IFArray<IFString> StringList;
 
 
-
-
-//class  IFCOMMON_API StringList : public IFArray<IFString>{};
-//typedef int uLongf;
-//typedef char Bytef;
-//typedef unsigned long uLong;
-//extern "C" int IFCOMMON_API compress(Bytef *dest,   uLongf *destLen,	const Bytef *source, uLong sourceLen);
-//extern "C" int IFCOMMON_API uncompress(Bytef *dest,   uLongf *destLen,	const Bytef *source, uLong sourceLen);
-
 float	IFCOMMON_API UGetPerformanceTime();
 
-bool	IFCOMMON_API UGetFilePathName( const char* sFullFileName, char* pOut );
-IFStringW IFCOMMON_API UGetFilePathNameW( const IFStringW& sFullFileName );
-bool	IFCOMMON_API UGetFileExName(const char* sFullFileName, char* pOut);
-IFStringW	IFCOMMON_API UGetFileExNameW(const IFStringW& sFullFileName);
-bool	IFCOMMON_API UGetFileMainName(const char* sFullFileName, char* pOut);
-IFStringW	IFCOMMON_API UGetFileMainNameW(const IFStringW& sFullFileName);
+IFString	IFCOMMON_API UGetFilePathName( const IFString& sFullFileName);
+IFString	IFCOMMON_API UGetFileName(const IFString& sFullFileName);
 
-IFString IFCOMMON_API UGetRelativePath(const char* pFullPath, const char* pCurPath);
-IFString IFCOMMON_API UGetSimplifiedPath(const char* pFullPath);
+IFString	IFCOMMON_API UGetFileExName(const IFString& sFullFileName);
+IFString	IFCOMMON_API UGetFileMainName(const IFString& sFullFileName);
 
-IFStringW IFCOMMON_API UGetRelativePathW(const IFStringW& pFullPath, const IFStringW& pCurPath);
-IFStringW IFCOMMON_API UGetSimplifiedPathW(const IFStringW& pFullPath);
+IFString IFCOMMON_API UGetRelativePath(const IFString& fullPath, const IFString& curPath);
+IFString IFCOMMON_API UGetSimplifiedPath(const IFString& path);
 
-IFString IFCOMMON_API UStandardWindowsPath(const char* sPath);
-IFStringW IFCOMMON_API UStandardPathW(const IFStringW& sPath);
-IFStringW IFCOMMON_API UStandardUnixPathW(const IFStringW& sPath);
+
+IFString IFCOMMON_API UStandardWindowsPath(const IFString& sPath);
+IFString IFCOMMON_API UStandardPath(const IFString& sPath);
 IFString IFCOMMON_API UStandardUnixPath(const IFString& sPath);
 
 bool IFCOMMON_API UIsRelativePath(const IFString& sPath);
-bool IFCOMMON_API UIsRelativePathW(const IFStringW& sPath);
-IFStringW IFCOMMON_API UCombinePathW(const IFStringW& a, const IFStringW& b);
 
-bool	IFCOMMON_API UMakeDirW( const IFStringW& sDirName );
+IFString IFCOMMON_API UCombinePath(const IFString& a, const IFString& b);
+
+bool	IFCOMMON_API UMakeDir(const IFString& sDirName);
+#define UMakeDirW UMakeDir
 
 bool IFCOMMON_API UCopyFile(const IFStringW& sSource, const IFStringW& destName, bool bOverWrite);
 bool IFCOMMON_API UDeleteFile(const IFStringW& sFile);
 
-void	IFCOMMON_API USplitStrings( StringList* OutList, const char* sInStr, const char* sSplitSign, bool bTrans = false, char cIgnor = 0 );
-int	IFCOMMON_API USplitStringsW( IFArray<IFStringW>* OutList, const WCHAR* sInStr, const WCHAR* sSplitSign, bool bTrans = false, WCHAR cIgnor = 0 );
+int	IFCOMMON_API USplitStrings( StringList* OutList, const IFString& sInStr, const IFString& sSplitSign, bool bTrans = false, char cIgnor = 0 );
+int	IFCOMMON_API USplitStringsW( IFArray<IFStringW>* OutList, const IFWCHAR* sInStr, const IFWCHAR* sSplitSign, bool bTrans = false, IFWCHAR cIgnor = 0 );
 
 IFCOMMON_API FILE*  UForceOpenFile( const char* sFileName, const char* sMode );
 
@@ -98,3 +89,5 @@ int IFCOMMON_API UFixPow2(int n);
 #define SAFE_DELETE_EX(p) if(p){delete[] p;p = NULL;}
 #define SAFE_Release(p) if(p){p->Release();p = NULL;}
 #define SAFE_release(p) if( p){p->release(); p = NULL;}
+
+#endif //__IF_UTILITY_H__

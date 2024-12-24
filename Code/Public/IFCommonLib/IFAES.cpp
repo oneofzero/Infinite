@@ -24,8 +24,14 @@ THE SOFTWARE.
 #include "IFAES.h"
 #include "crypt_aes.h"
 #include "IFMemStream.h"
+#ifndef DONT_USE_SSL
 #include "openssl/des.h"
-
+typedef DES_key_schedule des_key_schedule;
+#define des_cblock DES_cblock
+#define des_set_odd_parity DES_set_odd_parity
+#define des_set_key DES_set_key
+#define des_ecb_encrypt DES_ecb_encrypt
+#endif
 IF_DEFINERTTI(IFAES, IFRefObj)
 
 IFAES::IFAES( const IFString& sUserKey )
@@ -85,6 +91,7 @@ IF_DEFINERTTI(IFDES, IFRefObj)
 
 IFDES::IFDES(const IFString& sUserKey)
 {
+#ifndef DONT_USE_SSL
 	m_des.resize(sizeof(des_key_schedule));
 	des_key_schedule* pdes = (des_key_schedule*)(char*)m_des;
 	des_cblock key;
@@ -97,17 +104,18 @@ IFDES::IFDES(const IFString& sUserKey)
 	}
 	//char key[8];
 
-	key[0] = key_56[0];
-	key[1] = ((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1);
-	key[2] = ((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2);
-	key[3] = ((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3);
-	key[4] = ((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4);
-	key[5] = ((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5);
-	key[6] = ((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6);
-	key[7] = (key_56[6] << 1) & 0xFF;
+	//key[0] = key_56[0];
+	//key[1] = ((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1);
+	//key[2] = ((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2);
+	//key[3] = ((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3);
+	//key[4] = ((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4);
+	//key[5] = ((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5);
+	//key[6] = ((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6);
+	//key[7] = (key_56[6] << 1) & 0xFF;
 
-	des_set_odd_parity(&key);
-	des_set_key(&key, *pdes);
+	des_set_odd_parity(&key_56);
+	des_set_key(&key_56, pdes);
+#endif
 }
 
 IFDES::~IFDES()
@@ -117,7 +125,8 @@ IFDES::~IFDES()
 
 void IFDES::encrypt(IFStream* pInStream, IFStream* pOutStream) const
 {
-	des_key_schedule& ks = *(des_key_schedule*)(char*)m_des;
+#ifndef DONT_USE_SSL
+	auto ks = (des_key_schedule*)(char*)m_des;
 	des_cblock block;
 	des_cblock blockout;
 	pOutStream->writeUI32((IFUI32)pInStream->size());
@@ -134,24 +143,30 @@ void IFDES::encrypt(IFStream* pInStream, IFStream* pOutStream) const
 		des_ecb_encrypt(&block, &blockout, ks, DES_ENCRYPT);
 		pOutStream->write(blockout, AES_BLOCK_SIZE);
 	}
+#endif
 
 }
 
 void IFDES::encrypt(char* in_block, char* out_block) const
 {
-	des_key_schedule& ks = *(des_key_schedule*)(char*)m_des;
+#ifndef DONT_USE_SSL
+	auto ks = (des_key_schedule*)(char*)m_des;
 	des_ecb_encrypt((des_cblock*)in_block, (des_cblock*)out_block, ks, DES_ENCRYPT);
+#endif
 
 }
 void IFDES::decrypt(char* in_block, char* out_block) const
 {
-	des_key_schedule& ks = *(des_key_schedule*)(char*)m_des;
+#ifndef DONT_USE_SSL
+	auto ks = (des_key_schedule*)(char*)m_des;
 	des_ecb_encrypt((des_cblock*)in_block, (des_cblock*)out_block, ks, DES_DECRYPT);
+#endif
 
 }
 void IFDES::decrypt(IFStream* pInStream, IFStream* pOutStream) const
 {
-	des_key_schedule& ks = *(des_key_schedule*)(char*)m_des;
+#ifndef DONT_USE_SSL
+	auto ks = (des_key_schedule*)(char*)m_des;
 	des_cblock block;
 	des_cblock blockout;
 	int nSrcLen = pInStream->readUI32();
@@ -165,4 +180,5 @@ void IFDES::decrypt(IFStream* pInStream, IFStream* pOutStream) const
 
 		pOutStream->write(blockout, nWriteSize);
 	}
+#endif
 }

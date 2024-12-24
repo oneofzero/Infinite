@@ -24,6 +24,7 @@ THE SOFTWARE.
 #ifndef __IF_STREAM_H___
 #define __IF_STREAM_H___
 #include "IFRefObj.h"
+#include "IFException.h"
 
 
 class IFString;
@@ -61,7 +62,7 @@ protected:
 public:
 	IFStream(void);
 
-	virtual const IFStringW& getName() = 0;
+	virtual const IFString& getName() = 0;
 
 	virtual IFUI32 read(void* pDestData, IFUI32 nSize ) = 0  ; //读取指定大小一段数据
 	virtual IFUI32 write(const void* pSourceData, IFUI32 nSize ) = 0;//写入一段大小数据
@@ -76,8 +77,10 @@ public:
 
 	
 	IFString readS();
+	IFString readS64K();
 	IFStringW readWS();
 	void writeS(const IFString& s);
+	void writeS64K(const IFString& s);
 	void writeWS(const IFStringW& s);
 	void writeS(const char* s,int nLen);
 	void writeS(const IFPair<const char*, IFUI32>& s)
@@ -85,18 +88,20 @@ public:
 		writeS(s.first, s.second);
 	}
 
+
+
 	inline IFI8 readI8()
 	{
 		IFI8 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		return n;
 	}
 	inline IFUI8 readUI8()
 	{
 		IFUI8 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		return n;
 	}
 
@@ -104,7 +109,7 @@ public:
 	{
 		IFI16 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -114,7 +119,7 @@ public:
 	{
 		IFUI16 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -124,7 +129,7 @@ public:
 	{
 		IFI32 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -134,7 +139,7 @@ public:
 	{
 		IFUI32 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -144,7 +149,7 @@ public:
 	{
 		IFI64 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -154,7 +159,7 @@ public:
 	{
 		IFUI64 n;
 		if(read(&n,sizeof(n)) != sizeof(n))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		IF_FIXENDIAN(n);
 
 		return n;
@@ -219,7 +224,7 @@ public:
 	{
 		float f;
 		if(read(&f,sizeof(f)) != sizeof(f))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		return f;
 	}
 
@@ -232,9 +237,10 @@ public:
 	{
 		double f;
 		if(read(&f,sizeof(f)) != sizeof(f))
-			throw IFStreamReadException();
+			IF_THROW(-1,"StreamReadException");
 		return f;
 	}
+
 
 	static void flipEndian(void* pData, int nLen);
 
@@ -259,5 +265,15 @@ protected:
 
 };
 #include "IFSerialize.h"
+class IFCOMMON_API IFStreamLineReader : public IFMemObj
+{
+	IF_DECLARERTTI_STATIC;
+public: 
+
+	IFString readTextLine(IFStream* pStream, IFString::ENCODING encoding);
+	bool readTextLine(IFString& s, IFStream* pStream, IFString::ENCODING encoding);
+private:
+	IFString m_lineBuff;
+};
 
 #endif

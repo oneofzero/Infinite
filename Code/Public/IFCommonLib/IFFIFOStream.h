@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_FIFO_STREAM_H__
+#define __IF_FIFO_STREAM_H__
 #include "IFCommonLib_API.h"
 #include "IFStream.h"
 #include "IFList.h"
@@ -33,7 +35,7 @@ public:
 
 	IFFIFOStream();
 
-	virtual const IFStringW& getName();
+	virtual const IFString& getName();
 
 	virtual IFUI32 read(void* pDestData, IFUI32 nSize ); //读取指定大小一段数据
 
@@ -46,6 +48,7 @@ public:
 	virtual bool isEnd()const  ;
 
 	virtual bool isVaild()const;
+
 
 	void flush();
 protected:
@@ -78,33 +81,73 @@ protected:
 	FIFOBlockList m_BlockList;
 };
 
-class IFCOMMON_API IFFIFOFixedBuffer : public IFRefObj
+class IFCOMMON_API IFFIFOFixedStream : public IFStream
 {
 	IF_DECLARERTTI;
 public:
-	IFFIFOFixedBuffer(int nCap = 1024 * 1024);
+	IFFIFOFixedStream(int nCap = 1024 * 1024);
 
-	int write(const void* pBuff, int nSize);
+	const IFString& getName() override
+	{
+		return IFString::Empty;
+	}
 
-	int read(void* ppBuf, int nReadSize);
+	IFUI32 write(const void* pBuff, IFUI32 nSize) override;
+
+	IFUI32 read(void* ppBuf, IFUI32 nReadSize) override;
 
 
-	int readRaw(void** ppBuf, int nReadSize);
+	IFUI32 readRaw(void** ppBuf, IFUI32 nReadSize);
 
-	int freeSize() const
+	IFUI32 freeSize() const
 	{
 		return m_buff.size() - usedSize();
 	}
 
-	int usedSize() const
+	IFUI32 usedSize() const
 	{
-		return (int)(m_nWritePos - m_nReadPos);
+		return (m_nWritePos - m_nReadPos);
+	}
+	
+	const void* readUseInternalBuffer(IFUI32 readSize);
+
+	IFI64 seek(IFI64 nSeek, IFUI32 nFrom)override
+	{
+		return 0;
+	}
+	IFI64 tell()const
+	{
+		return 0;
+	}
+	IFI64 size()const override
+	{
+		return usedSize();
+	}
+	bool isEnd() const override
+	{
+		return usedSize() == 0;
+	}
+	void flush() override
+	{
+
+	}
+	bool isVaild()const override
+	{
+		return true;
+	}
+
+	void reset()
+	{
+		m_nReadPos = m_nWritePos = 0;
 	}
 
 protected:
-	~IFFIFOFixedBuffer();
+	~IFFIFOFixedStream();
 
-	IFI64 m_nReadPos;
-	IFI64 m_nWritePos;
+	IFUI32 m_nReadPos;
+	IFUI32 m_nWritePos;
 	IFSimpleArray<char> m_buff;
+	IFSimpleArray<char> m_tempReadBuff;
 };
+
+#endif //__IF_FIFO_STREAM_H__

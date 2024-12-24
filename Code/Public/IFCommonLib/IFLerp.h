@@ -21,8 +21,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_LERP_H__
+#define __IF_LERP_H__
+#include <float.h>
 #include "IFArray.h"
 #include "IFFixNumber.h"
+
 
 template<class T>
 inline void IFLinearLerp(T* pOut,const T& a,const T& b, float step)
@@ -89,3 +93,4 @@ inline void IFBezierLerpConst(T *pOut,
 	IFBezierLerp(pOut, &vt[0], nLen, step);
 }
 
+#endif //__IF_LERP_H__

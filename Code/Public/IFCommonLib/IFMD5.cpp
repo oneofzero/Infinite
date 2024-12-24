@@ -1,7 +1,8 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "IFMD5.h"
+#if !defined(DONT_USE_SSL) 
 #include "openssl/md4.h"
-
+#endif
 
 typedef unsigned char md5_byte_t; /* 8-bit byte */
 typedef unsigned int md5_word_t; /* 32-bit word */
@@ -26,6 +27,21 @@ void md5_finish(md5_state_t *pms, md5_byte_t digest[16]);
 
 IF_DEFINERTTIROOT(IFMD5Result);
 
+
+IFString IFMD5Binary::toString() const
+{
+    IFString s;
+    s.format("%02X%02X%02X%02X"
+        "%02X%02X%02X%02X"
+        "%02X%02X%02X%02X"
+        "%02X%02X%02X%02X",
+        data[0], data[1], data[2], data[3],
+        data[4], data[5], data[6], data[7],
+        data[8], data[9], data[10], data[11],
+        data[12], data[13], data[14], data[15]);
+    return s;
+}
+
 IFMD5Result::IFMD5Result(IFStream* sInput)
 	:m_pMD5State(NULL)
 {
@@ -36,6 +52,7 @@ IFMD5Result::IFMD5Result(IFStream* sInput)
 	md5_init(&md5State);
 
 	IFI64 nRemainSize = sInput->size();
+    sInput->seek(0, IFStream::ISSF_BEGIN);
 	while (nRemainSize)
 	{
 		int nReadSize = (int)(IFMin(nRemainSize,(IFI64)sizeof(buf)));
@@ -79,6 +96,7 @@ IFMD5Result::~IFMD5Result()
 
 void IFMD5Result::calcMD4(IFStream* sInput)
 {
+#if !defined(DONT_USE_SSL) 
 	MD4_CTX context;
 	MD4_Init(&context);
 	IFI64 nRemainSize = sInput->size();
@@ -94,6 +112,7 @@ void IFMD5Result::calcMD4(IFStream* sInput)
 		nRemainSize -= nReadSize;
 	}
 	MD4_Final(m_Result, &context);
+#endif
 }
 
 void IFMD5Result::init()
@@ -128,16 +147,7 @@ IFMD5Result& IFMD5Result::finish()
 
 IFString IFMD5Result::toString() const
 {
-	IFString s;
-	s.format("%02X%02X%02X%02X"
-		"%02X%02X%02X%02X"
-		"%02X%02X%02X%02X"
-		"%02X%02X%02X%02X",
-		m_Result[0],m_Result[1],m_Result[2],m_Result[3],
-		m_Result[4],m_Result[5],m_Result[6],m_Result[7],
-		m_Result[8],m_Result[9],m_Result[10],m_Result[11],
-		m_Result[12],m_Result[13],m_Result[14],m_Result[15]);
-	return s;
+    return m_Binary.toString();
 }
 
 void IFMD5Result::serialize( IFStream* pStream ) const

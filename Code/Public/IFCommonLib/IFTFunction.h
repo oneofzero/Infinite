@@ -1,7 +1,9 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_T_FUNCTION_H__
+#define __IF_T_FUNCTION_H__
 
 template<typename T,int nLen>
-inline int IFArraySize(T (&)[nLen])
+inline constexpr int IFArraySize(T (&)[nLen])
 {
 	return nLen;
 }
@@ -13,3 +15,4 @@ inline void IFSwap(T& a, T& b)
 	a = b;
 	b = c;
 }
+#endif //__IF_T_FUNCTION_H__

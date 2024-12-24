@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_PIPE_H__
+#define __IF_PIPE_H__
 #include "IFCommonLib_API.h"
 #include "IFRefObj.h"
 #include "IFEventSlot.h"
@@ -94,3 +96,4 @@ private:
 
 	friend class IFPipeCore;
 };
+#endif 

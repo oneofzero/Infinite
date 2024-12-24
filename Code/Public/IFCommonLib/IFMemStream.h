@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_MEM_STREAM_H__
+#define __IF_MEM_STREAM_H__
 #include "IFCommonLib_API.h"
 #include "IFStream.h"
 class IFCOMMON_API IFMemStream : public IFStream
@@ -34,12 +36,13 @@ public:
 	IFMemStream(void* pBuffer = 0, IFUI32 nBufferSize = 0, IFUI32 nReservesize = 512);
 	IFMemStream(const void* pBuffer, IFUI32 nBufferSize);
 
-	virtual const IFStringW& getName();
+	virtual const IFString& getName();
 
 	void setName(const IFString& sName);
 
 	IFUI32 read(void* pOut, IFUI32 nReadSize);
 	IFUI32 write(const void* pIn, IFUI32 nWriteSize);
+
 
 	IFI64 seek(IFI64 nOffset, IFUI32 nOrginal);
 
@@ -98,7 +101,9 @@ private:
 	IFUI32 m_nCurBufferSize;
 
 	bool m_bReadOnly;
-	IFStringW m_sStreamName;
+	IFString m_sStreamName;
 	//IFUI32 m_nReserveSize;
 
 };
+
+#endif //__IF_MEM_STREAM_H__

@@ -21,11 +21,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_FILE_SYSTEM_H__
+#define __IF_FILE_SYSTEM_H__
 #include "ifsingleton.h"
 #include "IFString.h"
 #include "IFMap.h"
 #include "IFFileInfo.h"
 #include "IFArray.h"
+#include "IFEventSlot.h"
+#include "IFQueue.h"
+#include "IFAsyncResult.h"
 class IFStream;
 
 
@@ -33,11 +38,43 @@ class IFFileInfo;
 class IFFileProvider;
 typedef IFRefPtr<IFFileInfo> IFFileInfoPtr;
 typedef IFArray<IFFileInfoPtr> IFFileInfoList;
+//typedef IFAsyncResultT<IFRefPtr<IFStream>>  IFAsyncOpenStreamResult;
+class IFCOMMON_API IFAsyncOpenStreamResult : public IFAsyncResultT<IFRefPtr<IFStream>>
+{
+	IF_DECLARERTTI;
+public:
+//	IFAsyncOpenStreamResult():IFRefObj(true),result(Pending)
+//	{
+//
+//	}
+//	enum Result : IFUI32
+//	{
+//		Pending,
+//		Success,
+//		Failed,
+//	};
+//
+//	IFEventSlot<void(IFAsyncOpenStreamResult* pSender)> event_Result;
+//	IFRefPtr<IFStream> spStream;
+//
+	IFString sFileName;
+//
+//	Result result;
+//
+//	Result checkResult();
+protected:
+	~IFAsyncOpenStreamResult();
+};
+
+#ifdef IFPLATFORM_WINDOWS
+#define IFFILE_SYSTEM_ENABLE_RECORD_OPEN_FILE 1
+#endif
+
 class IFCOMMON_API IFFileSystem : public IFSingleton<IFFileSystem>, public IFMemObj
 {
 	IF_DECLARERTTI;
 public:
-
+	
 	enum  OpenStreamFlag
 	{
 		OSF_READ = 1,
@@ -49,31 +86,60 @@ public:
 	~IFFileSystem(void);
 
 
-	bool addDirectory(const IFStringW& sDirectoryName, int nInsertPos = -1);
-	bool addFileProvider( IFRefPtr<IFFileProvider> spFileProvider);
+	bool addDirectory(const IFString& sDirectoryName, int nInsertPos = -1);
+	bool addFileProvider( IFRefPtr<IFFileProvider> spFileProvider, int nInsertPos = -1);
 	bool removeFileProvider(IFRefPtr<IFFileProvider> spFileProvider);
 
-	IFRefPtr<IFStream> openStream(const IFStringW& sName, const char* sMode);
-	IFRefPtr<IFStream> openStream(const IFStringW& sName, int nFlag);
+	IFRefPtr<IFStream> openStream(const IFString& sName, const char* sMode);
+	IFRefPtr<IFStream> openStream(const IFString& sName, int nFlag);
 
-	bool readAll(const IFStringW& sname, IFSimpleArray<char>& buff);
+	IFRefPtr<IFAsyncOpenStreamResult> openStreamAsync(const IFString& sName, const char* sMode);
 
-	IFStringW getWriteableDirectory();
+
+	bool readAll(const IFString& sname, IFSimpleArray<char>& buff);
+	bool writeAll(const IFString& sname, const void* pBuff, int len);
+	IFString readAllString(const IFString& sname);
+
+	IFString getWriteableDirectory();
 	//bool closeStream(IFStream* pStream);
-	//IFStringW getCurrentDirectory();
+	IFString getCurrentDirectory();
 
-	//bool setCurrentDirectory(const IFStringW& sDir);
-	IFFileInfoList listDirectory(const IFStringW& sDir, const IFStringW& sFilter = L"*");
+	bool setCurrentDirectory(const IFString& sDir);
 
-	bool createDir(const IFStringW& sDirName);
-	bool isDir(const IFStringW& sDirName);
-	bool removeDir(const IFStringW& sDirName);
-	bool removeFile(const IFStringW& sFileName);
-	bool rename(const IFStringW& sName, const IFStringW& sNewName);
-    static const IFStringW& PathSplitSign;
+	IFFileInfoList listDirectory(const IFString& sDir, const IFString& sFilter = "*");
+	IFFileInfoList listDirectoryAll(const IFString& sDir, const IFString& sFilter = "*");
+	void listDir(IFFileInfoList& out, const IFString& sDir, const IFString& sFilter = "*");
+	void listDirAll(IFFileInfoList& out, const IFString& sDir, const IFString& sFilter = "*");
+
+	bool createDir(const IFString& sDirName);
+	bool isDir(const IFString& sDirName);
+	bool isFileExist(const IFString& sDirName);
+	bool removeDir(const IFString& sDirName);
+	bool removeFile(const IFString& sFileName);
+	bool rename(const IFString& sName, const IFString& sNewName);
+
+	//void processAsyncResult();
+	//void addDoneAsyncResult(IFAsyncOpenStreamResult* pHandle);
+
+	void setPathEnvVar(const IFString& name, const IFString& value);
+	bool getPathEnvVar(const IFString& name, IFString& value);
+
+	IFString virtualPathToReal(const IFString& virtuaPath);
+	IFString realPathToVirtual(const IFString& realPath);
+	IFString makesureABSPath(const IFString& path);
+    static const IFString& PathSplitSign;
+
+#ifdef IFFILE_SYSTEM_ENABLE_RECORD_OPEN_FILE
+	IFArray<IFString> getOpenedFileList();
+	void RecordOpenedFile(const IFString& file);
+
+#endif
+	//static const IFStringW& PathSplitSignW;
 private:
+	IFRefPtr<IFStream> openStream(const IFString& sName, const char* sMode, bool searchProvider);
 
-	typedef IFArray<IFStringW> DirectoryList;
+
+	typedef IFArray<IFString> DirectoryList;
 
 	typedef IFArray<IFRefPtr<IFFileProvider> > ProviderList;
 	ProviderList m_ProviderList;
@@ -81,7 +147,17 @@ private:
 	DirectoryList m_DirectoryList ;
 
 	IFCSLock m_CurDirLock;
+
+	//IFQueue<IFRefPtr<IFAsyncOpenStreamResult>> m_OpenStreamResults;
 	//IFStringW m_sCurDir;
+	IFHashMap<IFString, IFString> m_PathEnvVar;
 	
+#ifdef IFFILE_SYSTEM_ENABLE_RECORD_OPEN_FILE
+
+	IFCSLock m_OpenedFilesLock;
+	IFHashMap<IFString, int> m_OpenedFiles;
+#endif
 	
 };
+
+#endif

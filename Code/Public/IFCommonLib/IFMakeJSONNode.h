@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_MAKE_JSON_NODE_H__
+#define __IF_MAKE_JSON_NODE_H__
 #include "IFJSON.h"
 
 template<typename T>
@@ -180,3 +182,4 @@ inline T loadFromIFJsonNode(IFJSONNode* pNode)
 	loadFromIFJsonNode(o, pNode);
 	return o;
 }
+#endif //__IF_MAKE_JSON_NODE_H__

@@ -23,6 +23,7 @@ THE SOFTWARE.
 #include "stdafx.h"
 #include "IFRandom.h"
 
+IF_DEFINERTTIROOT(IFRandom)
 
 IFRandom::IFRandom(IFUI32 nSeed)
 	:m_nIndex(0)

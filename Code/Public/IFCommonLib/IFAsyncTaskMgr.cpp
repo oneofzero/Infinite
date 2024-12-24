@@ -24,91 +24,86 @@ THE SOFTWARE.
 #include "IFAsyncTaskMgr.h"
 #include "IFThread.h"
 #include "IFFunctorDefaultParam.h"
+#include "IFAsyncResult.h"
+#include "IFSystemAPI.h"
 
 IF_DEFINESINGLETON(IFAsyncTaskMgr);
 
 IFAsyncTaskMgr::IFAsyncTaskMgr(int nMax)
-	:m_nMaxThreadCount(nMax)
 {
+#ifndef IFTHREAD_NOT_ENABLE
+	m_nMaxThreadCount = nMax;
+	m_spWaitTaskSignal = NewIFRefObj<IFThreadSyncObj>();
+	m_WorkThreadList.reserve(m_nMaxThreadCount);
 	for (int i = 0; i < nMax; i ++ )
 	{
-		IFRefPtr<IFAsyncTaskThread> spThread = IFNew IFAsyncTaskThread;
-		m_WorkThreadList[spThread] = false;
-		spThread->start(makeIFDPFunctor(this, &IFAsyncTaskMgr::workThread, makeIFDefaultParam<IFAsyncTaskThread*,bool*>(spThread,&m_WorkThreadList[spThread])));
+		auto spThread = NewIFRefObj<IFThread>();
+		m_WorkThreadList.push_back(spThread);
+		spThread->start([=]() 
+			{
+				workThread(i);
+			});
 	}
+#endif
 }
 
 
 IFAsyncTaskMgr::~IFAsyncTaskMgr(void)
 {
-	for (ThreadList::iterator it = m_WorkThreadList.begin();
-		it!=m_WorkThreadList.end(); ++it)
+#ifndef IFTHREAD_NOT_ENABLE
+	for (auto spThread : m_WorkThreadList)
 	{
-		IFRefPtr<IFAsyncTask> spTask = it->first->m_spTask;
-		if (spTask)
-			spTask->cancel();
-		it->second = true;
-	}
-	for (ThreadList::iterator it = m_WorkThreadList.begin();
-		it!=m_WorkThreadList.end(); ++it)
-	{
-		it->first->waitExit();
+		spThread->requestExit();
+		m_spWaitTaskSignal->notify();
 	}
 
-	m_WaitExecuteList.clear();
-	m_ExecutedList.clear();
+	for (auto spThread : m_WorkThreadList)
+	{
+		spThread->waitExit();
+	}	
+#endif
 }
 
-
+#ifndef IFTHREAD_NOT_ENABLE
 
 int IFAsyncTaskMgr::getMaxWorkThreadCount()
 {
 	return m_nMaxThreadCount;
 }
-
-bool IFAsyncTaskMgr::addTask( IFRefPtr<IFAsyncTask> spTask )
+#endif
+void IFAsyncTaskMgr::pushAsyncResult(IFAsyncResult* pResult)
 {
-	if (spTask->getState() != IFATS_UNKNWON)
-		return false;
-	spTask->m_eState = IFATS_WAIT_EXECUTE;
-	IFCSLockHelper lh(m_WaitExecuteListLock);
-	m_WaitExecuteList.push_back(spTask);
-	return true;
+	m_asyncResults.push(pResult);
+}
+#ifndef IFTHREAD_NOT_ENABLE
+
+void IFAsyncTaskMgr::addTaskInternal(IFAsyncTask* pTask)
+{
+	//auto spTask = NewIFRefObj<IFAsyncTask>(spTaskFun);
+	m_waitQueue.push(pTask);
+	m_spWaitTaskSignal->notify();
 }
 
-void IFAsyncTaskMgr::workThread(IFAsyncTaskThread* pThread, bool* bExit )
+void IFAsyncTaskMgr::workThread(int threadIdx)
 {
-	while (!*bExit)
+	while (!m_WorkThreadList[threadIdx]->isNeedExit())
 	{
+		m_spWaitTaskSignal->wait(100);
 		IFRefPtr<IFAsyncTask> spTask;
-		m_WaitExecuteListLock.lock();
-		if (m_WaitExecuteList.size())
+		while (m_waitQueue.pop(spTask))
 		{
-			spTask = m_WaitExecuteList.front();
-			m_WaitExecuteList.pop_front();
+			if(!spTask->isCancelled())
+				spTask->execute();
 		}
-		m_WaitExecuteListLock.unlock();
-
-		if (spTask)
-		{
-			pThread->m_spTask = spTask;
-			spTask->m_eState = IFATS_EXECUTING;
-			spTask->execute();
-			pThread->m_spTask = NULL;
-			spTask->m_eState = IFATS_DONE;
-			m_ExecutedListLock.lock();
-			m_ExecutedList.push_back(spTask);
-			m_ExecutedListLock.unlock();
-		}
-		else
-			IFThread::sleep(10);
 	}
 
 }
+#endif
 
 void IFAsyncTaskMgr::process()
 {
-	IFCSLockHelper lh(m_ExecutedListLock);
+
+	/*IFCSLockHelper lh(m_ExecutedListLock);
 	if (m_ExecutedList.size())
 	{
 		for (TaskList::iterator it = m_ExecutedList.begin();
@@ -117,7 +112,23 @@ void IFAsyncTaskMgr::process()
 			(*it)->event_TaskDone(*it);
 		}
 		m_ExecutedList.clear();
+	}*/
+	decltype(m_asyncResults)::DataType spResult;
+	while (m_asyncResults.pop(spResult))
+	{
+		spResult->notifyResult();
 	}
+
+}
+
+void IFAsyncTaskMgr::Create()
+{
+	IFNew IFAsyncTaskMgr(IFNativeSystemAPI::getProcessorCount());
+}
+
+void IFAsyncTaskMgr::Destroy()
+{
+	delete IFAsyncTaskMgr::getSingletonPtr();
 }
 
 
@@ -126,7 +137,7 @@ IF_DEFINERTTI(IFAsyncTask,IFRefObj)
 IFAsyncTask::IFAsyncTask()
 :IFRefObj(true)
 ,m_bCancel(false)
-,m_eState(IFATS_UNKNWON)
+,m_eState(IFATS_WAIT_EXECUTE)
 {
 
 }
@@ -142,10 +153,6 @@ bool IFAsyncTask::cancel()
 	return true;
 }
 
-void IFAsyncTask::execute()
-{
-
-}
 
 IFAsyncTaskState IFAsyncTask::getState()
 {
@@ -157,7 +164,3 @@ bool IFAsyncTask::isCancelled()
 	return m_bCancel;
 }
 
-IFAsyncTaskThread::~IFAsyncTaskThread()
-{
-
-}

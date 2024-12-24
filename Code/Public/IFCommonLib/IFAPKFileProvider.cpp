@@ -1,11 +1,11 @@
-#include "IFAPKFileProvider.h"
+﻿#include "IFAPKFileProvider.h"
 #include "IFCommonLib.h"
 #include "IFLogSystem.h"
 class IFAPKStream : public IFStream
 {
 	IF_DECLARERTTI;
 public:
-	IFAPKStream(AAsset* pAsset, const IFStringW& sFileName)
+	IFAPKStream(AAsset* pAsset, const IFString& sFileName)
 		:m_pAsset(pAsset)
 		,m_sFileName(sFileName)
 		,m_nPointer(0)
@@ -48,7 +48,7 @@ public:
 		return m_pAsset != NULL;
 	}
 
-	const IFStringW& getName()
+	const IFString& getName()
 	{
 		return m_sFileName;
 	}
@@ -66,7 +66,7 @@ protected:
 	}
 	IFI64 m_nPointer;
 	AAsset* m_pAsset;
-	IFStringW m_sFileName;
+	IFString m_sFileName;
 };
 
 IF_DEFINERTTI(IFAPKStream, IFStream);
@@ -83,11 +83,17 @@ IFAPKFileProvider::~IFAPKFileProvider(void)
 {
 }
 
-IFRefPtr<IFStream> IFAPKFileProvider::openStream( const IFStringW& sName, const char* sMode )
+IFRefPtr<IFStream> IFAPKFileProvider::openStream( const IFString& sName, const char* sMode )
 {
-	IFStringW sFileName = UCombinePathW(m_sCurDir, sName);
-	sFileName = UStandardPathW(sFileName);
-	AAsset* pAsset = AAssetManager_open(m_pAssetMgr, sFileName.toLocalString().c_str(), AASSET_MODE_UNKNOWN);
+
+	if (strstr(sMode, "w"))
+	{
+		IFLogError("can't open %s for write!\r\n", sName.c_str());
+		return NULL;
+	}
+	IFString sFileName = UCombinePath(m_sCurDir, sName);
+	sFileName = UStandardPath(sFileName);
+	AAsset* pAsset = AAssetManager_open(m_pAssetMgr, sFileName.c_str(), AASSET_MODE_UNKNOWN);
 	if (pAsset)
 	{
 		return IFNew IFAPKStream(pAsset, sFileName);
@@ -100,7 +106,7 @@ IFRefPtr<IFStream> IFAPKFileProvider::openStream( const IFStringW& sName, const 
 	return NULL;
 }
 
-void IFAPKFileProvider::setCurDir( const IFStringW& sDir )
+void IFAPKFileProvider::setCurDir( const IFString& sDir )
 {
 	m_sCurDir = sDir;
 }
@@ -108,18 +114,18 @@ void IFAPKFileProvider::setCurDir( const IFStringW& sDir )
 class ANDASSETINFO : public IFFileInfo
 {
 public:
-	ANDASSETINFO(const IFStringW& sdir, const char* sFileName)
+	ANDASSETINFO(const IFString& sdir, const char* sFileName)
 	{
 		m_eType = IFFileInfo::FT_FILE;
 		m_sFileName = sFileName;
-		m_sFilePath = UCombinePathW(sdir, m_sFileName);
+		m_sFilePath = UCombinePath(sdir, m_sFileName);
 	}
 };
-bool IFAPKFileProvider::listDirectory(const IFStringW& sdir, IFFileInfoList& list, const IFStringW& sFilter /*= L"*"*/ )
+bool IFAPKFileProvider::listDirectory(const IFString& sdir, IFFileInfoList& list, const IFString& sFilter /*= L"*"*/ )
 {
 	//IFStringW curdir = IFFileSystem::getSingleton().getCurrentDirectory();
-	IFLOG(IFLL_TRACE, "cur dir:%s\r\n", sdir.toLocalString().c_str());
-	AAssetDir* pDir = AAssetManager_openDir(m_pAssetMgr, sdir.toLocalString().c_str());
+	IFLOG(IFLL_TRACE, "cur dir:%s\r\n", sdir.c_str());
+	AAssetDir* pDir = AAssetManager_openDir(m_pAssetMgr, sdir.c_str());
 	if(pDir)
 	{
 		IFLOG(IFLL_TRACE, "dir found!\r\n");

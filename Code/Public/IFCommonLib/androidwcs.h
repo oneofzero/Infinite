@@ -22,6 +22,7 @@ THE SOFTWARE.
 */
 #pragma once
 #include "IFCommonLib_API.h"
+#include <stdarg.h>
 
 IFCOMMON_API int android_wcslen(const wchar_t* p, size_t count  = -1);
 IFCOMMON_API int android_wsprintf( wchar_t * buf, int nsize, const wchar_t * fmt, ... );

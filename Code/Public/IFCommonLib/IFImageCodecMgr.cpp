@@ -22,9 +22,10 @@ THE SOFTWARE.
 */
 #include "stdafx.h"
 #include "IFImageCodecMgr.h"
+#include "IFLogSystem.h"
 
-IF_DEFINERTTIROOT(IFSourceImageBuffer);
-IF_DEFINERTTIROOT(IFImageCodec );
+IF_DEFINERTTI(IFSourceImageBuffer, IFRefObj);
+IF_DEFINERTTI(IFImageCodec, IFAttributeSet);
 IF_DEFINERTTIROOT(IFImageCodecMgr);
 
 IF_DEFINESINGLETON(IFImageCodecMgr);
@@ -229,6 +230,72 @@ IFRefPtr<IFSourceImageBuffer> IFSourceImageBuffer::scale( float percent ) const
 	return spDSIB;
 }
 
+bool IFSourceImageBuffer::resize(int nFrame, int targetWidth, int targetHeight)
+{
+	if (m_eImageType != ITF_A8R8G8B8)
+		return false;
+	auto newDataSize = targetWidth * targetHeight * 4;
+	auto pNewData = (IFColor*)IFAlloc::Alloc(newDataSize);
+	auto pSrcData = (IFColor*)getData(nFrame);
+	auto srcWidth = getWidth(nFrame);
+	auto srcHeight = getHeight(nFrame);
+
+	IFColorF sample[4];
+	float sampleWeight[4];
+	for (int y = 0; y < targetHeight; y++)
+	{
+		auto pLine = pNewData +y * targetWidth;
+
+		float sampleY = (float)srcHeight * (float)y / (float)targetHeight;
+		auto sampleIY = (int)sampleY;
+		float sampleBlendY = sampleY - (float)(sampleIY);
+		for (int x = 0; x < targetWidth; x++)
+		{
+			float sampleX = (float)srcWidth * (float)x / (float)targetWidth;
+			auto sampleIX = (int)sampleX;
+			float sampleBlendX = sampleX - (float)(sampleIX);
+			sample[0] = pSrcData[sampleIX + sampleIY * srcWidth];
+			sampleWeight[0] = (1 - sampleBlendX) * (1 - sampleBlendY);
+			float totalWeight = sampleWeight[0];
+
+			bool xIn = sampleIX + 1 < srcWidth;
+			bool yIn = sampleIY + 1 < srcHeight;
+			if (xIn)
+			{
+				sample[1] = pSrcData[sampleIX + 1 + sampleIY * srcWidth];
+				sampleWeight[1] = (sampleBlendX) * (1 - sampleBlendY);
+				totalWeight += sampleWeight[1];
+			}
+			if (yIn)
+			{
+				sample[2] = pSrcData[sampleIX + (sampleIY + 1) * srcWidth];
+				sampleWeight[2] = (1 - sampleBlendX) *  (sampleBlendY);
+				totalWeight += sampleWeight[2];
+			}
+			if (xIn && yIn)
+			{
+				sample[3] = pSrcData[sampleIX + 1 + (sampleIY + 1) * srcWidth];
+				sampleWeight[3] = (sampleBlendX) * (sampleBlendY);
+				totalWeight += sampleWeight[3];
+			}
+			
+			IFColorF color(0,0,0,0);
+			for (int i = 0; i < 4; i++)
+			{
+				color += sample[i] * (sampleWeight[i] / totalWeight);
+			}
+			pLine[x] = color.toIFColor();
+		}
+	}
+
+
+	setData(pNewData, newDataSize, nFrame, targetWidth, targetHeight,
+		getXOffset(0),getYOffset(0),getFrameDelay(0), getOriginalWidth(0), getOriginalHeight(0)
+	 );
+	IFAlloc::Dealloc(pNewData);
+	return true;
+}
+
 
 
 
@@ -254,6 +321,9 @@ bool IFImageCodecMgr::installCodecoder(IFImageCodec* pDecoder)
 		return false;
 
 	m_CodecList.push_back( pDecoder );
+
+	IFLogDebug("image codec:<%s> installed\r\n", pDecoder->getName().c_str());
+
 	return true;
 }
 bool IFImageCodecMgr::uninstallCodecoder(IFImageCodec* pDecoder)

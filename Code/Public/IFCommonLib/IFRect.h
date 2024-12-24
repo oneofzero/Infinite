@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_RECT_H__
+#define __IF_RECT_H__
 #include "IFBaseTypeDefine.h"
 
 struct  IFRect 
@@ -108,3 +110,5 @@ struct  IFRect
 	}
 
 };
+
+#endif //__IF_RECT_H__

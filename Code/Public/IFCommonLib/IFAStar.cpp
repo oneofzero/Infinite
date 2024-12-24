@@ -78,7 +78,7 @@ bool IFAStarState::step()
 
 IFAStarNode* IFAStarState::getCurNode()
 {
-	if (m_nCurNodeID>=0&&m_nCurNodeID<m_NodeInfoList.size())
+	if (m_nCurNodeID>=0&&m_nCurNodeID<m_NodeInfoList.size() && isPathFound())
 		return m_NodeInfoList[m_nCurNodeID].pNode;
 	else if ( m_nNearstID >=0 && m_nNearstID< m_NodeInfoList.size())
 		return m_NodeInfoList[m_nNearstID].pNode;
@@ -156,7 +156,7 @@ bool IFAStarState::init(IFAStarNode* pS, IFAStarNode* pDest, IFAStarGraph* pGrap
 
 bool IFAStarState::isPathFound()
 {
-	return m_nCurNodeID != -1;
+	return m_nCurNodeID == 1;
 }
 
 void IFAStarNodeInfo::refreshValue(IFAStarNodeInfo* pPrev, IFAStarNodeInfo* pDest,IFAStarGraph* pGraph)

@@ -20,6 +20,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+
 #include "stdafx.h"
 #include "IFSystemAPI.h"
 #include "IFMemStream.h"
@@ -38,12 +39,14 @@ THE SOFTWARE.
 #endif
 
 #ifndef WIN32
+#if !defined(IFPLATFORM_EMBED_NOSYS)
 #include <time.h>
 #include <unistd.h>
 #include <sys/time.h>
 #include <sys/socket.h>
-
+#endif
 #else
+
 #include <WinSock2.h>
 
 #ifdef IFPLATFORM_WINDOWS
@@ -53,6 +56,11 @@ THE SOFTWARE.
 #include <IPHlpApi.h>
 #pragma comment(lib,"iphlpapi.lib")
 #endif
+#endif
+
+#ifdef IFPLATFORM_MAC
+#include <sys/types.h>
+#include <sys/sysctl.h>
 #endif
 
 
@@ -78,6 +86,7 @@ public:
 		m_hWaitableTimer = CreateWaitableTimer(NULL,TRUE, NULL);
 	
 		GetSystemInfo(&m_SystemInfo);
+
 	}
 	~IFWin32SystemAPI()
 	{
@@ -94,8 +103,17 @@ public:
 	{
 		IFUI64 curCounter;
 		QueryPerformanceCounter((LARGE_INTEGER*)&curCounter);
-		IFUI64 sec = 1000000*curCounter/m_uCPUFrequency;
-		return sec;
+		if (m_uCPUFrequency >= 1000000)
+		{
+			IFUI64 sec = curCounter / (m_uCPUFrequency / 1000000);
+			return sec;
+		}
+		else
+		{
+			IFUI64 sec = 1000*curCounter / (m_uCPUFrequency / 1000);
+			return sec;
+
+		}
 	}
 	static int getProcessorCount()
 	{
@@ -105,21 +123,21 @@ public:
 	static IFUI64 getDateTime()
 	{
 
-		#define	EPOCH_ADJUST	((guint64)62135596800LL)
+		//#define	EPOCH_ADJUST	((guint64)62135596800LL)
 
-		IFUI64 nTime;
+		//IFUI64 nTime;
 		SYSTEMTIME systemtime;
 		GetSystemTime(&systemtime);
-		//FILETIME fileTime;
-		SystemTimeToFileTime(&systemtime,(FILETIME*)&nTime);
-		nTime /= 10;
-		nTime -= 11644473600000000LL;	//convert 1601 -> 1970
-		return nTime;
+		FILETIME fileTime;
+		SystemTimeToFileTime(&systemtime,(FILETIME*)&fileTime);
+		//nTime /= 10;
+		//nTime -= 11644473600000000LL;	//convert 1601 -> 1970
+		return IFDateTime(fileTime).toInt64Time();
 	}
 
-	static void* loadDLL(const IFStringW& sDllName)
+	static void* loadDLL(const IFString& sDllName)
 	{
-		return LoadLibrary(sDllName.c_str());
+		return LoadLibrary(IFStringW(sDllName).c_str());
 	}
 	static  void* getProcAddress(void* pDLL, const IFString& sProcName)
 	{
@@ -152,8 +170,8 @@ public:
 			IFRefPtr<IFStream> spStream;
 			if( hData )
 			{
-				WCHAR* pData = (WCHAR*)GlobalLock(hData);
-				IFUI32 sz = GlobalSize(hData)/sizeof(WCHAR);
+				IFWCHAR* pData = (IFWCHAR*)GlobalLock(hData);
+				IFUI32 sz = (IFUI32)(GlobalSize(hData)/sizeof(IFWCHAR));
 				IFStringW s;
 				for (IFUI32 i = 0; i < sz; i ++)
 				{
@@ -198,26 +216,28 @@ public:
 		}
 
 	}
-	static IFStringW getModuleFileName(IFNativeModule module)
+	static IFString getModuleFileName(IFNativeModule module)
 	{
 #ifdef IFCOMMON_UNITY_SUPPORT
-		return IFStringW::Empty;
+		return IFString::Empty;
 #else
-		WCHAR buf[512]={0};
+		IFWCHAR buf[512]={0};
 		GetModuleFileName(module, buf, 512);
-		return buf;
+		return IFStringW(buf).toLocalString();
 #endif
 	}
-	static IFStringW getSystemDirectory()
+	static IFString getSystemDirectory()
 	{
-		WCHAR buf[512]={0};
+		IFWCHAR buf[512]={0};
 		GetSystemDirectory(buf, 512);
-		return buf;
+		return IFStringW(buf).toLocalString();
 	}
 
-	static IFStringW getWriteableDirectory()
+	static IFString getWriteableDirectory()
 	{
-		return UGetSimplifiedPathW(UGetFilePathNameW(getModuleFileName(NULL)));
+		auto writeabledir = UCombinePath(UGetSimplifiedPath(UGetFilePathName(getModuleFileName(NULL))), "wdata");
+
+		return writeabledir;
 	}
 
 	static int getKeyState(int nKey)
@@ -233,10 +253,10 @@ public:
 		return false;
 	}
 
-	static void openURL(const IFStringW& url)
+	static void openURL(const IFString& url)
 	{
 
-		ShellExecuteW(NULL, L"open",  url.c_str(), NULL, NULL, SW_SHOW );
+		ShellExecuteW(NULL, L"open",  IFStringW(url).c_str(), NULL, NULL, SW_SHOW );
 	};
 
 
@@ -280,7 +300,7 @@ public:
 		}
 		
 		IFString sMacS;
-		for (int i = 0; i < adpinfo[0].AddressLength; i ++ )
+		for (int i = 0; i < (int)adpinfo[0].AddressLength; i ++ )
 		{
 			sMacS += IFString().format("%02X", adpinfo[0].Address[i]);
 		}
@@ -311,14 +331,19 @@ public:
 	static IFUI64 freq;
 	static HANDLE m_hWaitableTimer;
 
-	IFUIPhoneSystemAPI()
+	static void init()
 	{
 		QueryPerformanceFrequency((LARGE_INTEGER*)&freq);
-		freq/=1000;
+		freq /= 1000;
 		IF_NATIVESYSTEMAPI_MAP(IFUIPhoneSystemAPI);
 		IF_NATIVESYSTEMAPI_MAP_FUN(IFUIPhoneSystemAPI, sleepToNextTime);
-
 	}
+
+	//IFUIPhoneSystemAPI()
+	//{
+	//	
+
+	//}
 	static IFUI32 getTickCount()
 	{
 		IFUI64 counter;
@@ -354,22 +379,22 @@ public:
 	{
 
 	}
-	static IFStringW getModuleFileName(IFNativeModule module)
+	static IFString getModuleFileName(IFNativeModule module)
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
-	static IFStringW getSystemDirectory()
+	static IFString getSystemDirectory()
 	{
-		return IFStringW(L"C:\\Windows\\");
+		return IFString("C:\\Windows\\");
 	}
 	static int getKeyState(int nKey)
 	{
 		return 0;
 	}
 
-	static IFStringW getWriteableDirectory()
+	static IFString getWriteableDirectory()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 
 	static void showKeyboard(bool bShow)
@@ -396,12 +421,12 @@ public:
 		return nTime;
 	}
 
-	static void openURL(const IFStringW& sulr)
+	static void openURL(const IFString& sulr)
 	{
 
 	}
 
-	static void* loadDLL(const IFStringW& sDllName)
+	static void* loadDLL(const IFString& sDllName)
 	{
 		return LoadPackagedLibrary(L"IFUID3D11Renderer.dll", 0);
 	}
@@ -425,10 +450,19 @@ public:
 		return bSleeped;
 
 	}
+	static IFString getPackagePath()
+	{
+		return IFString::Empty;
+	}
+
 };
 IFUI64 IFUIPhoneSystemAPI::freq = 0;
 HANDLE IFUIPhoneSystemAPI::m_hWaitableTimer = NULL;
 IFUIPhoneSystemAPI winphone8api;
+void NativeSystemAPIInit()
+{
+	IFUIPhoneSystemAPI::init();
+}
 #endif
 #elif defined(LINUX)
 #ifndef ANDROID
@@ -483,15 +517,13 @@ public:
 	{
 
 	}
-	static IFStringW getModuleFileName(IFNativeModule module)
-	{
-		WCHAR buf[512]={0};
-		return buf;
+	static IFString getModuleFileName(IFNativeModule module)
+	{		
+		return IFString::Empty;
 	}
-	static IFStringW getSystemDirectory()
+	static IFString getSystemDirectory()
 	{
-		WCHAR buf[512]={0};
-		return buf;
+		return IFString::Empty;
 	}
 	static int getKeyState(int nKey)
 	{
@@ -504,17 +536,21 @@ public:
 	{
 		return false;
 	}
-	static void openURL(const IFStringW& url)
+	static void openURL(const IFString& url)
 	{
 
 		//ShellExecuteW(NULL, L"open",  url.c_str(), NULL, NULL, SW_SHOW );
 	};
 	static IFUI64 getDateTime()
 	{
-        return getMicrosSec();
+		timespec now;
+		clock_gettime(CLOCK_REALTIME, &now);
+		return now.tv_sec * 1000000ull + now.tv_nsec / 1000;
+
+        //return getMicrosSec();
 	}
 
-	static void* loadDLL(const IFStringW& s)
+	static void* loadDLL(const IFString& s)
 	{
         return NULL;
 	}
@@ -523,9 +559,9 @@ public:
 	{
         return NULL;
 	}
-	static IFStringW getWriteableDirectory()
+	static IFString getWriteableDirectory()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 
 	static IFString getPackagePath()
@@ -543,7 +579,22 @@ void NativeSystemAPIInit()
 
 class IFMacSystemAPI : public IFNativeSystemAPI
 {
-	IFUI32 getTickCount()
+public:
+	static void init()
+	{
+		IF_NATIVESYSTEMAPI_MAP(IFMacSystemAPI);
+		IF_NATIVESYSTEMAPI_MAP_FUN(IFMacSystemAPI, getProcessorCount);
+	}
+
+	static int getProcessorCount()
+	{
+		int count;
+		size_t count_len = sizeof(count);
+		sysctlbyname("hw.logicalcpu", &count, &count_len, NULL, 0);
+		return count;
+	}
+
+    static IFUI32 getTickCount()
 	{
      	//timeval tv;
         //clock_gettime (&tv, NULL);
@@ -551,88 +602,93 @@ class IFMacSystemAPI : public IFNativeSystemAPI
 
 	}
 
-	IFUI64 getMicrosSec()
+    static IFUI64 getMicrosSec()
 	{
      	timeval tv;
         gettimeofday (&tv, NULL);
         return tv.tv_sec * 1000000ull + tv.tv_usec;
 	}
 
-    IFUI64 getDateTime()
+    static IFUI64 getDateTime()
     {
 
 
         return getMicrosSec();
     }
 
-	void enableIME(IFNativeWindowHandle hWnd,IFNativeIMC ime)
+    static void enableIME(IFNativeWindowHandle hWnd,IFNativeIMC ime)
 	{
 
 	}
-	IFNativeIMC isEnableIME(IFNativeWindowHandle hWnd)
+    static IFNativeIMC isEnableIME(IFNativeWindowHandle hWnd)
 	{
 	    return NULL;
 	}
-	void setCursor(IFNativeCursor cursor)
+    static void setCursor(IFNativeCursor cursor)
 	{
 	}
-	IFRefPtr<IFStream> getClipboardData(IFUI32 nFormat)
+    static IFRefPtr<IFStream> getClipboardData(IFUI32 nFormat)
 	{
 
 		return NULL;
 	}
-	void setClipboardData(IFUI32 nFormat, IFRefPtr<IFStream> spStreamData)
+    static void setClipboardData(IFUI32 nFormat, IFRefPtr<IFStream> spStreamData)
 	{
 
 	}
-	IFStringW getModuleFileName(IFNativeModule module)
+    static IFString getModuleFileName(IFNativeModule module)
 	{
-		WCHAR buf[512]={0};
-		return buf;
+		return IFString::Empty;
 	}
-	IFStringW getSystemDirectory()
+    static IFString getSystemDirectory()
 	{
-		WCHAR buf[512]={0};
-		return buf;
+		return IFString::Empty;
 	}
 
-	IFStringW getWriteableDirectory()
+    static IFString getWriteableDirectory()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 
-	int getKeyState(int nKey)
+    static int getKeyState(int nKey)
 	{
         return 0;
 	}
-	void showKeyboard(bool bShow)
+    static void showKeyboard(bool bShow)
 	{
 	}
-	bool isShowKeyboard()
+    static bool isShowKeyboard()
 	{
 		return false;
 	}
 
-    void openURL(const IFStringW& url)
+    static void openURL(const IFString& url)
 	{
 
 		//ShellExecuteW(NULL, L"open",  url.c_str(), NULL, NULL, SW_SHOW );
 	};
     
-    void* loadDLL(const IFStringW& s)
+    static void* loadDLL(const IFString& s)
     {
         return NULL;
     }
     
-    void* getProcAddress(void*, const IFString& s)
+    static void* getProcAddress(void*, const IFString& s)
     {
         return  NULL;
     }
 
+    static IFString getPackagePath()
+    {
+        return IFString::Empty;
+    }
 };
 
 IFMacSystemAPI macsystemapi;
-
+void NativeSystemAPIInit()
+{
+	IFMacSystemAPI::init();
+}
 #endif
 
 
@@ -655,27 +711,20 @@ static IFNetworkType getNetworkType()
 //
 static bool sleepToNextTime(IFUI64 nNextTime)
 {
-#ifndef IFPLATFORM_WINDOWS_SHOP
-//#ifdef LINUX
-//	static timespec time = { 0,100000};
-//	timespec tsleeped;
-//#else
+#if !defined(IFPLATFORM_WINDOWS_SHOP) && !defined(IFPLATFORM_EMBED_NOSYS)
+
 	timeval tv;
 
-//#endif
+
 	bool bSleeped = false;
 	while (IFNativeSystemAPI::getMicrosSec()<nNextTime)
 	{
 
-//#ifdef LINUX
-//		nanosleep(&time, &tsleeped);
-//		//clock_gettime(CLOCK_MONOTONIC, &now);
-//		//return now.tv_sec * 1000000ull + now.tv_nsec / 1000
-//#else
+
 		tv.tv_sec = 0;
 		tv.tv_usec = 1000;
 		select(0,0,0,0,&tv);
-//#endif
+
 		bSleeped = true;
 	}
 	return bSleeped;
@@ -724,6 +773,8 @@ const IFString& IFNativeSystemAPI::getPlatformName()
 		"WINDOWS"
 #elif defined(IFPLATFORM_WEB)
 		"WEB"
+#elif defined(IFPLATFORM_FREE_RTOS)
+		"FREE_RTOS"
 #else
 		"UNKNOWN"
 #endif
@@ -736,20 +787,20 @@ const IFString& IFNativeSystemAPI::getPlatformName()
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFUI32,getTickCount);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFUI64, getMicrosSec);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFUI64, getDateTime);
-IF_NATIVESYSTEM_IMPFUN_DEFINE(void* , loadDLL,const IFStringW& sDllName);
+IF_NATIVESYSTEM_IMPFUN_DEFINE(void* , loadDLL,const IFString& sDllName);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(void* , getProcAddress,void* pDLL, const IFString& sProcName);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(void , enableIME,IFNativeWindowHandle hWnd, IFNativeIMC ime);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFNativeIMC , isEnableIME,IFNativeWindowHandle hWnd);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(void , setCursor,IFNativeCursor cursor);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFRefPtr<IFStream> , getClipboardData,IFUI32 nFormat);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(void, setClipboardData,IFUI32 nFormat, IFRefPtr<IFStream> spStreamData);
-IF_NATIVESYSTEM_IMPFUN_DEFINE(IFStringW, getModuleFileName,IFNativeModule module);
-IF_NATIVESYSTEM_IMPFUN_DEFINE(IFStringW, getSystemDirectory);
-IF_NATIVESYSTEM_IMPFUN_DEFINE(IFStringW, getWriteableDirectory);
+IF_NATIVESYSTEM_IMPFUN_DEFINE(IFString, getModuleFileName,IFNativeModule module);
+IF_NATIVESYSTEM_IMPFUN_DEFINE(IFString, getSystemDirectory);
+IF_NATIVESYSTEM_IMPFUN_DEFINE(IFString, getWriteableDirectory);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(int, getKeyState,int nKey);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(void, showKeyboard,bool bShow);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(bool, isShowKeyboard);
-IF_NATIVESYSTEM_IMPFUN_DEFINE(void, openURL,const IFStringW& sulr);
+IF_NATIVESYSTEM_IMPFUN_DEFINE(void, openURL,const IFString& sulr);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFNetworkType, getNetworkType);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(bool, sleepToNextTime,IFUI64 nNextTime);
 IF_NATIVESYSTEM_IMPFUN_DEFINE(IFString, getDeviceIdentifier);
@@ -830,13 +881,13 @@ public:
 	{
 		return;
 	}
-	static IFStringW getModuleFileName(IFNativeModule module)
+	static IFString getModuleFileName(IFNativeModule module)
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
-	static IFStringW getSystemDirectory()
+	static IFString getSystemDirectory()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 	static int getKeyState(int nKey)
 	{
@@ -870,7 +921,7 @@ public:
 	}
 			
 
-	static void openURL(const IFStringW& surl)
+	static void openURL(const IFString& surl)
 	{
 		IFLOG(IFLL_DEBUG, L"openURL%s", surl.c_str());
 		jclass dpclazz = m_JNIEnv->FindClass(IFNativeSystemAPI::m_sPackageName.c_str());
@@ -886,7 +937,7 @@ public:
 		{
 			//IFLOG(IFLL_TRACE, "find method1");
 		}
-		auto str = m_JNIEnv->NewStringUTF(surl.toUTF8String().c_str());
+		auto str = m_JNIEnv->NewStringUTF(surl.c_str());
 		m_JNIEnv->CallStaticVoidMethod(dpclazz, method1, str);
 		m_JNIEnv->DeleteLocalRef(dpclazz);
 		//m_JNIEnv->DeleteLocalRef(method1);
@@ -894,9 +945,9 @@ public:
 		IFLOG(IFLL_DEBUG, L"openURL%s success", surl.c_str());
 	}
 
-	static void* loadDLL(const IFStringW& sDllName)
+	static void* loadDLL(const IFString& sDllName)
 	{
-		return dlopen(sDllName.toUTF8String().c_str(), RTLD_NOW);
+		return dlopen(sDllName.c_str(), RTLD_NOW);
 		jclass dpclazz = m_JNIEnv->FindClass(IFNativeSystemAPI::m_sPackageName.c_str());
 		if (dpclazz == 0) {
 			IFLOG(IFLL_ERROR, "find class error");
@@ -910,7 +961,7 @@ public:
 		{
 			IFLOG(IFLL_TRACE, "find method loadDLL");
 		}
-		m_JNIEnv->CallStaticVoidMethod(dpclazz, method1, m_JNIEnv->NewStringUTF(sDllName.toUTF8String().c_str()));
+		m_JNIEnv->CallStaticVoidMethod(dpclazz, method1, m_JNIEnv->NewStringUTF(sDllName.c_str()));
 
 		return NULL;
 	}
@@ -959,9 +1010,9 @@ public:
 		return processorcount;
 	}
 
-	static IFStringW sWriteablePath;
+	static IFString sWriteablePath;
 
-	static IFStringW getWriteableDirectory()
+	static IFString getWriteableDirectory()
 	{
 		if (sWriteablePath.length())
 			return sWriteablePath;
@@ -989,7 +1040,7 @@ public:
 		IFLOG(IFLL_DEBUG, "WriteablePath is=%s\r\n", sPath.c_str());
 		sWriteablePath = sPath;
 		return sPath;
-		return L"/data/data/com.android.ifandroid/";
+		//return "/data/data/com.android.ifandroid/";
 	}
 	static IFString sPackagePath;
 
@@ -1057,7 +1108,7 @@ public:
 
 };
 
-IFStringW IFAndroidNativeSystemAPI::sWriteablePath;
+IFString IFAndroidNativeSystemAPI::sWriteablePath;
 IFString IFAndroidNativeSystemAPI::sPackagePath;
 bool IFAndroidNativeSystemAPI::bKeyboardShow = false;
 int IFAndroidNativeSystemAPI::processorcount = 0;
@@ -1071,4 +1122,12 @@ void NativeSystemAPIInit(JNIEnv* jni)
 
 #ifdef IFPLATFORM_WEB
 #include "IFNativeSystemApiWeb.inc"
+#endif
+
+#ifdef IFPLATFORM_FREE_RTOS
+#include "IFNativeSystemApiFreeRTOS.inc"
+#endif
+
+#ifdef IFPLATFORM_EMBED_NOSYS
+#include "IFNativeSystemApiEMBED.inc"
 #endif

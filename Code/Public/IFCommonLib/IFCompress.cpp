@@ -7,6 +7,7 @@
 #include "unzip.h"
 #include "zip.h"
 #include "IFUtility.h"
+#include "IFException.h"
 
 int  uncompress2 (
 	Bytef *dest,
@@ -38,7 +39,8 @@ bool IFCompress::decompress( IFStream* pSrc, IFStream* pDest )
 	const int bufsize = 64*1024;
 	Bytef srcbuf[bufsize];
 	Bytef destbuf[bufsize];
-	try
+	//try
+	IF_TRY_BEGIN
 	{
 		IFI64 nSrcSize = pSrc->size()-pSrc->tell();
 		while (nSrcSize)
@@ -54,10 +56,12 @@ bool IFCompress::decompress( IFStream* pSrc, IFStream* pDest )
 			pDest->write(destbuf,destlen);
 		}
 	}
-	catch(IFStreamReadException& e)
+	IF_CATCH
+	//catch(IFStreamReadException& e)
 	{
 		return false;
 	}
+	IF_TRY_END
 
 	return true;
 }

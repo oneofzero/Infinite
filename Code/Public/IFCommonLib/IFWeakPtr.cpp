@@ -26,13 +26,16 @@ THE SOFTWARE.
 #include "IFMap.h"
 #include "IFHashMap.h"
 #include "IFList.h"
-extern IFMap<void*,IFRBTree<void*> > g_WeakPtrList;
+extern IFMap<void*, IFSet<void*> > g_WeakPtrList;
+extern IFCSLock g_WeakPtrListLock;
 
 void addWeakPtr( void* wkptr, void* pObj )
 {
 	if(pObj)
 	{
-		IFMap<void*,IFRBTree<void*> >::iterator it = g_WeakPtrList.find(pObj);
+		IFCSLockHelper lh(g_WeakPtrListLock);
+
+		auto it = g_WeakPtrList.find(pObj);
 		if(it!=g_WeakPtrList.end())
 		{
 			it->second.insert(wkptr);
@@ -48,10 +51,12 @@ void removeWeakPtr( void* wkptr, void* pObj )
 {
 	if(pObj)
 	{
-		IFMap<void*,IFRBTree<void*> >::iterator it = g_WeakPtrList.find(pObj);
+		IFCSLockHelper lh(g_WeakPtrListLock);
+
+		auto it = g_WeakPtrList.find(pObj);
 		if(it!=g_WeakPtrList.end())
 		{
-			IFRBTree<void*>::iterator it2 = it->second.find(wkptr);
+			auto it2 = it->second.find(wkptr);
 			if(it2!= it->second.end() )
 			{
 				it->second.erase(it2);

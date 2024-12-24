@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_STACK_DUMPER_H__
+#define __IF_STACK_DUMPER_H__
 #include "IFCommonLib_API.h"
 #include "IFString.h"
 
@@ -40,20 +42,34 @@ public:
 	IFString toString() const;
 
 	bool operator == (const IFStackDumper& dmp) const
+#ifdef IFPLATFORM_WEB
+		;
+#else
 	{
 		return m_nHash == dmp.m_nHash && m_Stack == dmp.m_Stack;
 	}
+#endif
 
 	inline IFUI32 getHash() const
+#ifdef IFPLATFORM_WEB
+		;
+#else
 	{
 		return m_nHash;
 	}
+#endif
 
 private:
+
+#ifdef IFPLATFORM_WEB
+	IFString m_CallStackString;
+#else
 	IFArray<void*> m_Stack;
 	int m_nHash;
+#endif
 };
 inline IFUI32 IFHashFunc(const IFStackDumper& p)
 {
 	return p.getHash();
 }
+#endif //__IF_STACK_DUMPER_H__

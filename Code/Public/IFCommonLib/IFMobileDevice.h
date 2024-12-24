@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+#ifndef __IF_MOBILE_DEVICE_H__
+#define __IF_MOBILE_DEVICE_H__
 #include "ifsingleton.h"
 #include "IFObj.h"
 #include "IFImageCodecMgr.h"
@@ -20,7 +22,9 @@ public:
 	typedef IFRefPtr<IFFunctor<void(const IFString& sPath, IFStream* pImgStream)>> ChoosePhotoResultFunPtr;
 
 	virtual void choosePhoto(ChoosePhotoResultFunPtr spResultFun) = 0;
-	virtual IFVector3D getAccSensor() = 0;	//¼ÓËÙ¶È¼Æ
+	virtual IFVector3D getAccSensor() = 0;	//åŠ é€Ÿåº¦è®¡
 
 };
 
+
+#endif //__IF_MOBILE_DEVICE_H__

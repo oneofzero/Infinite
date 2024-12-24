@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_PROFILE_H__
+#define __IF_PROFILE_H__
 #include "IFUtility.h"
 #include "IFObj.h"
 #include "IFMap.h"
@@ -80,7 +82,7 @@ public:
 	void dump(const IFString& tb, IFString& s);
 };
 
-class  IFCOMMON_API IFProfileMgr : public IFSingleton<IFProfileMgr>
+class  IFCOMMON_API IFProfileMgr : public IFSingleton<IFProfileMgr>, public IFMemObj
 {
 public:
 
@@ -102,12 +104,11 @@ private:
 		tpi->_backProfile = pInfo;
 	}
 
-private:
-
+public:
 	struct ThreadProfileInfo : public IFMemObj
 	{
 		ThreadProfileInfo()
-			: _backProfile (NULL)
+			: _backProfile(NULL)
 		{
 
 		}
@@ -115,9 +116,13 @@ private:
 		IFProfileInfo _profileRoot;
 	};
 
+private:
+
+
+
 	ThreadProfileInfo* getCurrentThreadProfileInfo();
 	
-
+	IFCSLock m_lock;
 	IFHashMap<IFUI32, ThreadProfileInfo*> _threadprofiles;
 	//TODO 一般windows 线程id 不会大于9999吧
 	//enum {MAX_THREAD_ID = 65536};
@@ -140,8 +145,9 @@ private:
 	IFProfileInfo* _parentInfo;
 };
 
-
-//#define IF_ENABLE_PROFILE TRUE
+#ifdef IFPLATFORM_WINDOWS
+//#define IF_ENABLE_PROFILE 1
+#endif
 
 #ifdef IF_ENABLE_PROFILE
 
@@ -168,3 +174,5 @@ private:
 #define IF_PROFILE_POINT_END()
 #define IF_PROFILE_INIT()
 #endif
+
+#endif //__IF_PROFILE_H__

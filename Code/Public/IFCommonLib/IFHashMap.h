@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_HASH_MAP_H__
+#define __IF_HASH_MAP_H__
 #include "IFHashSet.h"
 #include "IFMap.h"
 
@@ -42,6 +44,16 @@ public:
 	inline bool operator == (const IFHashPair& other) const
 	{
 		return first == other.first;
+	}
+
+	operator const First&() const
+	{
+		return first;
+	}
+
+	operator First& ()
+	{
+		return first;
 	}
 
 	IFHashPair() {}
@@ -66,15 +78,16 @@ inline IFUI32 IFHashFunc(const IFHashPair<First,Second>& n)
 }
 
 
-template<class TKey,class TVal, bool bMultiMap = false>
+template<class TKey,class TVal>
 
-class  IFHashMap : public IFHashSet<IFHashPair<TKey,TVal>>
+class  IFHashMap : public IFHashTable<IFHashPair<TKey,TVal>, TKey>
 {
 public:
-	typedef typename IFHashSet<IFHashPair<TKey, TVal>>::iterator iterator;
+	typedef IFHashTable<IFHashPair<TKey, TVal>, TKey> SuperClass;
+
+	typedef typename SuperClass::iterator iterator;
 	//typedef typename IFHashSet<IFPair<TKey, TVal>>::const_iterator const_iterator; 
 
-	typedef IFHashSet<IFHashPair<TKey,TVal>> SuperClass;
 
 	IFHashMap(IFUI32 nCapSize = 0)
 		:SuperClass(nCapSize)
@@ -90,7 +103,7 @@ public:
 	inline iterator find(const TKey& key) const
 	{
 		//IFPair<TKey,TVal> pair(key);
-		return SuperClass::find(*(IFHashPair<TKey,TVal>*)&key);
+		return SuperClass::find(key);
 	}
 
 	inline iterator insert(const IFPair<TKey, TVal>& pair)
@@ -117,3 +130,5 @@ public:
 	}
 
 };
+
+#endif //__IF_HASH_MAP_H__

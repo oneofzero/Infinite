@@ -33,7 +33,7 @@ typedef unsigned int IFUI32;
 #if defined(WIN32)
 typedef __int64 IFI64;
 typedef unsigned __int64 IFUI64;
-
+typedef wchar_t IFWCHAR;
 
 #else
 
@@ -49,13 +49,16 @@ struct RECT
 #ifndef NULL
 #define NULL 0
 #endif
-typedef wchar_t WCHAR;
+//typedef wchar_t IFWCHAR;
 
 #include <wchar.h>
 
 typedef unsigned char BYTE;
+#ifndef FF_INTDEF
+typedef wchar_t IFWCHAR;
+#endif
 
-typedef wchar_t WCHAR;
+typedef wchar_t IFWCHAR;
 
 template<class T>
 inline const T& min(const T&a, const T&b){return a<b?a:b;}

@@ -23,11 +23,11 @@ THE SOFTWARE.
 #include "stdafx.h"
 #include "IFTimer.h"
 #include "IFSystemAPI.h"
-
+#include "IFLogSystem.h"
 
 IFTimer::IFTimer(IFRefPtr<IFFunctor<IFUI64()>> spTickFun)
-	:m_spTickFun(spTickFun)
-	,m_bInUpdate(false)
+	:m_bInUpdate(false)
+	,m_spTickFun(spTickFun)
 {
 	if (!m_spTickFun)
 	{
@@ -105,6 +105,7 @@ void IFTimer::update()
 
 		for (auto& pr:m_TempFunInfoList)
 		{
+			//IFLogDebug("m_TempFunInfoList:%p size:%d key:%lld\r\n", &m_TimerFunInfoList, m_TimerFunInfoList.size(), pr.first);
 			auto& funlist = m_TimerFunInfoList[pr.first];
 			for (auto& info:pr.second)
 			{
@@ -136,7 +137,7 @@ void IFTimer::update()
 					auto spFunInfo = (*m_CurCallFunIt);
 					++m_CurCallFunIt ;
 
-					(*spFunInfo->m_spFun)();
+					(*spFunInfo->m_spFun)(nCurTick - it->first + spFunInfo->m_nDelay);
 					if ((int)(spFunInfo->m_nCallTime)>0)
 						spFunInfo->m_nCallTime --;
 					if (spFunInfo->m_nCallTime!=0 && spFunInfo->m_it!=funlist.end())

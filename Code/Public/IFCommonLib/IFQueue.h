@@ -22,10 +22,13 @@ THE SOFTWARE.
 */
 // lock free queue
 #pragma once
+#ifndef __IF_QUEUE_H__
+#define __IF_QUEUE_H__
 #include "IFObj.h"
 #include "IFAtomicOperation.h"
-
-//#define  IFQUEUE_USELOCK
+#ifdef IFPLATFORM_FREE_RTOS
+#define  IFQUEUE_USELOCK
+#endif
 #pragma pack(push)
 #pragma pack(8)
 template<typename T>
@@ -46,13 +49,32 @@ private:
 		T m_Data;
 	};
 public:
+	typedef T DataType;
+
 	IFQueue()
 		:m_pHead(NULL)
 		,m_pTail(NULL)
-		,m_nSize(0)
 		,m_nIdx(0)
+		,m_nSize(0)
+		
 	{
 		//m_pNIL->m_pNext = m_pNIL;
+	}
+
+	~IFQueue()
+	{
+		while (DataNode* pHead = (DataNode*)m_pHead)
+		{
+			m_pHead = m_pHead->m_pNext;
+			delete pHead;
+		}
+		m_nSize = 0;
+
+	}
+
+	int size() const
+	{
+		return m_nSize;
 	}
 
 #ifndef IFQUEUE_USELOCK
@@ -130,7 +152,7 @@ public:
 		DataNode* pHead = (DataNode*)m_pHead;
 
 
-		if (pHead == m_pNIL)
+		if (pHead == NULL)
 		{
 			m_Lock.unlock();
 			return false;
@@ -150,7 +172,7 @@ public:
 	void push(const T& d)
 	{
 		DataNode* pNewTail = IFNew DataNode(d);
-		pNewTail->m_pNext = m_pNIL;
+		pNewTail->m_pNext = NULL;
 		IFCSLockHelper lh(m_Lock);
 		if (m_nSize == 0 )
 		{
@@ -177,3 +199,5 @@ public:
 	volatile int m_nSize;
 };
 #pragma pack(pop)
+
+#endif //__IF_QUEUE_H__

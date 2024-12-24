@@ -20,6 +20,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
+#pragma once
+#ifndef __IF_NAVIGATION_H__
+#define __IF_NAVIGATION_H__
 #include "IFRefObj.h"
 #include "IFArray.h"
 #include "IFTypes.h"
@@ -52,3 +55,5 @@ protected:
 	IFArray<IFRefPtr<IFNaviCell>> m_Cells;
 	IFRefPtr<IFAStarState> m_spAStarState;
 };
+
+#endif //__IF_NAVIGATION_H__

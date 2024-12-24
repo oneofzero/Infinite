@@ -40,11 +40,17 @@ float IFVector3D::dot(const IFVector3D& o) const
 	return UVec3Dot( this, &o );
 }
 
-IFVector3D IFVector3D::normalize() const
+IFVector3D IFVector3D::normalized() const
 {
 	IFVector3D o;
 	UVec3Normalize(&o,this);
 	return o;
+}
+
+IFVector3D& IFVector3D::normalize()
+{
+	UVec3Normalize(this, this);
+	return *this;
 }
 
 IFVector3D IFVector3D::cross( const IFVector3D& o ) const
@@ -53,6 +59,19 @@ IFVector3D IFVector3D::cross( const IFVector3D& o ) const
 	UVec3Cross(&out,this,&o);
 	return out;
 }
+const IFVector3D IFVector3D::ZERO(0, 0, 0);
+
+const IFVector3D IFVector3D::ONE(1, 1, 1);
+
+const IFVector3D IFVector3D::LEFT(-1,0,0);
+
+const IFVector3D IFVector3D::RIGHT(1, 0, 0);
+
+const IFVector3D IFVector3D::FORWARD(0,-1,0);
+const IFVector3D IFVector3D::BACK(0, 1, 0);
+
+const IFVector3D IFVector3D::UP(0,0,1);
+const IFVector3D IFVector3D::DOWN(0, 0, -1);
 
 IFMatrix4x4 IFMatrix4x4::operator *(const IFMatrix4x4& o)const
 {
@@ -112,7 +131,7 @@ void IFMatrix4x4::translation(float x, float y, float z)
 
 }
 
-IFVector3D IFMatrix4x4::transPoint(float x, float y, float z)
+IFVector3D IFMatrix4x4::transPoint(float x, float y, float z) const
 {
 	IFVector3D v(x, y, z);
 	IFVector3D out;
@@ -131,6 +150,11 @@ void IFMatrix4x4::rotationY(float fAngle)
 void IFMatrix4x4::rotationZ(float fAngle)
 {
 	UMatrixRotationZ(this,fAngle);
+}
+
+void IFMatrix4x4::rotation(const IFQuaternion& r)
+{
+	UMatrixRotationQuaternion(this, &r);
 }
 
 void IFMatrix4x4::scale(const IFVector3D& s)
@@ -216,6 +240,39 @@ void IFMatrix4x4::decompose(IFVector3D* pos, IFVector3D* scale, IFVector3D* eule
 	}
 }
 
+
+IFMatrix4x4 IFMatrix4x4::TRS(const IFVector3D& pos, const IFQuaternion& rot, const IFVector3D& scale)
+{
+	IFMatrix4x4 t;
+	IFMatrix4x4 r;
+	IFMatrix4x4 s;
+	t.translation(pos);
+	r.rotation(rot);
+	s.scale(scale);
+
+	return s*r*t;
+}
+
+IFMatrix4x4 IFMatrix4x4::inverse() const
+{
+	IFMatrix4x4 mat;
+	UMatrixInverse(&mat, this);
+	return mat;
+}
+
+IFVector3D IFMatrix4x4::transformCoord(const IFVector3D& v) const
+{
+	IFVector3D out;
+	UVec3TransformCoord(&out, &v, this);
+	return out;
+}
+
+IFVector3D IFMatrix4x4::transformNormal(const IFVector3D& v) const
+{
+	IFVector3D out;
+	UVec3TransformNormal(&out, &v, this);
+	return out;
+}
 
 bool IFMatrix4x4::operator==(const IFMatrix4x4& o) const
 {
@@ -372,73 +429,73 @@ void IFPlane::transform( const IFMatrix4x4& mat )
 #else
 #endif
 }
-
-
-IFTime::IFTime()
-	:m_nTime(0)
-{
-#ifdef WIN32
-	SYSTEMTIME st;
-
-	FileTimeToSystemTime((const FILETIME*)&m_nTime, &st);
-
-	m_Year = st.wYear;
-	m_Month = st.wMonth;
-	m_Day = st.wDay;
-	m_Hour = st.wHour;
-	m_Minute = st.wMinute;
-	m_Second = st.wSecond;
-	m_MS =st.wMilliseconds;
-	#endif
-}
-
-IFTime::IFTime( IFUI64 nTime )
-	:m_nTime(nTime)
-{
-#ifdef WIN32
-	SYSTEMTIME st;
-	FileTimeToSystemTime((const FILETIME*)&m_nTime, &st);
-	m_Year = st.wYear;
-	m_Month = st.wMonth;
-	m_Day = st.wDay;
-	m_Hour = st.wHour;
-	m_Minute = st.wMinute;
-	m_Second = st.wSecond;
-	m_MS =st.wMilliseconds;
-#endif
-
-}
-
-#ifdef WIN32
-
-IFTime::IFTime( const FILETIME& ft )
-{
-	m_nTime = *(IFUI64*)&ft;
-	SYSTEMTIME st;
-	FileTimeToSystemTime((const FILETIME*)&ft, &st);
-	m_Year = st.wYear;
-	m_Month = st.wMonth;
-	m_Day = st.wDay;
-	m_Hour = st.wHour;
-	m_Minute = st.wMinute;
-	m_Second = st.wSecond;
-	m_MS =st.wMilliseconds;
-
-}
-
-IFTime::IFTime( const SYSTEMTIME st )
-{
-	SystemTimeToFileTime(&st, (FILETIME*)&m_nTime);
-	m_Year = st.wYear;
-	m_Month = st.wMonth;
-	m_Day = st.wDay;
-	m_Hour = st.wHour;
-	m_Minute = st.wMinute;
-	m_Second = st.wSecond;
-	m_MS =st.wMilliseconds;
-}
-
-#endif
+//
+//
+//IFTime::IFTime()
+//	:m_nTime(0)
+//{
+//#ifdef WIN32
+//	SYSTEMTIME st;
+//
+//	FileTimeToSystemTime((const FILETIME*)&m_nTime, &st);
+//
+//	m_Year = st.wYear;
+//	m_Month = st.wMonth;
+//	m_Day = st.wDay;
+//	m_Hour = st.wHour;
+//	m_Minute = st.wMinute;
+//	m_Second = st.wSecond;
+//	m_MS =st.wMilliseconds;
+//	#endif
+//}
+//
+//IFTime::IFTime( IFUI64 nTime )
+//	:m_nTime(nTime)
+//{
+//#ifdef WIN32
+//	SYSTEMTIME st;
+//	FileTimeToSystemTime((const FILETIME*)&m_nTime, &st);
+//	m_Year = st.wYear;
+//	m_Month = st.wMonth;
+//	m_Day = st.wDay;
+//	m_Hour = st.wHour;
+//	m_Minute = st.wMinute;
+//	m_Second = st.wSecond;
+//	m_MS =st.wMilliseconds;
+//#endif
+//
+//}
+//
+//#ifdef WIN32
+//
+//IFTime::IFTime( const FILETIME& ft )
+//{
+//	m_nTime = *(IFUI64*)&ft;
+//	SYSTEMTIME st;
+//	FileTimeToSystemTime((const FILETIME*)&ft, &st);
+//	m_Year = st.wYear;
+//	m_Month = st.wMonth;
+//	m_Day = st.wDay;
+//	m_Hour = st.wHour;
+//	m_Minute = st.wMinute;
+//	m_Second = st.wSecond;
+//	m_MS =st.wMilliseconds;
+//
+//}
+//
+//IFTime::IFTime( const SYSTEMTIME st )
+//{
+//	SystemTimeToFileTime(&st, (FILETIME*)&m_nTime);
+//	m_Year = st.wYear;
+//	m_Month = st.wMonth;
+//	m_Day = st.wDay;
+//	m_Hour = st.wHour;
+//	m_Minute = st.wMinute;
+//	m_Second = st.wSecond;
+//	m_MS =st.wMilliseconds;
+//}
+//
+//#endif
 
 const IFColor IFColor::WHITE(0xFFFFFFFF);
 
@@ -455,6 +512,21 @@ inline IFVector3D threeaxisrot(float r11, float r12, float r21, float r31, float
 asin ( r21 ),
 	-atan2( r11, r12 ));
 }
+
+void IFQuaternion::fromEuler(float x, float y, float z)
+{
+	const float cosz = cos(z / 2.0f);
+	const float cosy = cos(y / 2.0f);
+	const float cosx = cos(x / 2.0f);
+	const float sinz = sin(z / 2.0f);
+	const float siny = sin(y / 2.0f);
+	const float sinx = sin(x / 2.0f);
+	this->w = cosx * cosy * cosz + sinx * siny * sinz;
+	this->x = sinx * cosy * cosz - cosx * siny * sinz;
+	this->y = cosx * siny * cosz + sinx * cosy * sinz;
+	this->z = cosx * cosy * sinz - sinx * siny * cosz;
+}
+
 IFVector3D IFQuaternion::toEuler() const
 {
 	return threeaxisrot( 2*(x*y + w*z),
@@ -478,13 +550,33 @@ IFVector3D IFQuaternion::rotate(const IFVector3D& v) const
 
 }
 
+IFQuaternion IFQuaternion::inverse() const
+{
+	return IFQuaternion(-x, -y, -z, w);
+}
+
+IFQuaternion IFQuaternion::operator*(const IFQuaternion& o) const
+{
+	return IFQuaternion(
+		o.w * x + o.x * w + o.y * z - o.z * y,
+		o.w * y + o.y * w + o.z * x - o.x * z,
+		o.w * z + o.z * w + o.x * y - o.y * x,
+		o.w * w - o.x * x - o.y * y - o.z * z);
+}
+
 IFQuaternion IFQuaternion::FromTo(const IFVector3D& a, const IFVector3D& b)
 {
-	float w = -a.dot(b);;
-	auto v = a.cross(b);
-	return IFQuaternion(v.x, v.y, v.z, w);
+	auto c = a.cross(b);
+	float d = a.dot(b);
+	float s = sqrtf((1 + d) * 2.0f);
+	return IFQuaternion(c.x / s, c.y / s, c.z / s, s / 2.0f);
+	//float w = -a.dot(b);;
+	//auto v = a.cross(b);
+	//return IFQuaternion(v.x, v.y, v.z, w);
 	
 }
+
+
 
 IF_DEFINERTTIROOT(IFVertexDeclaration);
 IF_DEFINERTTIROOT(IFVector3D);
@@ -493,7 +585,7 @@ IF_DEFINERTTIROOT(IFMatrix4x4);
 IF_DEFINERTTIROOT(IFPlane);
 IF_DEFINERTTIROOT(IFColor);
 IF_DEFINERTTIROOT(IFColorF);
-IF_DEFINERTTIROOT(IFTime);
+//IF_DEFINERTTIROOT(IFTime);
 IF_DEFINERTTIROOT(IFQuaternion);
 
 

@@ -21,26 +21,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_RB_TREE_H__
+#define __IF_RB_TREE_H__
 #include "IFCommonLib_API.h"
 #include "IFObj.h"
 #include "IFAlloc.h"
 
-template <class KeyType,bool EnableMultiInsert = false>
+template <class NodeValueType, class KeyType, bool EnableMultiInsert = false>
 class  IFRBTree : public IFMemObj
 {
-	typedef IFRBTree<KeyType,EnableMultiInsert> MyType;
+	typedef IFRBTree<NodeValueType, KeyType, EnableMultiInsert> MyType;
+	//typedef typename NodeValueType::KeyType KeyType;
+	typedef NodeValueType ValueType;
+
 	//! red/black tree for map
 	//template <class KeyType>
 	class TreeNode : public IFMemObj
 	{
 	public:
 
-		TreeNode(const KeyType& k)
-			: left(0), right(0), parent(0), key(k),
+		TreeNode(const NodeValueType& v)
+			: left(0), right(0), parent(0), val(v),
 			mIsRed(true) {}
 
-		TreeNode(KeyType&& k)
-			: left(0), right(0), parent(0), key(k),
+		TreeNode(NodeValueType&& v)
+			: left(0), right(0), parent(0), val(v),
 			mIsRed(true) {}
 
 		~TreeNode(){}
@@ -61,14 +66,22 @@ class  IFRBTree : public IFMemObj
 
 		inline const KeyType& getKey() const
 		{
-			return key;
+			return val;
 		}
 
 		inline KeyType& getKey()
 		{
-			return key;
+			return val;
+		}
+		inline const ValueType& getVal() const
+		{
+			return val;
 		}
 
+		inline ValueType& getVal()
+		{
+			return val;
+		}
 
 		inline bool isRoot() const
 		{
@@ -120,7 +133,7 @@ class  IFRBTree : public IFMemObj
 
 		TreeNode*		parent;
 
-		KeyType	key;
+		NodeValueType	val;
 		bool mIsRed;
 	};
 
@@ -231,12 +244,17 @@ public:
 			return *this;
 		};
 
-		inline bool operator == (const iterator& other )
+		inline bool operator == (const iterator& other ) const
 		{
 			return m_pNode == other.m_pNode;
 		}
 
-		inline bool operator !=(const iterator& other )
+		inline bool operator < (const iterator& other) const
+		{
+			return m_pNode < other.m_pNode;
+		}
+
+		inline bool operator !=(const iterator& other ) const
 		{
 			return !operator==(other);
 		}
@@ -277,46 +295,19 @@ public:
 		{
 			m_pNode=  moveLeft(m_pNode,m_pTree);
 			return *this;
-			//if( !m_pNode )
-			//{
-			//	m_pNode = m_pTree->maxnum(m_pTree->mRoot);
-			//	return *this;
-			//}
 
-			//if( m_pNode->left /*&& m_pNode->left != m_pTree->NIL*/ )
-			//{
-			//	m_pNode = m_pTree->maxnum(m_pNode->left);
-			//	return *this;
-			//}
-			//else if( m_pNode->parent /*&& m_pNode->parent != m_pTree->NIL*/ )
-			//{
-
-			//	TreeNode* pParent=m_pNode->parent;
-			//	while(pParent  /*&& pParent != m_pTree->NIL*/)
-			//	{
-			//		if( m_pNode->key < pParent->key   )
-			//			pParent = pParent->parent;
-			//		else
-			//		{
-			//			m_pNode = pParent;
-			//			return *this;
-			//		}
-			//	}
-
-			//}
-
-			//m_pNode = NULL;
-			//return *this;
 		}
-		inline KeyType& operator*()
+		inline ValueType& operator*()
 		{
-			return m_pNode->key;
+			return m_pNode->getVal();
 		}
 
-		inline KeyType* operator->() const
+		inline ValueType* operator->() const
 		{
-			return &m_pNode->key;
+			return &m_pNode->getVal();
 		}
+
+
 
 		TreeNode* m_pNode;
 		MyType* m_pTree;
@@ -361,14 +352,14 @@ public:
 			return *this;
 
 		}
-		inline KeyType& operator*()
+		inline NodeValueType& operator*()
 		{
-			return m_pNode->key;
+			return m_pNode->getVal();
 		}
 
-		inline KeyType* operator->()
+		inline NodeValueType* operator->()
 		{
-			return &m_pNode->key;
+			return &m_pNode->getVal();
 		}
 
 		operator iterator()
@@ -418,14 +409,14 @@ public:
 			m_pNode = moveLeft(m_pNode,m_pTree);
 			return *this;
 		}
-		inline const KeyType& operator*() const
+		inline const NodeValueType& operator*() const
 		{
-			return m_pNode->key;
+			return m_pNode->getVal();
 		}
 
-		inline const KeyType* operator->() const
+		inline const NodeValueType* operator->() const
 		{
-			return &m_pNode->key;
+			return &m_pNode->getVal();
 		}
 
 		const TreeNode* m_pNode;
@@ -462,11 +453,11 @@ public:
 		return reverse_iterator(this,0);
 	}
 
-	iterator insert(const KeyType& keyNew)
+	iterator insert(const NodeValueType& keyNew)
 	{
-		return insert((KeyType&&)keyNew);
+		return insert((NodeValueType&&)keyNew);
 	}
-	iterator insert(KeyType&& keyNew)
+	iterator insert(NodeValueType&& keyNew)
 	{
 		TreeNode* newNode = IFNew/*(IFAlloc::Alloc(sizeof(TreeNode)))*/ TreeNode(keyNew);
 		if (!insert(newNode))
@@ -599,7 +590,7 @@ public:
 			//const KeyType& key(pNode->getKey());
 
 
-			if (keyToFind < pNode->key)
+			if (keyToFind < pNode->getKey())
 				pNode = pNode->left;
 			else
 			{
@@ -608,7 +599,7 @@ public:
 			}
 
 		}
-		if (pLastNode && pLastNode->key  < keyToFind )
+		if (pLastNode && pLastNode->getKey()  < keyToFind )
 			return iterator(this, NULL);
 		//	return iterator(this,pLastNode);
 		return iterator(this, pLastNode);
@@ -616,7 +607,7 @@ public:
 
 	const_iterator find(const KeyType& keyToFind) const
 	{
-		TreeNode* pNode = mRoot;
+		const TreeNode* pNode = mRoot;
 
 		while(pNode!=0)
 		{
@@ -666,8 +657,8 @@ public:
 			++itNext;
 			if( itNext.m_pNode )
 			{
-				KeyType dA = keyToFind - (*it);
-				KeyType dB = (*itNext) - keyToFind;
+				KeyType dA = keyToFind - it.m_pNode->getKey();
+				KeyType dB = itNext.m_pNode->getKey() - keyToFind;
 				if( dA < dB )
 				{
 					return it;
@@ -861,8 +852,12 @@ private:
 
 };
 
-template<class T>
-class IFMultiRBTree : public IFRBTree<T,true>
-{
+template <class T, class TKey>
 
-};
+using IFMultiRBTree = IFRBTree<T, TKey, true>;
+
+
+
+template <class NodeValueType, bool EnableMultiInsert = false>
+using IFSet = IFRBTree<NodeValueType, NodeValueType, EnableMultiInsert>;
+#endif //__IF_RB_TREE_H__

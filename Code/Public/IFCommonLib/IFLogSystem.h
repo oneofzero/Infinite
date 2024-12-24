@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_LOG_SYSTEM_H__
+#define __IF_LOG_SYSTEM_H__
 #include "ifsingleton.h"
 #include "IFStream.h"
 #include "IFCSLockHelper.h"
@@ -28,6 +30,7 @@ THE SOFTWARE.
 #include "IFArray.h"
 #include "IFString.h"
 #include "IFMap.h"
+#include "IFEventSlot.h"
 
 enum IFLogLevel
 {
@@ -43,14 +46,14 @@ enum IFLogLevel
 class IFCOMMON_API IFLogSystem : public IFMemObj
 {
 public:
-
+	IFEventSlot<void(IFLogLevel nLevel, const char* sLog, int nlen)> event_Log;
 
 	void addLogStream(IFStream* pStream);
 
 	void removeLogStream(IFStream* pStream);
 	
 	void log(int nLevel, const char* sformat, ... );
-	void log(int nLevel, const WCHAR* sformat, ...);
+	void log(int nLevel, const IFWCHAR* sformat, ...);
 	void logDirect(int nLevel, const char* sdata, int len);
 
 	void logToStream(IFStream* pStream, const IFString& s);
@@ -115,9 +118,9 @@ protected:
 	}
 public:
 
-	const IFStringW& getName()
+	const IFString& getName()
 	{
-		return IFStringW::Empty;
+		return IFString::Empty;
 	}
 	virtual IFUI32 read(void* pDestData, IFUI32 nSize )
 	{
@@ -157,3 +160,5 @@ class IFCOMMON_API IFDebugOutStream : public IFConsoleStream
 public:
 	virtual IFUI32 write(const void* pSourceData, IFUI32 nSize );
 };
+
+#endif //__IF_LOG_SYSTEM_H__

@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_CONNECTION_H__
+#define __IF_NET_CONNECTION_H__
 #ifdef WIN32
 #include <WinSock2.h>
 #if defined(WINAPI_FAMILY) && WINAPI_PARTITION_APP == WINAPI_FAMILY
@@ -28,6 +30,7 @@ typedef int SOCKET;
 #define NO_WINSOCK_API TRUE
 #endif
 #else
+#ifndef IFPLATFORM_EMBED_NOSYS
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
@@ -37,6 +40,7 @@ typedef int SOCKET;
 #include <string.h>
 #define INVALID_SOCKET  0
 #define closesocket close
+#endif
 
 #endif
 #include "IFRefObj.h"
@@ -48,11 +52,13 @@ typedef int SOCKET;
 #include "IFFIFOStream.h"
 #include "IFMemStream.h"
 
+#ifndef IFPLATFORM_FREE_RTOS
 class IFNet_Message;
+class IFNet_Message_EstablishEncryption_Res;
+#endif
 
 struct IFNetIOData;
 class IFNetCore;
-class IFNet_Message_EstablishEncryption_Res;
 class IFAES;
 
 enum IFNetConnectionState
@@ -116,6 +122,7 @@ public:
 	int m_nCurPackLenBufSize;
 
 private:
+	virtual ~IFNetRecvPackage();
 	IFNetRecvPackage(const IFNetRecvPackage& o)
 	{
 
@@ -165,9 +172,11 @@ public:
 	//receive data thread fire in  work threads if netcore work in multithread;
 	IFEventSlot<void(IFNetConnection* pConnection,const void* pBuf, IFUI32 nSize)> event_RecvUnKnownPackage;
 	//receive package event only fire in main process thread
+#ifndef IFPLATFORM_FREE_RTOS
 	IFEventSlot<void(IFNetConnection* pConnection,IFNet_Message* pPackage)> event_RecvPackage;
 
 	IFEventSlot<void(IFNetConnection* pConnection)> event_ErrorPack;
+#endif
 
 	IFEventSlot<void(IFNetConnection* pConnection, IFUI64 nSendID, bool bSendOK)> event_SendResult;
 
@@ -190,7 +199,10 @@ public:
 
 	IFUI64 sendData(const void* pData, IFUI32 nLen);
 	IFUI64 sendString(const char* sString);
+#ifndef IFPLATFORM_FREE_RTOS
 	IFUI64 sendMsg(IFNet_Message* pMsg, bool bCompress = false, IFNetEncryptFunctor* pFun = NULL);
+#endif
+	
 
 	IFNetConnectionState getState() const;
 
@@ -236,7 +248,7 @@ public:
 	//void setEncryptionPrivateKey(IFMemStream* pRivateKey);
 
 	//客户端建立sll 链接
-	bool establishSSL();
+	bool establishSSL(const IFString& hostname);
 	//服务端等待客户端建立sll链接
 	bool waitEstablishSSL();
 
@@ -265,9 +277,11 @@ protected:
 	void fireRecvPackageEvent(IFNetRecvPackage* pPackage);
 	
 	void fireSendDoneEvent(IFUI64 nSendID, bool bOK);
+#ifndef IFPLATFORM_FREE_RTOS
 
 	static void ProcEstablishEncryptRes(IFNetConnection* pCon, IFNet_Message_EstablishEncryption_Res* pRes);
 	void procEstablishEncryptRes(IFNet_Message_EstablishEncryption_Res* pRes);
+#endif
 
 	IFUI64 getSendID();
 
@@ -283,17 +297,21 @@ protected:
 	//IFNetIOData* m_pRecvDataBuf;
 
 	//IFRefPtr<IFFIFOStream> m_FIFO;
+#ifndef IFPLATFORM_FREE_RTOS
+
 	IFRefPtr<IFNetDepacker> m_spDepacker;
-	IFRefPtr<IFRefObj> m_spUserData;
 	IFRefPtr<IFNetEncryptFunctor> m_spDecryptFun;
 	IFRefPtr<IFNetEncryptFunctor> m_spDefaultEncryptFun;
 	IFArray<IFNet_Message*> m_PackageList;
+#endif
+	IFRefPtr<IFRefObj> m_spUserData;
+	
 	IFUI32 m_LastCommunicateTime;
 	PackProcessFunPtr m_spPackPreProcessFun;
 	IFUI32 m_nSendPendingBytes;
 	IFUI32 m_nMaxSendBufferSize;
 	IFUI32 m_nAutoKeepAliveTimeOutMS;
-	IFUI64 m_nSendID;
+	static IFUI64 m_nSendID;
 	IFRefPtr<IFMemStream> m_spKeepAlivePackage;
 	IFSimpleArray<IFUI8> m_EncryptTestData;
 	IFRefPtr<IFAES> m_spAES;
@@ -317,6 +335,7 @@ protected:
 	friend class IFNetCore;
 
 };
+#ifndef IFPLATFORM_FREE_RTOS
 
 struct IFAsyncSendMsgInfo : public IFMemObj
 {
@@ -326,7 +345,10 @@ struct IFAsyncSendMsgInfo : public IFMemObj
 	bool bCompress;
 	IFRefPtr<IFNetEncryptFunctor> pFun;
 };
+#endif
 #pragma pack(pop)
 
 typedef IFRefPtr<IFNetConnection> IFNetConnectionPtr;
 
+
+#endif //__IF_NET_CONNECTION_H__

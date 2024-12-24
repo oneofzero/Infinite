@@ -35,13 +35,30 @@ public:
 	IFSuperAttrInfo();
 
 	IFAttributeList m_AttributeList;
-	IFStringW m_sName;
+	IFString m_sName;
 	IFString m_ClassName;
+	IFString m_sDir;
+
+
+	IFString getPath();
+
+	bool isLoaded()
+	{
+		return m_loaded;
+	}
+
+	bool load();
 
 protected:
 	~IFSuperAttrInfo();
+	
+	bool m_loaded;
+
+	friend class IFSuperAttrMgr;
 
 };
+
+class IFAsyncResultBool;
 
 class IFCOMMON_API IFSuperAttrMgr : public IFSingleton<IFSuperAttrMgr>, public IFObj
 {
@@ -52,38 +69,50 @@ public:
 	IFEventSlot<void(IFSuperAttrInfo* pInfo)> event_SuperAttrRemove;
 
 
-	typedef IFMap<IFStringW, IFRefPtr<IFSuperAttrInfo> > SuperAttList;
+	typedef IFHashMap<IFString, IFRefPtr<IFSuperAttrInfo> > SuperAttList;
+
+	static const IFString BUILTIN_DIR;
+
 public:
 	IFSuperAttrMgr(void);
 	~IFSuperAttrMgr(void);
 
-	bool loadSuperAttrs(const IFStringW& sSuperAttrFileName );
 	
-	bool loadSuperAttrsFromDir(const IFStringW& sDir); //sdir must is absolute
-	bool loadSuperAttrsFromFileList(const IFStringW& sDir);
+	
+	//bool loadSuperAttrsFromDir(const IFString& sDir); //sdir must is absolute
+	bool loadSuperAttrsFromFileList(const IFString& sDirPath);
+	bool loadSuperAttrsFromStream(const IFString& sDir, IFStream* pStream);
 
-	bool saveSuperAttrs(const IFStringW& sSuperAttrFileName );
-	bool saveSuperAttr(const IFStringW& sSuperAttrName);
+	IFRefPtr<IFAsyncResultBool> loadSuperAttrsFromFileListAsync(const IFString& sDirPath, bool loadAttrs);
+
+
+	bool saveSuperAttrs(const IFString& sSuperAttrFileName );
+	bool saveSuperAttr(const IFString& sSuperAttrName);
 	bool saveSuperAttr(IFSuperAttrInfo* pInfo);
 	bool saveSuperAttrs();
 
-	IFSuperAttrInfo* getSuperAttr(const IFStringW& sName);
+	IFSuperAttrInfo* getSuperAttr(const IFString& sName);
 
-	void addSuperAttr(IFSuperAttrInfo* pInfo, bool bNeedSave = false);
-	void removeSuperAttr(const IFStringW& sName, bool bNeedSave = false);
-	void renameSuperAttr(const IFStringW& sOldName, const IFStringW& sNewName, bool bNeedSave = false);
+	void addSuperAttr(IFSuperAttrInfo* pInfo);
+	void removeSuperAttr(const IFString& sName, bool needSave = true);
+	void renameSuperAttr(const IFString& sOldName, const IFString& sNewName);
 
 	SuperAttList::iterator getFirstSuperAttr();
 	SuperAttList::iterator getEndSuperAttr();
 
-	IFStringW getAttFilePath(const IFStringW& sSuperAttrName);
+	//IFString getAttFilePath(const IFString& sSuperAttrName);
 
-	bool saveSuperAttriNameList();
+	bool saveSuperAttriNameList(const IFString& sDir);
 
 private:
 
+	bool loadSuperAttr(IFSuperAttrInfo* info);
+
 	SuperAttList m_SuperAttList;
-	IFStringW m_sCurSuperAttrFileName;
-	IFStringW m_sSuperAttrDir;
+	//IFHashSet<IFString> m_Loaded;
+	IFString m_sCurSuperAttrFileName;
+	//IFString m_sSuperAttrDir;
+
+	friend class IFSuperAttrInfo;
 };
 

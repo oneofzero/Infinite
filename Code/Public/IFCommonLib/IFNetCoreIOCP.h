@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_CORE_IOCP_H__
+#define __IF_NET_CORE_IOCP_H__
 #include "IFCommonLib_API.h"
 #include "IFNetCore.h"
 #include "WinSock2.h"
@@ -164,6 +166,9 @@ public:
 	{
 		delete (IFNetCoreIOCP_IODATA_Send*)pData;
 	}
+#ifdef _DEBUG
+	bool m_bIsDirectSend;
+#endif
 	IFUI64 m_nSendID;
 	WSABUF m_WSABuf;
 
@@ -182,7 +187,7 @@ class IFCOMMON_API IFNetCoreIOCP : public IFNetCore
 	IFNetConnectionPtr createConnection(const IFString& sAddress, int nPort, bool syncconnect = true,  bool bPackagemode = true, bool bSyncEvent = true);
 	virtual bool startListen(int nPort, bool enableSSL = false, bool packagemode = false);
 	virtual bool stopListen(int nPort);
-
+	virtual bool isListening(int nPort) override;
 
 	IFRefPtr<IFStream> createSendPack();
 
@@ -358,3 +363,5 @@ protected:
 	friend class IFNetCoreIOCP;
 	IFCSLock m_Lock;
 };
+
+#endif //__IF_NET_CORE_IOCP_H__

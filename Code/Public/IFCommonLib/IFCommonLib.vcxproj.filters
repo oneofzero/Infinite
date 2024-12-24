@@ -82,6 +82,9 @@
     <Filter Include="Net\RedisClient">
       <UniqueIdentifier>{66a222d3-440d-41ac-9e52-f6ecbd2bda97}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Net\Web">
+      <UniqueIdentifier>{7f8c1c5f-3596-4aa1-a6a5-d7d8a2e9a667}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -402,9 +405,6 @@
     <ClCompile Include="IFSHA.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="IFComPort.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="IFNumParse.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -416,6 +416,42 @@
     </ClCompile>
     <ClCompile Include="IFNumArray.cpp">
       <Filter>Math</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFloatNumber.cpp">
+      <Filter>头文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFFileLogStream.cpp">
+      <Filter>Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="IFException.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAttributeAccessor.cpp">
+      <Filter>Attribute</Filter>
+    </ClCompile>
+    <ClCompile Include="IFStringCSFormat.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFDirectoryWatcher.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFAsyncResult.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFMemoryDLLLoader.cpp">
+      <Filter>System</Filter>
+    </ClCompile>
+    <ClCompile Include="IFSingleThreadAlloc.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="IFNetCoreWebSocket.cpp">
+      <Filter>Net\Web</Filter>
+    </ClCompile>
+    <ClCompile Include="IFCFileStream.cpp">
+      <Filter>FileSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="IFWIN32FileStream.cpp">
+      <Filter>FileSystem</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -587,9 +623,6 @@
     <ClInclude Include="IFParamsMacro.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IFEventSlotSpec.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="androidwcs.h">
       <Filter>源文件</Filter>
     </ClInclude>
@@ -668,9 +701,6 @@
     <ClInclude Include="IFJSON.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IFContainerSerialize.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="IFCompress.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -737,9 +767,6 @@
     <ClInclude Include="IFSHA.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="IFComPort.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="IFRemoteLogStream.h">
       <Filter>Logger</Filter>
     </ClInclude>
@@ -748,6 +775,42 @@
     </ClInclude>
     <ClInclude Include="IFNumArray.h">
       <Filter>Math</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFloatNumber.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFFileLogStream.h">
+      <Filter>Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="IFException.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAttributeAccessor.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFAttrGeneric.h">
+      <Filter>Attribute</Filter>
+    </ClInclude>
+    <ClInclude Include="IFStringCSFormat.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFDirectoryWatcher.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFMemoryDLLLoader.h">
+      <Filter>System</Filter>
+    </ClInclude>
+    <ClInclude Include="IFSingleThreadAlloc.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="IFNetCoreWebSocket.h">
+      <Filter>Net\Web</Filter>
+    </ClInclude>
+    <ClInclude Include="IFCFileStream.h">
+      <Filter>FileSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="IFWIN32FileStream.h">
+      <Filter>FileSystem</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

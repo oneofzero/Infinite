@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="IFCommonLib" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="../../../binD/IFCommonLib" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../../obj/Debug/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-std=c++11" />
+					<Add option="-g" />
+					<Add option="-fPIC" />
+					<Add directory="../3rd/include" />
+					<Add directory="./rsa" />
+				</Compiler>
+				<Linker>
+					<Add option="-pthread" />
+					<Add library="../3rd/lib/Linux/x86/libtinyxml_d.a" />
+				</Linker>
+			</Target>
+			<Target title="Release">
+				<Option output="../../../bin/IFCommonLib" prefix_auto="1" extension_auto="1" />
+				<Option object_output="../../../obj/Release/" />
+				<Option type="3" />
+				<Option compiler="gcc" />
+				<Option createDefFile="1" />
+				<Option createStaticLib="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-fPIC" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add option="-DLINUX" />
+			<Add directory="../3rd/include" />
+		</Compiler>
+		<Linker>
+			<Add option="-Wl,--no-undefined" />
+		</Linker>
+		<Unit filename="CMakeLists.txt" />
+		<Unit filename="Common_old.h" />
+		<Unit filename="IFAlloc.cpp" />
+		<Unit filename="IFAlloc.h" />
+		<Unit filename="IFAnyBasic.cpp" />
+		<Unit filename="IFArray.cpp" />
+		<Unit filename="IFArray.h" />
+		<Unit filename="IFAtomicOperation.h" />
+		<Unit filename="IFAttribute.cpp" />
+		<Unit filename="IFAttribute.h" />
+		<Unit filename="IFAttributeMgr.cpp" />
+		<Unit filename="IFAttributeMgr.h" />
+		<Unit filename="IFAttributeSet.cpp" />
+		<Unit filename="IFAttributeSet.h" />
+		<Unit filename="IFBaseTypeDefine.h" />
+		<Unit filename="IFCSLockHelper.h" />
+		<Unit filename="IFCommonLib.cbp" />
+		<Unit filename="IFCommonLib.cpp" />
+		<Unit filename="IFCommonLib.h" />
+		<Unit filename="IFCommonLib.vcproj" />
+		<Unit filename="IFCommonLib.vcxproj" />
+		<Unit filename="IFCommonLib.vcxproj.filters" />
+		<Unit filename="IFCommonLib_2005.vcproj" />
+		<Unit filename="IFCommonLib_API.h" />
+		<Unit filename="IFEventSlot.h" />
+		<Unit filename="IFEventSlotSpec.h" />
+		<Unit filename="IFFIFOStream.cpp" />
+		<Unit filename="IFFIFOStream.h" />
+		<Unit filename="IFFileInfo.cpp" />
+		<Unit filename="IFFileInfo.h" />
+		<Unit filename="IFFileMappingList.h" />
+		<Unit filename="IFFilePackage.cpp" />
+		<Unit filename="IFFilePackage.h" />
+		<Unit filename="IFFileProvider.cpp" />
+		<Unit filename="IFFileProvider.h" />
+		<Unit filename="IFFileStream.cpp" />
+		<Unit filename="IFFileStream.h" />
+		<Unit filename="IFFileSystem.cpp" />
+		<Unit filename="IFFileSystem.h" />
+		<Unit filename="IFFixNumber.cpp" />
+		<Unit filename="IFFunctor.cpp" />
+		<Unit filename="IFFunctor.h" />
+		<Unit filename="IFGlobalObject.cpp" />
+		<Unit filename="IFHttpDownloader.cpp" />
+		<Unit filename="IFIDAllocator.cpp" />
+		<Unit filename="IFIDAllocator.h" />
+		<Unit filename="IFImageCodecMgr.cpp" />
+		<Unit filename="IFImageCodecMgr.h" />
+		<Unit filename="IFJSON.cpp" />
+		<Unit filename="IFLerp.h" />
+		<Unit filename="IFList.cpp" />
+		<Unit filename="IFList.h" />
+		<Unit filename="IFLogSystem.cpp" />
+		<Unit filename="IFLogSystem.h" />
+		<Unit filename="IFMD5.cpp" />
+		<Unit filename="IFMD5.h" />
+		<Unit filename="IFMap.cpp" />
+		<Unit filename="IFMap.h" />
+		<Unit filename="IFMath.cpp" />
+		<Unit filename="IFMath.h" />
+		<Unit filename="IFMemPool.cpp" />
+		<Unit filename="IFMemPool.h" />
+		<Unit filename="IFMemStream.cpp" />
+		<Unit filename="IFMemStream.h" />
+		<Unit filename="IFNaviCell.cpp" />
+		<Unit filename="IFNaviCell.h" />
+		<Unit filename="IFNaviPath.cpp" />
+		<Unit filename="IFNaviPath.h" />
+		<Unit filename="IFNavigation.cpp" />
+		<Unit filename="IFNavigation.h" />
+		<Unit filename="IFNetConnection.cpp" />
+		<Unit filename="IFNetConnection.h" />
+		<Unit filename="IFNetCore.cpp" />
+		<Unit filename="IFNetCore.h" />
+		<Unit filename="IFNetCoreEPOLL.cpp" />
+		<Unit filename="IFNetCoreEPOLL.h" />
+		<Unit filename="IFNetCoreSelect.cpp" />
+		<Unit filename="IFNetCoreSelect.h" />
+		<Unit filename="IFNetGlobalDefine.h" />
+		<Unit filename="IFNetIOData.cpp" />
+		<Unit filename="IFNetIOData.h" />
+		<Unit filename="IFNetMsgFactory.cpp" />
+		<Unit filename="IFNetMsgFactory.h" />
+		<Unit filename="IFObjectFactory.cpp" />
+		<Unit filename="IFObjectFactory.h" />
+		<Unit filename="IFParamsMacro.h" />
+		<Unit filename="IFPipe.h" />
+		<Unit filename="IFPipeCore.h" />
+		<Unit filename="IFProfile.cpp" />
+		<Unit filename="IFProfile.h" />
+		<Unit filename="IFRBTree.cpp" />
+		<Unit filename="IFRBTree.h" />
+		<Unit filename="IFRSA.cpp" />
+		<Unit filename="IFRTTI.h" />
+		<Unit filename="IFRect.h" />
+		<Unit filename="IFRefObj.cpp" />
+		<Unit filename="IFRefObj.h" />
+		<Unit filename="IFRefPointer.h" />
+		<Unit filename="IFRefPtr.cpp" />
+		<Unit filename="IFRefPtr.h" />
+		<Unit filename="IFServerFrame.cpp" />
+		<Unit filename="IFServerFrame.h" />
+		<Unit filename="IFSet.cpp" />
+		<Unit filename="IFSet.h" />
+		<Unit filename="IFSort.h" />
+		<Unit filename="IFStackDumper.h" />
+		<Unit filename="IFStateMgr.cpp" />
+		<Unit filename="IFStateMgr.h" />
+		<Unit filename="IFStream.cpp" />
+		<Unit filename="IFStream.h" />
+		<Unit filename="IFString.cpp" />
+		<Unit filename="IFString.h" />
+		<Unit filename="IFSuperAttrMgr.cpp" />
+		<Unit filename="IFSuperAttrMgr.h" />
+		<Unit filename="IFSystemAPI.cpp" />
+		<Unit filename="IFSystemAPI.h" />
+		<Unit filename="IFThread.cpp" />
+		<Unit filename="IFThread.h" />
+		<Unit filename="IFTimer.cpp" />
+		<Unit filename="IFTimer.h" />
+		<Unit filename="IFTypes.cpp" />
+		<Unit filename="IFUtility.cpp" />
+		<Unit filename="IFUtility.h" />
+		<Unit filename="IFWeakPtr.cpp" />
+		<Unit filename="IFWeakPtr.h" />
+		<Unit filename="ReadMe.txt" />
+		<Unit filename="Utility.h" />
+		<Unit filename="androidwcs.cpp" />
+		<Unit filename="androidwcs.h" />
+		<Unit filename="ifobj.cpp" />
+		<Unit filename="ifobj.h" />
+		<Unit filename="ifsingleton.h" />
+		<Unit filename="iftypes.h" />
+		<Unit filename="rsa/des.h" />
+		<Unit filename="rsa/desc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/digit.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/digit.h" />
+		<Unit filename="rsa/global.h" />
+		<Unit filename="rsa/md2.h" />
+		<Unit filename="rsa/md2c.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/md5.h" />
+		<Unit filename="rsa/md5c.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/nn.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/nn.h" />
+		<Unit filename="rsa/prime.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/prime.h" />
+		<Unit filename="rsa/r_dh.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/r_encode.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/r_enhanc.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/r_keygen.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/r_random.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/r_random.h" />
+		<Unit filename="rsa/r_stdlib.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/rsa.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="rsa/rsa.h" />
+		<Unit filename="rsa/rsaref.h" />
+		<Unit filename="stdafx.cpp" />
+		<Unit filename="stdafx.h" />
+		<Unit filename="targetver.h" />
+		<Extensions>
+			<code_completion />
+			<debugger />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

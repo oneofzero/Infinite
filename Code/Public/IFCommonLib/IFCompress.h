@@ -1,4 +1,6 @@
-#pragma once
+ï»¿#pragma once
+#ifndef __IF_COMPRESS_H__
+#define __IF_COMPRESS_H__
 #include "IFCommonLib_API.h"
 #include "IFFunctor.h"
 #include "IFString.h"
@@ -44,7 +46,7 @@ struct ZipFileDataDesc : public IFMemObj
 	{
 
 	}
-	IFUI32 header;//±¾µØheader±ê¼Ç
+	IFUI32 header;//æœ¬åœ°headeræ ‡è®°
 	IFUI32 crc;	//CRC-32
 	IFUI32 cpsize;	//Compressed size
 	IFUI32 uncpsize;	//Uncompressed size
@@ -69,11 +71,11 @@ struct ZipDirData : public IFMemObj
 	IFUI32 len;
 	IFUI16 f_len;
 	IFUI16 e_len;
-	IFUI16 fc_len;//ÎÄ¼ş×¢ÊÍ³¤¶È
-	IFUI16 fbdcn;//ÎÄ¼ş¿ªÊ¼Î»ÖÃµÄ´ÅÅÌ±àºÅ
-	IFUI16 ifi;//ÄÚ²¿ÎÄ¼şÊôĞÔ
-	IFUI32 efi;//Íâ²¿ÎÄ¼şÊôĞÔ
-	IFUI32 localfheadoffset;	//±¾µØÎÄ¼şheaderµÄÏà¶ÔÎ»ÒÆ
+	IFUI16 fc_len;//æ–‡ä»¶æ³¨é‡Šé•¿åº¦
+	IFUI16 fbdcn;//æ–‡ä»¶å¼€å§‹ä½ç½®çš„ç£ç›˜ç¼–å·
+	IFUI16 ifi;//å†…éƒ¨æ–‡ä»¶å±æ€§
+	IFUI32 efi;//å¤–éƒ¨æ–‡ä»¶å±æ€§
+	IFUI32 localfheadoffset;	//æœ¬åœ°æ–‡ä»¶headerçš„ç›¸å¯¹ä½ç§»
 
 };
 
@@ -122,3 +124,4 @@ protected:
 	}
 
 };
+#endif //__IF_COMPRESS_H__

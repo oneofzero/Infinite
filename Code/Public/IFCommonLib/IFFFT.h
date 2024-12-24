@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_FFT_H__
+#define __IF_FFT_H__
 #include "IFArray.h"
 #include "IFTypes.h"
 class IFCOMMON_API IFFFT
@@ -13,3 +15,4 @@ private:
 	~IFFFT();
 };
 
+#endif //__IF_FFT_H__

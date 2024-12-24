@@ -21,28 +21,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_THREAD_H__
+#define __IF_THREAD_H__
+
 #include "IFRefObj.h"
 #include "IFFunctor.h"
 #include "IFPlatformDefine.h"
-#ifdef LINUX
-#include <pthread.h>
-#else
-#if defined(IFPLATFORM_WINDOWS_SHOP) || defined(IFPLATFORM_WP) || defined(__APPLE__) || defined(IFPLATFORM_WEB)
+
+#ifdef IFTHREAD_USE_STD_THREAD
 #include <thread>
-#define IFTHREAD_SUPPORT_STD_THREAD true
-#endif
+#elif defined(IFTHREAD_USE_PTHREAD)
+#include <pthread.h>
 #endif
 
-class IFThreadSyncObj;
+#ifndef IFTHREAD_NOT_ENABLE
+
+#include "IFThreadSyncObj.h"
 
 class IFCOMMON_API IFThread : public IFRefObj
 {
 public:
 	IFThread(void);
 
+	template<typename FUNT>
+	bool start(FUNT fun)
+	{
+		return start(makeIFFunctor<void()>(fun));
+	}
 
-
-	bool start( IFFunctor<void()>* pFunctor );
+	bool start( IFRefPtr<IFFunctor<void()>> pFunctor );
 
 	void requestExit();
 
@@ -64,34 +71,35 @@ public:
 protected:
 	~IFThread(void);
 
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 
 	static void* run(void*);
-#else
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#elif defined(IFTHREAD_USE_STD_THREAD)
 	void run();
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	static DWORD WINAPI run(LPVOID);
-#endif
 #endif
 
 	IFRefPtr<IFFunctor<void()> > m_spFunctor;
 
 	bool m_bNeedExit;
 	bool m_bRunning;
-	bool m_bStarted;
-	IFCSLock m_Lock;
+	//bool m_bStarted;
+	//IFCSLock m_Lock;
 	IFRefPtr<IFThreadSyncObj> m_spSyncObj;
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 
 	pthread_t m_threadid;
-#else
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#elif defined(IFTHREAD_USE_STD_THREAD)
 	std::thread* m_pThread;
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	HANDLE m_hThread;
-#endif
 #endif
 
 };
 
+#endif
+
+#endif //__IF_THREAD_H__

@@ -21,9 +21,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_PLATFORM_DEFINE_H__
+#define __IF_PLATFORM_DEFINE_H__
 #include "IFCommonLib_API.h"
 
-#ifdef WIN32
+#if  defined(WIN32) || defined(_WIN32)
 #	if  defined(WINAPI_FAMILY) 
 #		if  WINAPI_FAMILY == WINAPI_FAMILY_PHONE_APP
 #			define IFPLATFORM_WP
@@ -51,6 +53,25 @@ THE SOFTWARE.
 #	endif
 #elif defined(EMSCRIPTEN)
 #	define IFPLATFORM_WEB
-
+#elif defined(FREE_RTOS)
+#	define IFPLATFORM_FREE_RTOS
+#elif defined(EMBED_NOSYS)
+#	define IFPLATFORM_EMBED_NOSYS
+#else
+#error "unknown platform target!"
 #endif
 
+
+#if defined(IFPLATFORM_LINUX)|| defined(IFPLATFORM_ANDROID) || defined(IFPLATFORM_FREE_RTOS)
+#define IFTHREAD_USE_PTHREAD true
+#elif defined(IFPLATFORM_WINDOWS_SHOP) || defined(IFPLATFORM_WP) || defined(__APPLE__) 
+#define IFTHREAD_USE_STD_THREAD true
+#elif defined(IFPLATFORM_WINDOWS)
+#define IFTHREAD_USE_WIN_THREAD true
+#elif defined(IFPLATFORM_EMBED_NOSYS)
+#define IFTHREAD_USE_EMBED_THREAD true
+#else
+#define IFTHREAD_NOT_ENABLE
+#endif
+
+#endif //__IF_PLATFORM_DEFINE_H__

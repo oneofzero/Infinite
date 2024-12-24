@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_IMAGE_CODEC_MGR_H__
+#define __IF_IMAGE_CODEC_MGR_H__
 #include "IFUtility.h"
 #include "IFRefObj.h"
 #include "IFTypes.h"
@@ -53,6 +55,8 @@ public:
 	IFTextureFormat getImageType() const;
 
 	IFRefPtr<IFSourceImageBuffer> scale(float percent) const;
+
+	bool resize(int nFrame, int targetWidth, int targetHeight);
 
 	void init(IFTextureFormat eType, int nFrameCount);	//will clear all data
 
@@ -136,3 +140,5 @@ private:
 
 	CodecList m_CodecList;
 };
+
+#endif //__IF_IMAGE_CODEC_MGR_H__

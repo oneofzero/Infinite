@@ -24,472 +24,147 @@ THE SOFTWARE.
 #include "IFMemPool.h"
 #include "IFSort.h"
 #include "IFBinSearch.h"
+#include <assert.h>
 
-#ifdef _DEBUG
-#define DEBUG_MEMPOOL_OVERFLOW true
-#define DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE 32
-#endif
-
-static int allocid = 0;
-int IFCOMMON_API IFMemGetAllocID()
+IFMemPool::IFMemPool(int blockSize)
 {
-	ATOMIC_INC_INT32(&allocid);
-	return allocid;
-}
-static IFCSLock* memLock = NULL; 
-extern IFSystemAllocSA<IFMemPool*>* g_mempools;
-static char lockbuf[sizeof(IFCSLock)];
-
-#pragma pack(push)
-#pragma pack(1)
-struct PreAllocInfo
-{
-	union 
-	{
-		long long alligned;
-
-		struct  
-		{
-
-			short nPool;
-			short nBlock;
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-			int nAllocSize;
-			int nAllocID;
-
-#endif
-
-		};
-
-	};
-
-};
-#pragma pack(pop)
-
-IFMemPool::IFMemPool(int nPoolIdx):m_OTFreeList(128),m_pNext(NULL)
-{
-	m_OTFreeList.clear();
-	m_nPoolIdx = nPoolIdx;
-	m_nAllocSize = 0;
-	m_bIsFreed = false;
-	
-	//m_nOTFreeList_Size = 0;
-	int nBlockAllocSize = 8;
-	for (int i = 0; i < IFArraySize(m_Blocks); i++ )
-	{
-		int nBlockSize = 32 * 1024 / nBlockAllocSize;
-		m_Blocks[i] = new IFMemPoolBlock(nBlockSize, nBlockAllocSize);
-		nBlockAllocSize += 8;
-	}
-	if (memLock == NULL)
-		memLock = new (lockbuf) IFCSLock();
-
-	IFCSLockHelper lh(memLock);
-	if (m_pFirst == NULL)
-	{
-		m_pFirst = this;
-	}
-	else
-	{
-		m_pFirst->m_pNext = m_pFirst;
-		m_pFirst = this;
-	}
 }
 
-
-IFMemPool::~IFMemPool()
+void* IFMemPool::alloc(int size)
 {
-	for (int i = 0; i < IFArraySize(m_Blocks); i++)
-	{		
-		delete m_Blocks[i];
-	}
-
-	IFCSLockHelper lh(memLock);
-	if (m_pFirst == this)
-	{
-		m_pFirst = m_pFirst->m_pNext;
-	}
-	else
-	{
-		auto pCur = m_pFirst;
-		while (pCur)
-		{
-
-			if (pCur->m_pNext == this)
-			{
-				pCur->m_pNext = m_pNext;
-				break;;
-			}
-			pCur = pCur->m_pNext;
-		}
-
-	}
-
+	return nullptr;
 }
 
-void* IFMemPool::Alloc(int nSize)
+void IFMemPool::free(void* pMem)
 {
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-	int nallocsize = nSize;
-	m_nAllocSize += nallocsize;
-#endif
-	if (m_OTFreeList.size())
-	{
-		IFCSLockHelper lh(m_OTFreeLock);
-		for (int i = 0; i < m_OTFreeList.size(); i ++)
-		{
-			Free(m_OTFreeList[i]);
-		}
-		
-		m_OTFreeList.clear();
-	}
-
-	nSize += sizeof(PreAllocInfo);
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-	nSize += DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE*sizeof(int) * 2;
-#endif
-	int nBlock = (nSize) >> 3;
-	char* pMem;
-	if (nBlock < IFArraySize(m_Blocks))
-	{
-		pMem = (char*)m_Blocks[nBlock]->Alloc();
-	}
-	else
-	{
-		pMem = (char*)malloc(nSize);
-	}
-
-	PreAllocInfo* p = (PreAllocInfo*)pMem;
-	p->nPool = m_nPoolIdx;
-	p->nBlock = nBlock<256?nBlock:256;
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-	p->nAllocSize = nallocsize;
-	p->nAllocID = IFMemGetAllocID();
-	int* pheaddata = (int*)(pMem + sizeof(PreAllocInfo));
-	for (int i = 0; i<DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE; i ++)
-	{
-		pheaddata[i] = 0xaaaaaaaa;
-	}
-	int* ptaildata = (int*)(pMem + sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE*sizeof(int) + nallocsize);
-	for (int i = 0; i < DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE; i++)
-	{
-		ptaildata[i] = 0xaaaaaaaa;
-	}
-	auto pfreedata = (pMem + sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE * sizeof(int));
-	for (int i = 0; i < nallocsize; i++)
-	{
-		pfreedata[i] = 0xac;
-	}
-	return pMem + sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE*sizeof(int);
-#else
-	return pMem + sizeof(PreAllocInfo);
-
-#endif
-	//m_nAllocSize += nSize;
-
 }
 
-void IFMemPool::Free(void* p)
+IFMemPoolBlock::IFMemPoolBlock(int size)
 {
-	char* pp = (char*)p;
-
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-	pp -= sizeof(PreAllocInfo)+ DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE*sizeof(int);
-	PreAllocInfo* pa = (PreAllocInfo*)pp;
-
-	int* pheaddata = (int*)(pp + sizeof(PreAllocInfo));
-	for (int i = 0; i < DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE; i++)
-	{
-		assert(pheaddata[i] == 0xaaaaaaaa && "buffer over flow");
-	}
-	int* ptaildata = (int*)(pp + sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE * sizeof(int) + pa->nAllocSize);
-	for (int i = 0; i < DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE; i++)
-	{
-		assert(ptaildata[i] == 0xaaaaaaaa && "buffer over flow");
-	}
-	auto pfreedata = (pp + sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE * sizeof(int));
-	for (int i = 0; i < pa->nAllocSize;i++)
-	{
-		pfreedata[i] = 0xFE;
-	}
-	
-#else
-	pp -= sizeof(PreAllocInfo);
-	PreAllocInfo* pa = (PreAllocInfo*)pp;
-#endif
-
-	if (pa->nBlock >= IFArraySize(m_Blocks))
-	{
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-		m_nAllocSize -= pa->nAllocSize;
-#endif
-		//m_nAllocSize -= pa->nSize;
-		free(pa);
-		return;
-	}
-
-	if (pa->nPool == m_nPoolIdx)
-	{
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-		m_nAllocSize -= pa->nAllocSize;
-#endif
-		//m_nAllocSize -= pa->nSize;
-		m_Blocks[pa->nBlock]->Free(pa);
-	}
-	else
-	{
-		g_mempools->operator[](pa->nPool)->FreeInOT(p);
-		//pa->pAllocPool->FreeInOT(pa);
-	}
-}
-
-int IFMemPool::GetAllPool(IFMemPool** p, int nBufCount)
-{
-	IFCSLockHelper lh(memLock);
-	int ncount = 0;
-	for (IFMemPool* pCur = m_pFirst; pCur; pCur=pCur->m_pNext)
-	{
-		if (ncount < nBufCount)
-		{
-			p[ncount] = pCur;
-		}
-		ncount++;
-	}
-	return ncount;
-}
-
-
-
-void IFMemPool::UnkownFree(void* p)
-{
-	char* pp = (char*)p;
-#ifdef DEBUG_MEMPOOL_OVERFLOW
-	pp -= sizeof(PreAllocInfo) + DEBUG_MEMPOOL_OVERFLOW_DATA_SIZE * sizeof(int);
-#else
-	pp -= sizeof(PreAllocInfo);
-#endif
-	PreAllocInfo* pa = (PreAllocInfo*)pp;
-	g_mempools->operator[](pa->nPool)->FreeInOT(p);
-}
-
-struct LinkListNode
-{
-	LinkListNode* pPrev;
-	LinkListNode* pNext;
-	void* pData;
-};
-
-
-void IFMemPool::FreeInOT(void* p)
-{
-	IFCSLockHelper lh(m_OTFreeLock);
-	//p->pNext = m_pOTFreeList;
-	//m_pOTFreeList = p;
-	m_OTFreeList.push_back(p);
-}
-
-IFMemPool* IFMemPool::m_pFirst = NULL;
-
-IFMemPoolBlock::IFMemPoolBlock(int nBlockCount, int nPerAllocSize)
-{
-	m_pCurAllocBlock = NULL;
-	m_nSubBlockCount = nBlockCount;
-	m_nSubBlockSize = nPerAllocSize;
-	int n = m_nSubBlockSize % 8;
-	if (n)
-	{
-		m_nSubBlockSize += 8 - n;
-	}
-	m_nBlockSize = m_nSubBlockSize*m_nSubBlockCount;
-	//m_pFreeHeader = NULL;
-	//m_pAllocBlockHeader = NULL;
 }
 
 IFMemPoolBlock::~IFMemPoolBlock()
 {
-	for (int i = 0; i < m_blocks.size(); i ++)
-	{
-		if (m_blocks[i])
-		{
-			free(m_blocks[i]->pMem);
-			delete m_blocks[i];
-
-		}
-	}
-
-}
-void* IFMemPoolBlock::Alloc()
-{
-
-
-	while (m_FreeSubBlocks.size() )
-	{
-#if _DEBUG
-		int nFree = m_FreeSubBlocks.pop_back();
-		assert(nFree != 0xFFFFFFFF);
-		//if (nFree!=0xFFFFFFFF)
-		{
-			int nBlockIdx = (nFree) >> 16;
-			int nSubIdx = 0xFFFF & nFree;
-			m_blocks[nBlockIdx]->nAllocNum++;
-			auto pData = m_blocks[nBlockIdx]->pMem + nSubIdx*m_nSubBlockSize;
-			for (int i = 0; i < m_nSubBlockSize; i ++ )
-			{
-				assert(pData[i] == (char)0xfe && "use mem after free!");
-			}
-			return pData;
-		}
-
-#else
-		return m_FreeSubBlocks.pop_back();
-#endif
-	
-	}
-
-
-
-
-	if (!m_pCurAllocBlock)
-	{
-		m_pCurAllocBlock = AllocNewBlock();
-		m_nAllocPos = 0;
-	}
-
-
-	void* p = m_pCurAllocBlock->pMem + m_nAllocPos*m_nSubBlockSize;
-	m_nAllocPos++;;
-	m_pCurAllocBlock->nAllocNum++;
-	if (m_nAllocPos >= m_nSubBlockCount)
-	{
-		m_pCurAllocBlock = NULL;
-	}
-
-	return p;
-
 }
 
-void IFMemPoolBlock::Free(void* p)
+void* IFMemPoolBlock::alloc(int size)
 {
-#if _DEBUG
-	char* pp = (char*)p;
+	auto freed = m_freeFirst;
 
-	//for (int i = 0; i < m_blocks.size(); i ++)
-	//{
-	//	if (pp >= m_blocks[i] && pp < m_blocks[i] + m_nBlockSize)
-	//	{
-	//		//int nSubIdx = (pp - m_blocks[i]) / m_nSubBlockSize;
-	//		m_FreeSubBlocks.push_back(pp);
-	//		return;
-	//	}
-	//}
-
-	if (SubBlockInfo** pInfo = IFBinSearch(&m_sortedBlocks[0], m_sortedBlocks.size(), [&](const SubBlockInfo* sbinfo)
+	while (freed >= 0)
 	{
-		if (pp < sbinfo->pMem)
-			return -1;
-		else if (pp >= sbinfo->pMem + m_nBlockSize)
-			return 1;
-		else
-			return 0;
-	}))
-	{
-		(*pInfo)->nAllocNum--;
-		//if ((*pInfo)->nAllocNum == 0)
-		//{
-		//	if (m_pCurAllocBlock == *pInfo)
-		//		m_pCurAllocBlock = NULL;
-		//	int idx = (*pInfo)->nBlockIdx;
-		//	m_FreeBlocks.push_back(idx);
-		//	free((*pInfo)->pMem);
-		//	(*pInfo)->pMem = NULL;
-		//	SortBlocks();
-		//	for (int i = 0; i < m_FreeSubBlocks.size(); i++)
-		//	{
-		//		if ((m_FreeSubBlocks[i] >> 16) == idx)
-		//		{
-		//			m_FreeSubBlocks[i] = 0xFFFFFFFF;
-		//		}
-		//	}
-		//}
-		//else
-
-
+		auto pFree = getHeader(freed);
+		if (pFree->size >= size)
 		{
-			for (int i = 0; i < m_nSubBlockSize; i++)
+			if (pFree->size <= size + sizeof(MemHeader))
 			{
-				pp[i] = (char)0xfe;
+				m_freeFirst = pFree->next;
 			}
-			int nSubIdx = (pp - (*pInfo)->pMem) / m_nSubBlockSize;
-			m_FreeSubBlocks.push_back(nSubIdx| ((*pInfo)->nBlockIdx<<16));
+			else
+			{
+				m_freeFirst = freed + sizeof(MemHeader) + size;
 
+				getHeader(m_freeFirst)->next = pFree->next;
+				getHeader(m_freeFirst)->size = pFree->size - size - sizeof(MemHeader);
+				pFree->size = size;
+			}
+
+			getHeader(freed)->next = m_allocFirst;
+			//getHeader(freed)->ref = 0;
+			m_allocedBytes += pFree->size;
+			m_allocCount++;
+			m_actureAllocedBytes += pFree->size + sizeof(MemHeader);
+			m_allocFirst = freed;
+			return m_memory + freed + sizeof(MemHeader);
 		}
+		freed = pFree->next;
+	}
+
+	//assert(0 && "out of memory!");
+	return NULL;
+}
+
+void IFMemPoolBlock::free(void* ptr)
+{
+	if (ptr <= (void*)0)
+		return;
+	auto header = (char*)ptr - m_memory;
+	header -= sizeof(MemHeader);
+	//check ptr valid
+	bool valid = false;
+	int prev = 0;
+	for (auto alloced = m_allocFirst; alloced >= 0; alloced = getHeader(alloced)->next)
+	{
+		if (alloced == header)
+		{
+			valid = true;
+			if (prev)
+			{
+				getHeader(prev)->next = getHeader(alloced)->next;
+			}
+			else
+			{
+				m_allocFirst = getHeader(alloced)->next;
+			}
+
+			break;
+		}
+		prev = alloced;
+	}
+
+	assert(valid && "free ptr is not valid!");
+
+	m_allocCount--;
+
+	auto pHeader = getHeader(header);
+	//assert(pHeader->ref == 0);
+
+	m_allocedBytes -= pHeader->size;
+	m_actureAllocedBytes -= pHeader->size + sizeof(MemHeader);
+
+	if (m_freeFirst < 0)
+	{
+		m_freeFirst = header;
 		return;
 	}
 
-	assert(false && "p not alloc from this block!");
-#else
-	
-	m_FreeSubBlocks.push_back((char*)p);
-	return;
-#endif
-}
+	auto instertPos = m_freeFirst;
 
-IFMemPoolBlock::SubBlockInfo* IFMemPoolBlock::AllocNewBlock()
-{
 
-	SubBlockInfo* sbinfo;
-	//MemInfo info;
-	//info.blockIdx = m_blocks.size();
-	//info.blockPtr = pNewblock;
-	char* pNewblock = (char*)malloc(m_nBlockSize);
-
-	if (m_FreeBlocks.size())
-	{	
-		int nFreeBlockIdx = m_FreeBlocks.pop_back();
-		sbinfo = m_blocks[nFreeBlockIdx];
-		sbinfo->pMem = pNewblock;
-	}
-	else
+	auto prevPos = 0;
+	while (instertPos > 0)
 	{
-		sbinfo = new SubBlockInfo(m_blocks.size(), pNewblock);
-
-		m_blocks.push_back(sbinfo);
-		m_sortedBlocks.push_back(sbinfo);
-	}
-#ifdef _DEBUG
-	SortBlocks();
-#endif
-	return sbinfo;
-}
-
-void IFMemPoolBlock::CheckBlockFree()
-{
-	/*IFSort(&m_FreeSubBlocks[0], &m_FreeSubBlocks[m_FreeSubBlocks.size()]);
-	
-	int continues = 1;
-	for (size_t i = 0; i < m_FreeSubBlocks.size()-1; i++)
-	{
-		if (m_FreeSubBlocks[i] + m_nSubBlockSize == m_FreeSubBlocks[i + 1])
+		if (header < instertPos)
 		{
-			continues++;
-			if (continues == m_nSubBlockCount)
+			pHeader->next = instertPos;
+
+			if (prevPos)
 			{
-
+				getHeader(prevPos)->next = header;
 			}
+			else
+				m_freeFirst = header;
+
+			if (prevPos > 0)
+			{
+				if (prevPos + getHeader(prevPos)->size + sizeof(MemHeader) == header)
+				{
+					getHeader(prevPos)->next = getHeader(header)->next;
+					getHeader(prevPos)->size = getHeader(prevPos)->size + getHeader(header)->size + sizeof(MemHeader);
+					header = prevPos;
+				}
+			}
+			if (header + getHeader(header)->size + sizeof(MemHeader) == instertPos)
+			{
+				getHeader(header)->next = getHeader(instertPos)->next;
+				getHeader(header)->size = getHeader(header)->size + getHeader(instertPos)->size + sizeof(MemHeader);
+			}
+
+
+			break;
 		}
-	}*/
-}
+		prevPos = instertPos;
+		instertPos = getHeader(instertPos)->next;
+	}
 
-void IFMemPoolBlock::SortBlocks()
-{
-	IFSort(&m_sortedBlocks[0], &m_sortedBlocks[m_sortedBlocks.size()], [](SubBlockInfo** a, SubBlockInfo** b)
-	{
-		return (*a)->pMem < (*b)->pMem;
-	}, [](SubBlockInfo** a, SubBlockInfo** b)
-	{
-		SubBlockInfo* pMid = *a;
-		*a = *b;
-		*b = pMid;
-
-	});
 }

@@ -34,7 +34,7 @@ IFZipFileProvider::IFZipFileProvider()
 
 }
 
-bool IFZipFileProvider::init(const IFStringW& zippath, const IFStringW& sZipPerfix)
+bool IFZipFileProvider::init(const IFString& zippath, const IFString& sZipPerfix)
 {
 	auto spZipStream = IFFileSystem::getSingleton().openStream(zippath, "rb");
 	if (!spZipStream)
@@ -44,38 +44,38 @@ bool IFZipFileProvider::init(const IFStringW& zippath, const IFStringW& sZipPerf
 	m_spUnZip = IFUnZip::create();
 	m_spUnZip->open(spZipStream);
 	m_sZipPerfix = sZipPerfix;
-	IFLOG(IFLL_DEBUG, L"open zip ok:%s %s\r\n", zippath.c_str(), sZipPerfix.c_str());
+	IFLOG(IFLL_DEBUG, "open zip ok:%s %s\r\n", zippath.c_str(), sZipPerfix.c_str());
 
 	return true;
 }
 
-bool IFZipFileProvider::init(IFRefPtr<IFStream> spZipStream, const IFStringW& sZipPerfix)
+bool IFZipFileProvider::init(IFRefPtr<IFStream> spZipStream, const IFString& sZipPerfix)
 {
 	m_spUnZip = IFUnZip::create();
 	if (!m_spUnZip->open(spZipStream))
 	{
-		IFLOG(IFLL_DEBUG, L"open zip failed\r\n");
+		IFLOG(IFLL_DEBUG, "open zip failed\r\n");
 
 		return false;
 	}
 	m_sZipPerfix = sZipPerfix;
-	IFLOG(IFLL_DEBUG, L"open zip ok\r\n");
+	IFLOG(IFLL_DEBUG, "open zip ok\r\n");
 
 	return true;
 }
 
-IFRefPtr<IFStream> IFZipFileProvider::openStream(const IFStringW& sName, const char* sMode)
+IFRefPtr<IFStream> IFZipFileProvider::openStream(const IFString& sName, const char* sMode)
 {
 	if (!m_spUnZip)
 		return NULL;
 	IFRefPtr<IFMemStream> spStream = IFNew IFMemStream(0, 0, 1024 * 64);
-	IFStringW sInZipName = sName;
-	IFLOG(IFLL_DEBUG, L"open zip stream:%s\r\n", sName.c_str());
+	IFString sInZipName = sName;
+	IFLOG(IFLL_DEBUG, "open zip stream:%s\r\n", sName.c_str());
 	if (sName.find(m_sZipPerfix) == 0)
 	{
 		sInZipName = sName.sub(m_sZipPerfix.length(), sName.length() - m_sZipPerfix.length());
 	}
-	IFLOG(IFLL_DEBUG, L"open zip stream in name:%s\r\n", sInZipName.c_str());
+	IFLOG(IFLL_DEBUG, "open zip stream in name:%s\r\n", sInZipName.c_str());
 	if (m_spUnZip->openFile(sInZipName, spStream))
 	{
 		spStream->seek(0, IFStream::ISSF_BEGIN);
@@ -85,6 +85,13 @@ IFRefPtr<IFStream> IFZipFileProvider::openStream(const IFStringW& sName, const c
 	{
 		return NULL;
 	}
+}
+
+IFRefPtr<IFAsyncOpenStreamResult> IFZipFileProvider::openStreamAsync(const IFString& sName, const char* sMode)
+{
+	auto spResult = NewIFRefObj<IFAsyncOpenStreamResult>();
+	spResult->setResult(openStream(sName, sMode));
+	return spResult;
 }
 
 class IFZipFileInfo : public IFFileInfo
@@ -101,7 +108,7 @@ protected:
 
 };
 
-bool IFZipFileProvider::listDirectory(const IFStringW& sParentDir, IFFileInfoList& list, const IFStringW& sFilter /*= L"*"*/)
+bool IFZipFileProvider::listDirectory(const IFString& sParentDir, IFFileInfoList& list, const IFString& sFilter /*= L"*"*/)
 {
 	if (!m_spUnZip)
 		return false;

@@ -80,7 +80,9 @@ bool IFNetCoreEPOLL::startListen(int nPort, bool enableSSL /*= false*/, bool pac
 	{
 		IFLOG(IFLL_ERROR, "set socket addr reuse error:%d\r\n", errno);
 	}
-
+	int enable_nodelay = 1;
+	setsockopt(listenScoket, IPPROTO_TCP, TCP_NODELAY, (char*)&enable_nodelay, sizeof(enable_nodelay));
+	fcntl(listenScoket, F_SETFL, fcntl(listenScoket, F_GETFD, 0) | O_NONBLOCK);
 
 	sockaddr_in address;
 	address.sin_family = AF_INET;
@@ -111,11 +113,12 @@ bool IFNetCoreEPOLL::startListen(int nPort, bool enableSSL /*= false*/, bool pac
 	}
 	else
 	{
-		IFLOG(IFLL_DEBUG, "epoll add event listener ok\r\n");
+		IFLOG(IFLL_DEBUG, "epoll add event listener ok packagemode:%d\r\n", packagemode);
 	}
 	ListenSocketInfo lsi;
 	lsi.nPort = nPort;
 	lsi.bEnableSSL = enableSSL;
+	lsi.bPackagemode = packagemode;
 	m_ListenScoket.insert(makeIFPair(listenScoket, lsi));
 	return true;
 }
@@ -135,6 +138,18 @@ bool IFNetCoreEPOLL::stopListen(int nPort)
 	return false;
 }
 
+bool IFNetCoreEPOLL::isListening(int nPort)
+{
+	for (auto it = m_ListenScoket.begin(); it != m_ListenScoket.end(); ++it)
+	{
+		if (it->second.nPort == nPort)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
 
 bool IFNetCoreEPOLL::onServiceStart()
 {
@@ -147,7 +162,7 @@ bool IFNetCoreEPOLL::onServiceStart()
 	}
 	if (m_nPort)
 	{
-		if (!startListen(m_nPort))
+		if (!startListen(m_nPort,false, m_bPackageMode))
 			return false;
 
 	}
@@ -163,7 +178,7 @@ bool IFNetCoreEPOLL::onServiceStop()
     m_spWorkThread->waitExit();
 	m_ConnectingList.clear();
 
-
+	return true;
 
 }
 
@@ -193,35 +208,39 @@ void IFNetCoreEPOLL::workThread()
 					sockaddr_in remoteAddress;
 					socklen_t ADDSIZE = sizeof(sockaddr_in);
 
-					SOCKET sk = accept(listenSocket, (sockaddr*)&remoteAddress, &ADDSIZE);
-					IFRefPtr<IFNetEPOLLConnection> spEPOLLConnection = IFNew IFNetEPOLLConnection(this, m_bPackageMode, m_bSyncEvent, sk);
-					spEPOLLConnection->setNoDelay();
-					spEPOLLConnection->setNoBlock();
-					spEPOLLConnection->m_eConnectionState = IFNCS_CONNECTED;
-					if (listenIT->second.bEnableSSL)
-						spEPOLLConnection->waitEstablishSSL();
-
-					char ip[128];
-					inet_ntop(AF_INET, &(remoteAddress.sin_addr), ip, sizeof(ip));
-					spEPOLLConnection->m_sRemoteIP = ip;
-					spEPOLLConnection->m_nRemotePort = ntohs(remoteAddress.sin_port);
-					spEPOLLConnection->m_nLocalPort = listenIT->second.nPort;
-
-
-					epoll_event epe;
-					//epe.data.fd = m_ListenScoket;
-					epe.data.ptr = spEPOLLConnection;
-					//epe.data.fd = spEPOLLConnection->m_Socket;
-
-					epe.events = EPOLLOUT| EPOLLIN | EPOLLERR | EPOLLPRI |EPOLLET;
-					int result = epoll_ctl(m_nEpoll, EPOLL_CTL_ADD, spEPOLLConnection->m_Socket, &epe);
+					SOCKET sk;
+					while ((sk = accept(listenSocket, (sockaddr*)&remoteAddress, &ADDSIZE)) && sk > 0)
 					{
-						IFCSLockHelper lh2(m_ConnectionListLock);
-						m_Connections.insert(spEPOLLConnection);
-						IFLOG(IFLL_DEBUG, "new connection accepted!\r\n", sk);
+						IFRefPtr<IFNetEPOLLConnection> spEPOLLConnection = IFNew IFNetEPOLLConnection(this, listenIT->second.bPackagemode, m_bSyncEvent, sk);
+						spEPOLLConnection->setNoDelay();
+						spEPOLLConnection->setNoBlock();
+						spEPOLLConnection->m_eConnectionState = IFNCS_CONNECTED;
+						if (listenIT->second.bEnableSSL)
+							spEPOLLConnection->waitEstablishSSL();
+
+						char ip[128];
+						inet_ntop(AF_INET, &(remoteAddress.sin_addr), ip, sizeof(ip));
+						spEPOLLConnection->m_sRemoteIP = ip;
+						spEPOLLConnection->m_nRemotePort = ntohs(remoteAddress.sin_port);
+						spEPOLLConnection->m_nLocalPort = listenIT->second.nPort;
+
+
+						epoll_event epe;
+						//epe.data.fd = m_ListenScoket;
+						epe.data.ptr = spEPOLLConnection;
+						//epe.data.fd = spEPOLLConnection->m_Socket;
+
+						epe.events = EPOLLOUT | EPOLLIN | EPOLLERR | EPOLLPRI | EPOLLET;
+						int result = epoll_ctl(m_nEpoll, EPOLL_CTL_ADD, spEPOLLConnection->m_Socket, &epe);
+						{
+							IFCSLockHelper lh2(m_ConnectionListLock);
+							m_Connections.insert(spEPOLLConnection);
+							IFLOG(IFLL_DEBUG, "new connection accepted!\r\n", sk);
+						}
+						IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(spEPOLLConnection, IFNetCoreEvent::ET_NEW_CONNECTION);
+						pushEvent(pEvent);
 					}
-					IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(spEPOLLConnection, IFNetCoreEvent::ET_NEW_CONNECTION);
-					pushEvent(pEvent);
+					
 				}
 				else if (pConnection)
 				{
@@ -284,15 +303,16 @@ void IFNetCoreEPOLL::workThread()
 								else
 								{
 									IFLOG(IFLL_ERROR, "connect error!%d\r\n", error);
+						
+									IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, false);
+									pushEvent(pEvent);
+									pConnection->disconnect();
 									{
 										IFCSLockHelper lh(m_ConnectingLock);
 										ConnectionList::iterator it = m_ConnectingList.find(pConnection);
 										if (it != m_ConnectingList.end())
 											m_ConnectingList.erase(it);
 									}
-									IFNetCoreEvent* pEvent = IFNew IFNetCoreEvent(pConnection, IFNetCoreEvent::ET_CONNECT, false);
-									pushEvent(pEvent);
-									pConnection->disconnect();
 								}
 							}												
 						}
@@ -641,4 +661,8 @@ void IFNetEPOLLConnection::setNoDelay()
 	int bOptLen = sizeof(int);
 	int br = setsockopt(m_Socket,IPPROTO_TCP, TCP_NODELAY , (char*)&bOptVal, bOptLen);
 
+}
+IFRefPtr<IFNetCore> IFNetCore::createNetCore()
+{
+	return IFNew IFNetCoreEPOLL;
 }

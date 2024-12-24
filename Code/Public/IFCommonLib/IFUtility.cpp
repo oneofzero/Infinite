@@ -64,7 +64,9 @@ THE SOFTWARE.
 
 #else
 #include <limits.h>
+#ifndef IFPLATFORM_EMBED_NOSYS
 #include <sys/time.h>
+#endif
 #		define min(a,b) (a)<(b)?(a):(b)
 
 
@@ -103,12 +105,11 @@ static wchar_t pathspliter='/';
 
 
 
-bool	UGetFilePathName(const char* sFullFileName, char* pOut )
+IFString UGetFilePathName(const IFString& sFullFileName )
 {
-	IFUI32 dwLen = (IFUI32)strlen( sFullFileName );
-	int i,j;
+	IFUI32 dwLen = sFullFileName.length();
 
-
+	int i;
 	for( i = dwLen; i >= 0; i -- )
 	{
 		if( sFullFileName[i] == '/' || sFullFileName[i] == '\\' )
@@ -118,64 +119,54 @@ bool	UGetFilePathName(const char* sFullFileName, char* pOut )
 	}
 	if( i == -1 )
 	{
-		return false;
+		return IFString::Empty;
 	}
 
-	for( j = 0; j < i; j ++ )
-	{
-		pOut[j] = sFullFileName[j];
-	}
-	pOut[j] = 0;
-	return true;
+	return IFString(&sFullFileName[0], i);
 }
 
-IFStringW	UGetFilePathNameW(const IFStringW& sFullFileName )
+IFString UGetFileName(const IFString& sFullFileName)
 {
-	if (sFullFileName.size()==0)
-		return IFStringW::Empty;
-	IFUI32 dwLen = sFullFileName.length();
+	auto dwLen = sFullFileName.length();
 	int i;
 
 
-	for( i = dwLen; i >= 0; i -- )
+	for (i = dwLen; i >= 0; i--)
 	{
-		if( sFullFileName[i] == L'/' || sFullFileName[i] == L'\\' )
+		if (sFullFileName[i] == '/' || sFullFileName[i] == '\\')
 		{
 			break;
 		}
 	}
-	if( i == -1 )
+	if (i == -1)
 	{
-		return IFStringW();
+		return sFullFileName;
 	}
 
-	//for( j = 0; j < i; j ++ )
-	//{
-		//pOut[j] = sFullFileName[j];
-	//}
-	//pOut[j] = 0;
-	return IFStringW(&sFullFileName[0], i);
+	return sFullFileName.sub(i+1, sFullFileName.size()-i-1);
 }
 
 
-bool UMakeDirW(const IFStringW& sDirName )
+
+
+bool UMakeDir(const IFString& sDirName)
 {
-	
+
 	if (IFFileSystem::getSingleton().isDir(sDirName))
 		return true;
 
-	IFStringW temName = sDirName;
+	IFString temName = sDirName;
 	//strcpy_s( szTempName, MAX_PATH, sDirName );
 	IFI32 dwLen = sDirName.length();//(IFUI32)strlen( sDirName );
-	IFArray<IFStringW>	NameStack;
-	
+	IFArray<IFString>	NameStack;
+
 	//int r = _mkdir( temName.toLocalString().c_str() );
 	auto r = (IFFileSystem::getSingleton().createDir(temName));
-	while( !r  )
+	while (!r)
 	{
-		NameStack.push_back( temName );
-		IFStringW newtemName = UGetFilePathNameW( temName );
-		if(newtemName==temName)
+		NameStack.push_back(temName);
+		IFString newtemName = UGetFilePathName(temName);
+		if (newtemName == temName)
 		{
 			return false;
 		}
@@ -183,182 +174,127 @@ bool UMakeDirW(const IFStringW& sDirName )
 
 		r = IFFileSystem::getSingleton().isDir(newtemName) || IFFileSystem::getSingleton().createDir(newtemName);
 	}
-	for( int i = NameStack.size() - 1; i >= 0; i -- )
+	for (int i = NameStack.size() - 1; i >= 0; i--)
 	{
-		if(!IFFileSystem::getSingleton().isDir(NameStack[i]) )
+		if (!IFFileSystem::getSingleton().isDir(NameStack[i]))
 		{
-			if(!IFFileSystem::getSingleton().createDir(NameStack[i]))
+			if (!IFFileSystem::getSingleton().createDir(NameStack[i]))
 				return false;
 		}
 	}
 
-	
+
 	return true;
 
 
-
 }
-
-void USplitStrings(StringList* OutList, const char* sInStr, const char* sSplitSign, bool bTrans, char cIgnor )
+template<typename TString, typename TChar>
+int USplitStringsT(IFArray<TString>* OutList, const TChar* sInStr, const TChar* sSplitSign, bool bTrans, TChar cIgnor, size_t (*pStrLenFun)(const TChar*))
 {
-	IFUI32 dwSplitSignLen = (IFUI32)strlen( sSplitSign );
-	int i = 0;
-	std::string tempStr;
-	if( bTrans )
-	{
-		bool bFullStr = false;
-		while( sInStr[i] != 0 )
-		{
-			if( sInStr[i] == '\\' )
-			{
-				i++;
-				if( sInStr[i] != cIgnor )
-					tempStr.push_back( sInStr[i] );
-				i++;
-				continue;
-				
-			}
-			if( sInStr[i] == '\"' )
-			{
-				bFullStr = !bFullStr;
-				i ++;
-				continue;
-			}
-			if( memcmp( &sInStr[i], sSplitSign, dwSplitSignLen) == 0 && bFullStr == false )
-			{
-				OutList->push_back( tempStr.c_str() );
-				tempStr.clear();
-				i += dwSplitSignLen;
-				continue;
-			}
-			if( sInStr[i] != cIgnor )
-				tempStr.push_back( sInStr[i] );
-			i ++;
-		}
-		if( tempStr.size() > 0 )
-			OutList->push_back( tempStr.c_str() );
-	}
-	else if (dwSplitSignLen == 1)
-	{
-		char c = sSplitSign[0];
-		const char* pCur = sInStr;
-		for (; *pCur; pCur++)
-		{
-			if (*pCur == c)
-			{
-				if(pCur> sInStr)
-					OutList->push_back(IFString(sInStr, pCur));
-				sInStr = pCur + 1;
-			}
-		}
-		if (pCur != sInStr)
-		{
-			OutList->push_back(IFString(sInStr, pCur));
-		}
-	}
-	else
-	{
-		
-		while( sInStr[i] != 0 )
-		{
-			if( memcmp( &sInStr[i], sSplitSign, dwSplitSignLen) == 0 )
-			{
-				OutList->push_back( tempStr.c_str() );
-				tempStr.clear();
-				i += dwSplitSignLen;
-				continue;
-			}
-			if( sInStr[i] != cIgnor )
-				tempStr.push_back( sInStr[i] );
-			i ++;
-		}
-		if( tempStr.size() > 0 )
-			OutList->push_back( tempStr.c_str() );
-	}
-	
-	
-}
-
-int USplitStringsW( IFArray<IFStringW>* OutList, const WCHAR* sInStr, const WCHAR* sSplitSign, bool bTrans , WCHAR cIgnor  )
-{
-	IFUI32 dwSplitSignLen = (IFUI32)wcslen( sSplitSign );
+	IFUI32 dwSplitSignLen = (IFUI32)(*pStrLenFun)(sSplitSign);
 	int i = 0;
 	int snum = 0;
-	IFStringW tempStr;
-	if( bTrans )
+	TString tempStr;
+	if (bTrans)
 	{
 		bool bFullStr = false;
-		while( sInStr[i] != 0 )
+		while (sInStr[i] != 0)
 		{
-			if( sInStr[i] == '\\' )
+			if (sInStr[i] == '\\')
 			{
 				i++;
-				if( sInStr[i] != cIgnor )
-					tempStr.push_back( sInStr[i] );
+				if (sInStr[i] != cIgnor)
+					tempStr.push_back(sInStr[i]);
 				i++;
 				continue;
 
 			}
-			if( sInStr[i] == '\"' )
+			if (sInStr[i] == '\"')
 			{
 				bFullStr = !bFullStr;
-				i ++;
+				i++;
 				continue;
 			}
-			if( memcmp( &sInStr[i], sSplitSign, dwSplitSignLen*sizeof(WCHAR)) == 0 && bFullStr == false )
+			if (memcmp(&sInStr[i], sSplitSign, dwSplitSignLen * sizeof(TChar)) == 0 && bFullStr == false )
 			{
-				OutList->push_back( tempStr.c_str() );
-				tempStr.clear();
+				if (!tempStr.isEmpty())
+				{
+
+					OutList->push_back(tempStr.c_str());
+					tempStr.clear();
+				}
 				i += dwSplitSignLen;
-				snum ++;
+				snum++;
 				continue;
 			}
-			if( sInStr[i] != cIgnor )
-				tempStr.push_back( sInStr[i] );
-			i ++;
+			if (sInStr[i] != cIgnor)
+				tempStr.push_back(sInStr[i]);
+			i++;
 		}
-		if( tempStr.size() > 0 )
-			OutList->push_back( tempStr.c_str() );
+		if (tempStr.size() > 0)
+			OutList->push_back(tempStr.c_str());
 	}
 	else if (dwSplitSignLen == 1)
 	{
-		WCHAR c = sSplitSign[0];
-		const WCHAR* pCur = sInStr;
+		TChar c = sSplitSign[0];
+		const TChar* pCur = sInStr;
 		for (; *pCur; pCur++)
 		{
 			if (*pCur == c)
 			{
-				OutList->push_back(IFStringW(sInStr, pCur));
+				OutList->push_back(TString(sInStr, pCur));
 				sInStr = pCur + 1;
 			}
 		}
 		if (pCur != sInStr)
 		{
-			OutList->push_back(IFStringW(sInStr, pCur));
+			OutList->push_back(TString(sInStr, pCur));
 		}
 	}
 	else
 	{
-		
-		while( sInStr[i] != 0 )
+
+		while (sInStr[i] != 0)
 		{
-			if( memcmp( &sInStr[i], sSplitSign, dwSplitSignLen*sizeof(WCHAR)) == 0 )
+			if (memcmp(&sInStr[i], sSplitSign, dwSplitSignLen * sizeof(TChar)) == 0  )
 			{
-				OutList->push_back( tempStr.c_str() );
-				tempStr.clear();
+				if (!tempStr.isEmpty())
+				{
+					OutList->push_back(tempStr.c_str());
+					tempStr.clear();
+				}
 				i += dwSplitSignLen;
-				snum ++;
+				snum++;
 				continue;
 			}
-			if( sInStr[i] != cIgnor )
-				tempStr.push_back( sInStr[i] );
-			i ++;
+			if (sInStr[i] != cIgnor)
+				tempStr.push_back(sInStr[i]);
+			i++;
 		}
-		if( tempStr.size() > 0 )
-			OutList->push_back( tempStr.c_str() );
+		if (tempStr.size() > 0)
+			OutList->push_back(tempStr.c_str());
 	}
 
 	return snum;
+
+}
+
+
+int USplitStrings(StringList* OutList, const IFString& sInStr, const IFString& sSplitSign, bool bTrans, char cIgnor)
+{
+	int n = USplitStringsT(OutList, sInStr.c_str(), sSplitSign.c_str(), bTrans, cIgnor, strlen);
+	for (auto& s : *OutList)
+	{
+		s.setUTF8Codeing(sInStr.isUTF8Codeing());
+	}
+
+	return n;
+}
+
+int USplitStringsW( IFArray<IFStringW>* OutList, const IFWCHAR* sInStr, const IFWCHAR* sSplitSign, bool bTrans , IFWCHAR cIgnor  )
+{
+	return USplitStringsT(OutList, sInStr, sSplitSign, bTrans, cIgnor, wcslen);
+
 }
 #ifdef WIN32
 FILE* UForceOpenFile(const char* sFileName, const char* sMode )
@@ -375,10 +311,10 @@ FILE* UForceOpenFile(const char* sFileName, const char* sMode )
 	if( !fOut )
 	{
 
-		char dirName[MAX_PATH];
-		UGetFilePathName( sFileName, dirName );
+		//char dirName[MAX_PATH];
+		auto dirName = UGetFilePathName( sFileName );
 
-		if(UMakeDirW( IFString(dirName) ))
+		if(UMakeDirW( dirName ))
 		{
 			fopen_s( &fOut, sFileName, sMode);
 		}
@@ -389,97 +325,69 @@ FILE* UForceOpenFile(const char* sFileName, const char* sMode )
 }
 #endif
 
-bool UGetFileExName(const char* sFullFileName, char* pOut)
+IFString UGetFileExName(const IFString& sFullFileName)
 {
-	int nlen = (int)strlen( sFullFileName );
-	int i = nlen ;
-	while( i >= 0 )
-	{
-		if( sFullFileName[i] == '.' )
-			break;
-		if( sFullFileName[i] == '\\' || sFullFileName[i] == '/' )
-		{
-			pOut[0] = 0;
-			return false;
-		}
 
-		i --;
-
-		
-	}
-	i ++;
-	while( i < nlen )
-	{
-		*pOut = sFullFileName[i];
-		pOut ++;
-		i ++;
-	}
-	*pOut = 0;
-	return true;
-
-}
-IFStringW UGetFileExNameW(const IFStringW& sFullFileName)
-{
-	
 	int nlen = sFullFileName.length();
-	if (nlen<=0)
-		return IFStringW::Empty;
-	int i = nlen ;
-	while( i >= 0 )
+	if (nlen <= 0)
+		return IFString::Empty;
+	int i = nlen;
+	while (i >= 0)
 	{
-		if( sFullFileName[i] == L'.' )
+		if (sFullFileName[i] == '.')
 			break;
-		if( sFullFileName[i] == L'\\' || sFullFileName[i] == L'/' )
+		if (sFullFileName[i] == '\\' || sFullFileName[i] == '/')
 		{
-			return IFStringW();
+			return IFString();
 		}
 
-		i --;
+		i--;
 
 
 	}
-	i ++;
+	i++;
 
-	if(i==0)
-		return IFStringW();
+	if (i == 0)
+		return IFString();
 	//*pOut = 0;
-	return IFStringW(&sFullFileName[i]);;
+	return IFString(&sFullFileName[i]);;
 
 }
 
 
-bool UGetFileMainName(const char* sFullFileName, char* pOut)
+IFString UGetFileMainName(const IFString& sFullFileName)
 {
-	int nlen = (int)strlen( sFullFileName );
-	int i = nlen ;
+	if (!sFullFileName.length())
+		return IFString::Empty;
+	int nlen = sFullFileName.length();
+	int i = nlen;
 	int extPos = nlen;
-	while( i >= 0 )
+	while (i >= 0)
 	{
-		if( sFullFileName[i] == '.' && extPos==nlen)
+		if (sFullFileName[i] == '.' && extPos == nlen)
 			extPos = i;
-		if( sFullFileName[i] == '\\' || sFullFileName[i] == '/' )
+		if (sFullFileName[i] == '\\' || sFullFileName[i] == '/')
 		{
 			//pOut[0] = 0;
 			//return FALSE;
 			break;
 		}
 
-		i --;
+		i--;
 
 
 	}
-	i ++;
-	while( i < extPos )
-	{
-		*pOut = sFullFileName[i];
-		pOut ++;
-		i ++;
-	}
-	*pOut = 0;
-	return true;
+	i++;
+	//while( i < extPos )
+	//{
+	//	*pOut = sFullFileName[i];
+	//	pOut ++;
+	//	i ++;
+	//}
+	//*pOut = 0;
+	return IFString(&sFullFileName[i], extPos - i);
 
 }
-
 
 IFStringW UGetFileMainNameW(const IFStringW& sFullFileName)
 {
@@ -515,13 +423,16 @@ IFStringW UGetFileMainNameW(const IFStringW& sFullFileName)
 
 }
 
-IFString UGetRelativePath(const char* pFullPath, const char* pCurPath)
+IFString UGetRelativePath(const IFString& _fullPath, const IFString& _curPath)
 {
 	IFString relativePath;
 
 	StringList sl0,sl1;
-	USplitStrings(&sl0, pFullPath, "\\" );
-	USplitStrings(&sl1, pCurPath, "\\" );
+	auto fullPath = UStandardUnixPath(_fullPath);
+	auto curPath = UStandardUnixPath(_curPath);
+	
+	USplitStrings(&sl0, fullPath, "/" );
+	USplitStrings(&sl1, curPath, "/" );
 
 	IFUI32 nLevel = min(sl0.size(), sl1.size() );
 
@@ -532,12 +443,12 @@ IFString UGetRelativePath(const char* pFullPath, const char* pCurPath)
 		{
 			if( i == 0 )
 			{
-				relativePath = pFullPath;
+				relativePath = fullPath;
 				return relativePath;
 			}
 			for( int j = i; j < sl1.size(); j ++ )
 			{
-				relativePath += "..\\";
+				relativePath += "../";
 
 			}
 			for( int j = i; j < sl0.size(); j ++ )
@@ -545,7 +456,7 @@ IFString UGetRelativePath(const char* pFullPath, const char* pCurPath)
 				relativePath += sl0[j];
 				if( j != sl0.size() - 1 )
 				{
-					relativePath += "\\";
+					relativePath += "/";
 				}
 			}
 
@@ -558,15 +469,64 @@ IFString UGetRelativePath(const char* pFullPath, const char* pCurPath)
 	{
 		relativePath += sl0[i];
 		if(i!=sl0.size()-1)
-			relativePath += "\\";
+			relativePath += "/";
 	}
 
 
 	return relativePath;
 }
 
-IFString UGetSimplifiedPath( const char* pFullPath )
+static bool IsPathSplitChar(char c)
 {
+	return c == '\\' || c == '/';
+}
+
+IFString UGetSimplifiedPath(const IFString& path)
+{
+	IFString simpllified;
+
+
+	auto deleteLastDir = [&]()
+	{
+		for (int i = (int)simpllified.size() - 1; i >= 0; i--)
+		{
+			if (IsPathSplitChar(simpllified[i]))
+			{
+				simpllified.erase(simpllified.size() - 1);
+				return;
+			}
+			simpllified.erase(simpllified.size() - 1);
+		}
+	};
+
+	for (int i = 0; i < (int)path.size(); i++)
+	{
+		if (IsPathSplitChar(path[i] ))
+		{
+			if (i + 2 < (int)path.size() && path[i + 1] == '.')
+			{
+				if (IsPathSplitChar(path[i+2]))
+				{
+
+					i+=1;
+					continue;
+				}
+				else if (i + 3 < (int)path.size() && path[i + 2] == '.' && IsPathSplitChar(path[i+3]))
+				{
+					deleteLastDir();
+					i += 2;
+					continue;
+				}
+			}
+
+		}
+	
+		simpllified.push_back(path[i]);
+		
+
+	}
+	return simpllified;
+	/*
 
 	StringList sl0;
 	USplitStrings(&sl0, pFullPath, "\\" );
@@ -587,193 +547,76 @@ IFString UGetSimplifiedPath( const char* pFullPath )
 		if(i!=sl0.size()-1)
 			path += "\\";
 	}
+		return path;
+	*/
 
-	return path;
 
 }
 
-IFStringW UGetRelativePathW(const IFStringW& pFullPath, const IFStringW& pCurPath)
+IFString UStandardWindowsPath(const IFString& sPath)
 {
-	IFStringW relativePath;
-
-	IFArray<IFStringW> sl0,sl1;
-
-	IFStringW fullpath =pFullPath;
-	for (int i = 0; i < fullpath.size(); i ++)
-	{
-		if (fullpath[i] == L'/')
-			fullpath[i] = L'\\';
-	}
-
-	IFStringW curpath = pCurPath;
-	for (int i = 0; i < curpath.size(); i ++)
-	{
-		if (curpath[i] == L'/')
-			curpath[i] = L'\\';
-	}
-
-	USplitStringsW(&sl0, fullpath.c_str(), L"\\" );
-	USplitStringsW(&sl1, pCurPath.c_str(), L"\\" );
-
-	IFUI32 nLevel = min(sl0.size(), sl1.size() );
-
-	for( IFUI32 i = 0; i < nLevel; i ++ )
-	{
-
-		if( sl0[i] != sl1[i] )
-		{
-			if( i == 0 )
-			{
-				relativePath = pFullPath;
-				return relativePath;
-			}
-			for( int j = i; j < sl1.size(); j ++ )
-			{
-				relativePath += L"..\\";
-
-			}
-			for( int j = i; j < sl0.size(); j ++ )
-			{
-				relativePath += sl0[j];
-				if( j != sl0.size() - 1 )
-				{
-					relativePath += L"\\";
-				}
-			}
-
-			return relativePath;
-
-		}
-	}
-
-	for( int i = nLevel; i < sl0.size(); i ++  )
-	{
-		relativePath += sl0[i];
-		if(i!=sl0.size()-1)
-			relativePath.push_back(pathspliter);
-	}
-
-
-	return relativePath;
-}
-
-IFStringW UGetSimplifiedPathW( const IFStringW& pFullPath )
-{
-
-	IFArray<IFStringW> sl0;
-	int sLen = pFullPath.length();
-	bool bNeed = false;
-	if (sLen<=0)
-		return IFStringW::Empty;
-	if(pFullPath[sLen-1] == '\\' || pFullPath[sLen-1] == '/'  )
-	{
-		bNeed = true;
-	}
-
-	USplitStringsW(&sl0, pFullPath.c_str(), IFFileSystem::PathSplitSign.c_str() );
-	for( int i = 0; i < sl0.size() ; i++ )
-	{
-		if(sl0[i] == L"..")
-		{
-			
-			if( i > 0 )
-			{
-				sl0.erase(sl0.begin() + i);
-				sl0.erase(sl0.begin() + i - 1);
-				i --;
-				i --;
-			}
-		}
-		else if (sl0[i]==L".")
-		{
-			sl0.erase(sl0.begin()+i);
-			i--;
-		}
-	}
-	IFStringW path;
-	for( int i = 0; i < sl0.size() ; i++ )
-	{
-		path += sl0[i];
-		if(i!=sl0.size()-1)
-			path += IFFileSystem::PathSplitSign;
-	}
-
-	if(bNeed)
-		path += IFFileSystem::PathSplitSign;
-
-	return path;
-
-}
-
-IFString UStandardWindowsPath(const char* sPath)
-{
-	IFString s;
-	while(*sPath)
-	{
-		if( *sPath == '/')
-		{
-			s.push_back('\\');
-		}
-		else
-		{
-			s.push_back(*sPath);
-		}
-
-		sPath++;
-	}
+	IFString s = sPath;
+	s.replace('/', '\\');
 
 	return s;
 }
 
-IFStringW UStandardPathW(const IFStringW& path)
-{
-	IFStringW s;
-	const WCHAR* sPath = path.c_str();
-	while(*sPath)
-	{
-#ifdef WIN32
 
-		if( *sPath == L'/')
-		{
-			s.push_back(L'\\');
-		}
+IFString UStandardPath(const IFString& path)
+{
+	IFString s = path;
+#ifdef IFPLATFORM_WINDOWS
+	s.replace('/', '\\');
 #else
-		if( *sPath == L'\\')
-		{
-			s.push_back(L'/');
-		}
+	s.replace('\\', '/');
 #endif
-		else
-		{
-			s.push_back(*sPath);
-		}
-
-		sPath++;
-	}
+	//const char* sPath = path.c_str();
+//	while (*sPath)
+//	{
+//#ifdef WIN32
+//
+//		if (*sPath == '/')
+//		{
+//			s.push_back('\\');
+//		}
+//#else
+//		if (*sPath == '\\')
+//		{
+//			s.push_back('/');
+//		}
+//#endif
+//		else
+//		{
+//			s.push_back(*sPath);
+//		}
+//
+//		sPath++;
+//	}
 
 	return s;
 }
 
-IFStringW UStandardUnixPathW(const IFStringW& path)
-{
-	IFStringW s = path;
-	int sz = path.size();
-	for (int i = 0; i < sz; i ++)
-	{
-		if (path[i]==L'\\')
-			s[i] = L'/';
-	}
-	return s;
-}
+//IFStringW UStandardUnixPathW(const IFStringW& path)
+//{
+//	IFStringW s = path;
+//	int sz = path.size();
+//	for (int i = 0; i < sz; i ++)
+//	{
+//		if (path[i]==L'\\')
+//			s[i] = L'/';
+//	}
+//	return s;
+//}
 IFString UStandardUnixPath(const IFString& path)
 {
 	IFString s = path;
-	int sz = path.size();
-	for (int i = 0; i < sz; i++)
-	{
-		if (path[i] == L'\\')
-			s[i] = L'/';
-	}
+	s.replace('\\', '/');
+	//int sz = path.size();
+	//for (int i = 0; i < sz; i++)
+	//{
+	//	if (path[i] == L'\\')
+	//		s[i] = L'/';
+	//}
 	return s;
 }
 int HATOI(const char* sHex )
@@ -867,14 +710,14 @@ float GetLineRadian(float x0, float y0, float x1, float y1 )
 	else if( dx > 0 )
 	{
 		if( dy > 0 )
-			return atan(  dy / dx );
+			return atanf(  dy / dx );
 		else
-			return 2.0f*3.141592654f + atan( dy / dx ) ;
+			return 2.0f*3.141592654f + atanf( dy / dx ) ;
 	}
 	else
 	{
 
-		return 3.141592654f + atan( dy/dx );
+		return 3.141592654f + atanf( dy/dx );
 	}
 
 
@@ -1031,9 +874,9 @@ void UMatrixMultiply(IFMatrix4x4 *pOut, const IFMatrix4x4 *pA, const IFMatrix4x4
 #else
 	 XMMATRIX matA = ConvertIFM(*pA);
 	 XMMATRIX matB = ConvertIFM(*pB);
-	 //*(XMMATRIX*)(pOut) = matA*matB;
+	 // *(XMMATRIX*)(pOut) = matA*matB;
 	 XMStoreFloat4x4((XMFLOAT4X4*)pOut,matA*matB);
-	//*(XMMATRIX*)(pOut) = XMMatrixMultiply( matA, matB);
+	// *(XMMATRIX*)(pOut) = XMMatrixMultiply( matA, matB);
 #endif
 }
 
@@ -1198,7 +1041,7 @@ bool IFCOMMON_API UIsRelativePath( const IFString& sPath )
 {
 	if( sPath.find_first_of(':') != -1 )
 		return false;
-	if( sPath.size()>0 && sPath[0] == '\\' )
+	if( sPath.size()>0 && (sPath[0] == '\\' || sPath[0]=='/'))
 		return false;
 
 	return true;
@@ -1284,7 +1127,8 @@ float UGetPerformanceTime()
 	QueryPerformanceCounter( (LARGE_INTEGER*)&c );
 
 	return (float)((double)(c) / (double)(freq));
-#else
+#elif !defined(IFPLATFORM_EMBED_NOSYS)
+
 	struct timeval tv;
 	IFI64 res = 0;
 	static timeval oldtv={0,0};
@@ -1299,6 +1143,8 @@ float UGetPerformanceTime()
 	//	res = ((IFI64)tv.tv_sec * 1000000 + tv.tv_usec);
 	//IFLOG(IFLL_DEBUG, "cur time = %d,%d\r\n",tv.tv_sec, tv.tv_usec);
 	return (float)(tv.tv_sec - oldtv.tv_sec)+ (float)tv.tv_usec/1000000.0f;
+#else
+	return 0.0f;
 #endif
 }
 
@@ -1327,11 +1173,11 @@ IFStringW IFCOMMON_API UCombinePathW( const IFStringW& a, const IFStringW& b )
 		IFStringW s;
 		if (a.length() )
 		  s = a
-#ifdef WIN32
-			+L"\\";
-#else
+//#ifdef WIN32
+//			+L"\\";
+//#else
 			+L"/";
-#endif
+//#endif
 		if (b.length())
 			s += b;
 		return s;
@@ -1339,6 +1185,46 @@ IFStringW IFCOMMON_API UCombinePathW( const IFStringW& a, const IFStringW& b )
 
 	}
 }
+
+IFString IFCOMMON_API UCombinePath(const IFString& a, const IFString& b)
+{
+	if (a.size() == 0)
+	{
+		return b;
+	}
+
+	if (b.size() == 0)
+		return a;
+
+
+	bool bhavesp = false;
+	if ((a[a.size() - 1] == '\\' || a[a.size() - 1] == '/'))
+		bhavesp = true;
+	else if ((b[0] == '\\' || b[0] == '/'))
+		bhavesp = true;
+	if (bhavesp)
+	{
+		return a + b.convertEncoding(a.getEncoding());
+	}
+	else
+	{
+
+		IFString s;
+		if (a.length())
+			s = a
+//#ifdef WIN32
+//			+ "\\";
+//#else
+			+ "/";
+//#endif
+		if (b.length())
+			s += b.convertEncoding(a.getEncoding());
+		return s;
+
+
+	}
+}
+
 
 bool IFCOMMON_API UCopyFile( const IFStringW& sSource, const IFStringW& destName, bool bOverWrite )
 {

@@ -87,9 +87,123 @@
 		4F3A13CF1AA9A7300034BCA1 /* IFCoroutine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */; };
 		4F55FADD1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */; };
 		4F55FADE1ABFF3A200AA44F4 /* IFRedis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */; };
+		63965195257507FE00E490BC /* IFNumParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */; };
+		639651982575080500E490BC /* IFThreadSyncObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */; };
+		6396519C2575084700E490BC /* IFNumArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6396519B2575084700E490BC /* IFNumArray.cpp */; };
+		6396519D2575084700E490BC /* IFNumArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6396519B2575084700E490BC /* IFNumArray.cpp */; };
+		639653BC25761E5F00E490BC /* IFRemoteLogStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 639653BB25761E5F00E490BC /* IFRemoteLogStream.cpp */; };
+		63F0E9E82576568000BF9F93 /* IFSystemAPIIOS.mm in Sources */ = {isa = PBXBuildFile; fileRef = 63F0E9E72576568000BF9F93 /* IFSystemAPIIOS.mm */; };
 		78FCAF151B1FEBA10018DDA0 /* IFAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */; };
 		78FCAF161B1FEBA10018DDA0 /* IFAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */; };
 		8A07751523F3E61900CC1FF3 /* IFNumParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */; };
+		8A1FF9E82979568000790C3D /* IFFFT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924B20D71C3600BD93BF /* IFFFT.cpp */; };
+		8A1FF9EC2979568900790C3D /* IFNumArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6396519B2575084700E490BC /* IFNumArray.cpp */; };
+		8A1FF9ED2979568900790C3D /* IFNumParse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */; };
+		8A1FF9EE2979568900790C3D /* IFSHA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924C20D71C3600BD93BF /* IFSHA.cpp */; };
+		8A1FF9EF2979568900790C3D /* IFZipFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */; };
+		8A1FF9F02979568900790C3D /* IFThreadSyncObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */; };
+		8A1FF9F12979568900790C3D /* IFAStar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */; };
+		8A1FF9F52979569100790C3D /* ioapi.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE9B1A3165EA00237415 /* ioapi.c */; };
+		8A1FF9F62979569100790C3D /* adler32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE681A3163F100237415 /* adler32.c */; };
+		8A1FF9F72979569100790C3D /* compress.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE691A3163F100237415 /* compress.c */; };
+		8A1FF9F82979569100790C3D /* crc32.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6A1A3163F100237415 /* crc32.c */; };
+		8A1FF9F92979569100790C3D /* deflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6B1A3163F100237415 /* deflate.c */; };
+		8A1FF9FA2979569100790C3D /* infback.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6D1A3163F100237415 /* infback.c */; };
+		8A1FF9FB2979569100790C3D /* inffast.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6E1A3163F100237415 /* inffast.c */; };
+		8A1FF9FC2979569100790C3D /* inflate.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE6F1A3163F100237415 /* inflate.c */; };
+		8A1FF9FD2979569100790C3D /* inftrees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE701A3163F100237415 /* inftrees.c */; };
+		8A1FF9FE2979569100790C3D /* minigzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE721A3163F100237415 /* minigzip.c */; };
+		8A1FF9FF2979569100790C3D /* mztools.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE731A3163F100237415 /* mztools.c */; };
+		8A1FFA002979569100790C3D /* trees.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE741A3163F100237415 /* trees.c */; };
+		8A1FFA012979569100790C3D /* uncompr.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE751A3163F100237415 /* uncompr.c */; };
+		8A1FFA022979569100790C3D /* unzip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE761A3163F100237415 /* unzip.c */; };
+		8A1FFA032979569100790C3D /* zip.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE771A3163F100237415 /* zip.c */; };
+		8A1FFA042979569100790C3D /* zutil.c in Sources */ = {isa = PBXBuildFile; fileRef = A4C7EE781A3163F100237415 /* zutil.c */; };
+		8A1FFA08297956A700790C3D /* IFRedis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */; };
+		8A1FFA09297956A700790C3D /* IFCoroutine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4F3A13CB1AA9A7300034BCA1 /* IFCoroutine.cpp */; };
+		8A1FFA0A297956A700790C3D /* IFCompress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4BF699D1A19D8F50001C966 /* IFCompress.cpp */; };
+		8A1FFA0B297956A700790C3D /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD359195D272000CB8867 /* IFJSON.cpp */; };
+		8A1FFA0C297956A700790C3D /* IFRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4FD134A19372AC000467634 /* IFRandom.cpp */; };
+		8A1FFA0D297956A700790C3D /* IFFixNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A4FD134619372AAE00467634 /* IFFixNumber.cpp */; };
+		8A1FFA12297956EE00790C3D /* crypt_aes.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F181907A83600BC5A3F /* crypt_aes.c */; };
+		8A1FFA13297956EE00790C3D /* rijndael-alg-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1A1907A83600BC5A3F /* rijndael-alg-fst.c */; };
+		8A1FFA14297956EE00790C3D /* rijndael-api-fst.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1C1907A83600BC5A3F /* rijndael-api-fst.c */; };
+		8A1FFA15297956EE00790C3D /* androidwcs.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F1E1907A83600BC5A3F /* androidwcs.cpp */; };
+		8A1FFA16297956EE00790C3D /* IFAES.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F251907A83600BC5A3F /* IFAES.cpp */; };
+		8A1FFA17297956EE00790C3D /* IFAlloc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F271907A83600BC5A3F /* IFAlloc.cpp */; };
+		8A1FFA18297956EE00790C3D /* IFAnyBasic.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F291907A83600BC5A3F /* IFAnyBasic.cpp */; };
+		8A1FFA19297956EE00790C3D /* IFArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2B1907A83600BC5A3F /* IFArray.cpp */; };
+		8A1FFA1A297956EE00790C3D /* IFAsyncTaskMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F2D1907A83600BC5A3F /* IFAsyncTaskMgr.cpp */; };
+		8A1FFA1B297956EE00790C3D /* IFAttribute.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F301907A83600BC5A3F /* IFAttribute.cpp */; };
+		8A1FFA1C297956EE00790C3D /* IFAttributeMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F321907A83600BC5A3F /* IFAttributeMgr.cpp */; };
+		8A1FFA1D297956EE00790C3D /* IFAttributeSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F341907A83600BC5A3F /* IFAttributeSet.cpp */; };
+		8A1FFA1E297956EE00790C3D /* IFCommonLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F3A1907A83600BC5A3F /* IFCommonLib.cpp */; };
+		8A1FFA1F297956EE00790C3D /* IFDateTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F401907A83600BC5A3F /* IFDateTime.cpp */; };
+		8A1FFA20297956EE00790C3D /* IFFIFOStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F441907A83600BC5A3F /* IFFIFOStream.cpp */; };
+		8A1FFA21297956EE00790C3D /* IFFileInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F461907A83600BC5A3F /* IFFileInfo.cpp */; };
+		8A1FFA22297956EE00790C3D /* IFFilePackage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F491907A83600BC5A3F /* IFFilePackage.cpp */; };
+		8A1FFA23297956EE00790C3D /* IFFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4B1907A83600BC5A3F /* IFFileProvider.cpp */; };
+		8A1FFA24297956EE00790C3D /* IFFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4D1907A83600BC5A3F /* IFFileStream.cpp */; };
+		8A1FFA25297956EE00790C3D /* IFFileSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F4F1907A83600BC5A3F /* IFFileSystem.cpp */; };
+		8A1FFA26297956EE00790C3D /* IFFunctor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F511907A83600BC5A3F /* IFFunctor.cpp */; };
+		8A1FFA27297956EE00790C3D /* IFGlobalObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F571907A83600BC5A3F /* IFGlobalObject.cpp */; };
+		8A1FFA28297956EE00790C3D /* IFGUID.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F581907A83600BC5A3F /* IFGUID.cpp */; };
+		8A1FFA29297956EE00790C3D /* IFHttpDownloader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5A1907A83600BC5A3F /* IFHttpDownloader.cpp */; };
+		8A1FFA2A297956EE00790C3D /* IFIDAllocator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5C1907A83600BC5A3F /* IFIDAllocator.cpp */; };
+		8A1FFA2B297956EE00790C3D /* IFImageCodecMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F5E1907A83600BC5A3F /* IFImageCodecMgr.cpp */; };
+		8A1FFA2C297956EE00790C3D /* IFList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F611907A83600BC5A3F /* IFList.cpp */; };
+		8A1FFA2D297956EE00790C3D /* IFLogSystem.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F631907A83600BC5A3F /* IFLogSystem.cpp */; };
+		8A1FFA2E297956EE00790C3D /* IFMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F651907A83600BC5A3F /* IFMap.cpp */; };
+		8A1FFA2F297956EE00790C3D /* IFMath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F671907A83600BC5A3F /* IFMath.cpp */; };
+		8A1FFA30297956EE00790C3D /* IFMD5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F691907A83600BC5A3F /* IFMD5.cpp */; };
+		8A1FFA31297956EE00790C3D /* IFMemPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6B1907A83600BC5A3F /* IFMemPool.cpp */; };
+		8A1FFA352979574400790C3D /* IFMemStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6D1907A83600BC5A3F /* IFMemStream.cpp */; };
+		8A1FFA362979574400790C3D /* IFNaviCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F6F1907A83600BC5A3F /* IFNaviCell.cpp */; };
+		8A1FFA372979574400790C3D /* IFNavigation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F711907A83600BC5A3F /* IFNavigation.cpp */; };
+		8A1FFA382979574400790C3D /* IFNaviPath.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F731907A83600BC5A3F /* IFNaviPath.cpp */; };
+		8A1FFA392979574400790C3D /* IFNetConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F751907A83600BC5A3F /* IFNetConnection.cpp */; };
+		8A1FFA3A2979574400790C3D /* IFNetCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F771907A83600BC5A3F /* IFNetCore.cpp */; };
+		8A1FFA3B2979574400790C3D /* IFNetCoreSelect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F7D1907A83600BC5A3F /* IFNetCoreSelect.cpp */; };
+		8A1FFA3C2979574400790C3D /* IFNetIOData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F801907A83600BC5A3F /* IFNetIOData.cpp */; };
+		8A1FFA3D2979574400790C3D /* IFNetMsgFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F821907A83600BC5A3F /* IFNetMsgFactory.cpp */; };
+		8A1FFA3E2979574400790C3D /* ifobj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F841907A83600BC5A3F /* ifobj.cpp */; };
+		8A1FFA3F2979574400790C3D /* IFObjectFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F861907A83600BC5A3F /* IFObjectFactory.cpp */; };
+		8A1FFA402979574400790C3D /* IFPipe.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F891907A83600BC5A3F /* IFPipe.cpp */; };
+		8A1FFA412979574400790C3D /* IFPipeCore.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F8B1907A83600BC5A3F /* IFPipeCore.cpp */; };
+		8A1FFA422979574400790C3D /* IFProfile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F8E1907A83600BC5A3F /* IFProfile.cpp */; };
+		8A1FFA432979574400790C3D /* IFRBTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F911907A83600BC5A3F /* IFRBTree.cpp */; };
+		8A1FFA442979574500790C3D /* IFRefObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F941907A83600BC5A3F /* IFRefObj.cpp */; };
+		8A1FFA452979574500790C3D /* IFRefPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F961907A83600BC5A3F /* IFRefPtr.cpp */; };
+		8A1FFA462979574500790C3D /* IFRSA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9A1907A83600BC5A3F /* IFRSA.cpp */; };
+		8A1FFA472979574500790C3D /* IFServerFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9D1907A83600BC5A3F /* IFServerFrame.cpp */; };
+		8A1FFA482979574500790C3D /* IFSet.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2F9F1907A83600BC5A3F /* IFSet.cpp */; };
+		8A1FFA492979574500790C3D /* IFStateMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA51907A83600BC5A3F /* IFStateMgr.cpp */; };
+		8A1FFA4A2979574500790C3D /* IFStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA71907A83600BC5A3F /* IFStream.cpp */; };
+		8A1FFA4B2979574500790C3D /* IFString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FA91907A83600BC5A3F /* IFString.cpp */; };
+		8A1FFA4C2979574500790C3D /* IFSuperAttrMgr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAB1907A83600BC5A3F /* IFSuperAttrMgr.cpp */; };
+		8A1FFA4D2979574500790C3D /* IFSystemAPI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAD1907A83600BC5A3F /* IFSystemAPI.cpp */; };
+		8A1FFA4E2979574500790C3D /* IFThread.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FAF1907A83600BC5A3F /* IFThread.cpp */; };
+		8A1FFA4F2979574500790C3D /* IFTimer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB11907A83600BC5A3F /* IFTimer.cpp */; };
+		8A1FFA502979574500790C3D /* IFTypes.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB31907A83600BC5A3F /* IFTypes.cpp */; };
+		8A1FFA512979574500790C3D /* IFUtility.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB51907A83600BC5A3F /* IFUtility.cpp */; };
+		8A1FFA522979574500790C3D /* IFWeakPtr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FB71907A83600BC5A3F /* IFWeakPtr.cpp */; };
+		8A1FFA532979574500790C3D /* desc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBC1907A83600BC5A3F /* desc.c */; };
+		8A1FFA542979574500790C3D /* digit.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FBD1907A83600BC5A3F /* digit.c */; };
+		8A1FFA552979574500790C3D /* md2c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC21907A83600BC5A3F /* md2c.c */; };
+		8A1FFA562979574500790C3D /* md5c.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC41907A83600BC5A3F /* md5c.c */; };
+		8A1FFA572979574500790C3D /* nn.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC51907A83600BC5A3F /* nn.c */; };
+		8A1FFA582979574500790C3D /* prime.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC71907A83600BC5A3F /* prime.c */; };
+		8A1FFA592979574500790C3D /* r_dh.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FC91907A83600BC5A3F /* r_dh.c */; };
+		8A1FFA5A2979574500790C3D /* r_encode.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCA1907A83600BC5A3F /* r_encode.c */; };
+		8A1FFA5B2979574500790C3D /* r_enhanc.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCB1907A83600BC5A3F /* r_enhanc.c */; };
+		8A1FFA5C2979574500790C3D /* r_keygen.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCC1907A83600BC5A3F /* r_keygen.c */; };
+		8A1FFA5D2979574500790C3D /* r_random.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCD1907A83600BC5A3F /* r_random.c */; };
+		8A1FFA5E2979574500790C3D /* r_stdlib.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FCF1907A83600BC5A3F /* r_stdlib.c */; };
+		8A1FFA5F2979574500790C3D /* rsa.c in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD01907A83600BC5A3F /* rsa.c */; };
+		8A1FFA602979574500790C3D /* utf8wchar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A49D2FD61907A83600BC5A3F /* utf8wchar.cpp */; };
+		8A1FFB1929795E3300790C3D /* IFFileLogStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A1FFB1829795E3200790C3D /* IFFileLogStream.cpp */; };
+		8A1FFB1A29795E3300790C3D /* IFFileLogStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A1FFB1829795E3200790C3D /* IFFileLogStream.cpp */; };
+		8A1FFB1B29795E3300790C3D /* IFFileLogStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A1FFB1829795E3200790C3D /* IFFileLogStream.cpp */; };
 		8A2F34611937703C00C65AC4 /* IFFixNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */; };
 		8A2F34621937703C00C65AC4 /* IFFixNumber.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */; };
 		8A2F34651937704B00C65AC4 /* IFRandom.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A2F34631937704B00C65AC4 /* IFRandom.cpp */; };
@@ -101,7 +215,6 @@
 		8A4E925220D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */; };
 		8A4E925320D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8A4E924D20D71C3700BD93BF /* IFZipFileProvider.cpp */; };
 		A41EF0A41DE67EA80035BD12 /* IFThreadSyncObj.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A41EF0A31DE67EA80035BD12 /* IFThreadSyncObj.cpp */; };
-		A43BD35B195D272000CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD359195D272000CB8867 /* IFJSON.cpp */; };
 		A43BD35E1965492300CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD35C1965492300CB8867 /* IFJSON.cpp */; };
 		A43BD35F1965492300CB8867 /* IFJSON.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A43BD35C1965492300CB8867 /* IFJSON.cpp */; };
 		A49D2EF11907A6C300BC5A3F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A49D2EF01907A6C300BC5A3F /* Foundation.framework */; };
@@ -244,9 +357,14 @@
 		4F3A13CD1AA9A7300034BCA1 /* IFCoroutineWaitEvent.inl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = IFCoroutineWaitEvent.inl; sourceTree = SOURCE_ROOT; };
 		4F55FADB1ABFF3A200AA44F4 /* IFRedis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFRedis.cpp; sourceTree = SOURCE_ROOT; };
 		4F55FADC1ABFF3A200AA44F4 /* IFRedis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFRedis.h; sourceTree = SOURCE_ROOT; };
+		6396519B2575084700E490BC /* IFNumArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFNumArray.cpp; sourceTree = "<group>"; };
+		639653BB25761E5F00E490BC /* IFRemoteLogStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFRemoteLogStream.cpp; path = ../IFCommonLib/IFRemoteLogStream.cpp; sourceTree = "<group>"; };
+		63F0E9E72576568000BF9F93 /* IFSystemAPIIOS.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; name = IFSystemAPIIOS.mm; path = ../IFCommonLib/IFSystemAPIIOS.mm; sourceTree = "<group>"; };
 		78FCAF131B1FEBA10018DDA0 /* IFAStar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFAStar.cpp; sourceTree = "<group>"; };
 		78FCAF141B1FEBA10018DDA0 /* IFAStar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFAStar.h; sourceTree = "<group>"; };
 		8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IFNumParse.cpp; path = ../IFCommonLib/IFNumParse.cpp; sourceTree = "<group>"; };
+		8A1FF9E12979563B00790C3D /* libIFCommonLib-mac-static.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libIFCommonLib-mac-static.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		8A1FFB1829795E3200790C3D /* IFFileLogStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFileLogStream.cpp; sourceTree = "<group>"; };
 		8A2F345E1937703C00C65AC4 /* IFCommonLib_2005.vcproj */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = IFCommonLib_2005.vcproj; sourceTree = SOURCE_ROOT; };
 		8A2F345F1937703C00C65AC4 /* IFFixNumber.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IFFixNumber.cpp; sourceTree = SOURCE_ROOT; };
 		8A2F34601937703C00C65AC4 /* IFFixNumber.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IFFixNumber.h; sourceTree = SOURCE_ROOT; };
@@ -486,6 +604,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8A1FF9DF2979563B00790C3D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A49D2EEA1907A6C300BC5A3F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -500,6 +625,10 @@
 		A49D2EE41907A6C300BC5A3F = {
 			isa = PBXGroup;
 			children = (
+				8A1FFB1829795E3200790C3D /* IFFileLogStream.cpp */,
+				63F0E9E72576568000BF9F93 /* IFSystemAPIIOS.mm */,
+				639653BB25761E5F00E490BC /* IFRemoteLogStream.cpp */,
+				6396519B2575084700E490BC /* IFNumArray.cpp */,
 				8A07751423F3E61900CC1FF3 /* IFNumParse.cpp */,
 				8A4E924B20D71C3600BD93BF /* IFFFT.cpp */,
 				8A4E924C20D71C3600BD93BF /* IFSHA.cpp */,
@@ -518,6 +647,7 @@
 			children = (
 				A49D2EED1907A6C300BC5A3F /* libIFCommonLib-ios.a */,
 				07C4A4111919237100229F4A /* libIFCommonLib-mac.a */,
+				8A1FF9E12979563B00790C3D /* libIFCommonLib-mac-static.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -798,6 +928,16 @@
 		};
 /* End PBXGroup section */
 
+/* Begin PBXHeadersBuildPhase section */
+		8A1FF9DD2979563B00790C3D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
 /* Begin PBXNativeTarget section */
 		07C4A3BE1919237100229F4A /* IFCommonLib-mac */ = {
 			isa = PBXNativeTarget;
@@ -814,6 +954,23 @@
 			name = "IFCommonLib-mac";
 			productName = IFCommonLib;
 			productReference = 07C4A4111919237100229F4A /* libIFCommonLib-mac.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		8A1FF9E02979563B00790C3D /* IFCommonLib-mac-static */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A1FF9E42979563B00790C3D /* Build configuration list for PBXNativeTarget "IFCommonLib-mac-static" */;
+			buildPhases = (
+				8A1FF9DD2979563B00790C3D /* Headers */,
+				8A1FF9DE2979563B00790C3D /* Sources */,
+				8A1FF9DF2979563B00790C3D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "IFCommonLib-mac-static";
+			productName = "IFCommonLib-mac-static";
+			productReference = 8A1FF9E12979563B00790C3D /* libIFCommonLib-mac-static.a */;
 			productType = "com.apple.product-type.library.static";
 		};
 		A49D2EEC1907A6C300BC5A3F /* IFCommonLib-ios */ = {
@@ -839,8 +996,14 @@
 		A49D2EE51907A6C300BC5A3F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0510;
+				LastUpgradeCheck = 1210;
 				ORGANIZATIONNAME = "___FULLUSERNAME___";
+				TargetAttributes = {
+					8A1FF9E02979563B00790C3D = {
+						CreatedOnToolsVersion = 12.4;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = A49D2EE81907A6C300BC5A3F /* Build configuration list for PBXProject "IFCommonLib" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -857,6 +1020,7 @@
 			targets = (
 				A49D2EEC1907A6C300BC5A3F /* IFCommonLib-ios */,
 				07C4A3BE1919237100229F4A /* IFCommonLib-mac */,
+				8A1FF9E02979563B00790C3D /* IFCommonLib-mac-static */,
 			);
 		};
 /* End PBXProject section */
@@ -887,6 +1051,7 @@
 				07C4A3CE1919237100229F4A /* r_stdlib.c in Sources */,
 				07C4A3CF1919237100229F4A /* IFMemStream.cpp in Sources */,
 				07C4A3D01919237100229F4A /* IFWeakPtr.cpp in Sources */,
+				6396519D2575084700E490BC /* IFNumArray.cpp in Sources */,
 				07C4A3D11919237100229F4A /* IFImageCodecMgr.cpp in Sources */,
 				07C4A3D21919237100229F4A /* IFSuperAttrMgr.cpp in Sources */,
 				8A4E924F20D71C3700BD93BF /* IFFFT.cpp in Sources */,
@@ -919,10 +1084,12 @@
 				07C4A3E61919237100229F4A /* IFLogSystem.cpp in Sources */,
 				07C4A3E71919237100229F4A /* IFFileSystem.cpp in Sources */,
 				8A4E925320D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */,
+				639651982575080500E490BC /* IFThreadSyncObj.cpp in Sources */,
 				A4C7EE9A1A3163F100237415 /* zutil.c in Sources */,
 				A4C7EE961A3163F100237415 /* unzip.c in Sources */,
 				07C4A3E81919237100229F4A /* IFNavigation.cpp in Sources */,
 				07C4A3E91919237100229F4A /* IFPipe.cpp in Sources */,
+				63965195257507FE00E490BC /* IFNumParse.cpp in Sources */,
 				A4C7EE7C1A3163F100237415 /* compress.c in Sources */,
 				A4C7EE8E1A3163F100237415 /* minigzip.c in Sources */,
 				A4C7EE801A3163F100237415 /* deflate.c in Sources */,
@@ -950,6 +1117,7 @@
 				A4C7EE941A3163F100237415 /* uncompr.c in Sources */,
 				07C4A3FC1919237100229F4A /* IFAsyncTaskMgr.cpp in Sources */,
 				07C4A3FD1919237100229F4A /* androidwcs.cpp in Sources */,
+				8A1FFB1A29795E3300790C3D /* IFFileLogStream.cpp in Sources */,
 				07C4A3FE1919237100229F4A /* IFIDAllocator.cpp in Sources */,
 				A4BF69A01A19D8FE0001C966 /* IFCompress.cpp in Sources */,
 				07C4A3FF1919237100229F4A /* IFAttribute.cpp in Sources */,
@@ -967,6 +1135,119 @@
 				A4C7EE841A3163F100237415 /* infback.c in Sources */,
 				07C4A40A1919237100229F4A /* IFCommonLib.cpp in Sources */,
 				A4C7EE921A3163F100237415 /* trees.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8A1FF9DE2979563B00790C3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A1FFA0D297956A700790C3D /* IFFixNumber.cpp in Sources */,
+				8A1FFA0C297956A700790C3D /* IFRandom.cpp in Sources */,
+				8A1FFA352979574400790C3D /* IFMemStream.cpp in Sources */,
+				8A1FFA362979574400790C3D /* IFNaviCell.cpp in Sources */,
+				8A1FFA372979574400790C3D /* IFNavigation.cpp in Sources */,
+				8A1FFA382979574400790C3D /* IFNaviPath.cpp in Sources */,
+				8A1FFA392979574400790C3D /* IFNetConnection.cpp in Sources */,
+				8A1FFA3A2979574400790C3D /* IFNetCore.cpp in Sources */,
+				8A1FFA3B2979574400790C3D /* IFNetCoreSelect.cpp in Sources */,
+				8A1FFA3C2979574400790C3D /* IFNetIOData.cpp in Sources */,
+				8A1FFA3D2979574400790C3D /* IFNetMsgFactory.cpp in Sources */,
+				8A1FFA3E2979574400790C3D /* ifobj.cpp in Sources */,
+				8A1FFA3F2979574400790C3D /* IFObjectFactory.cpp in Sources */,
+				8A1FFA402979574400790C3D /* IFPipe.cpp in Sources */,
+				8A1FFA412979574400790C3D /* IFPipeCore.cpp in Sources */,
+				8A1FFA422979574400790C3D /* IFProfile.cpp in Sources */,
+				8A1FFA432979574400790C3D /* IFRBTree.cpp in Sources */,
+				8A1FFA442979574500790C3D /* IFRefObj.cpp in Sources */,
+				8A1FFA452979574500790C3D /* IFRefPtr.cpp in Sources */,
+				8A1FFA462979574500790C3D /* IFRSA.cpp in Sources */,
+				8A1FFA472979574500790C3D /* IFServerFrame.cpp in Sources */,
+				8A1FFA482979574500790C3D /* IFSet.cpp in Sources */,
+				8A1FFA492979574500790C3D /* IFStateMgr.cpp in Sources */,
+				8A1FFA4A2979574500790C3D /* IFStream.cpp in Sources */,
+				8A1FFA4B2979574500790C3D /* IFString.cpp in Sources */,
+				8A1FFA4C2979574500790C3D /* IFSuperAttrMgr.cpp in Sources */,
+				8A1FFA4D2979574500790C3D /* IFSystemAPI.cpp in Sources */,
+				8A1FFA4E2979574500790C3D /* IFThread.cpp in Sources */,
+				8A1FFA4F2979574500790C3D /* IFTimer.cpp in Sources */,
+				8A1FFA502979574500790C3D /* IFTypes.cpp in Sources */,
+				8A1FFA512979574500790C3D /* IFUtility.cpp in Sources */,
+				8A1FFA522979574500790C3D /* IFWeakPtr.cpp in Sources */,
+				8A1FFA532979574500790C3D /* desc.c in Sources */,
+				8A1FFA542979574500790C3D /* digit.c in Sources */,
+				8A1FFA552979574500790C3D /* md2c.c in Sources */,
+				8A1FFA562979574500790C3D /* md5c.c in Sources */,
+				8A1FFA572979574500790C3D /* nn.c in Sources */,
+				8A1FFA582979574500790C3D /* prime.c in Sources */,
+				8A1FFA592979574500790C3D /* r_dh.c in Sources */,
+				8A1FFA5A2979574500790C3D /* r_encode.c in Sources */,
+				8A1FFA5B2979574500790C3D /* r_enhanc.c in Sources */,
+				8A1FFA5C2979574500790C3D /* r_keygen.c in Sources */,
+				8A1FFA5D2979574500790C3D /* r_random.c in Sources */,
+				8A1FFA5E2979574500790C3D /* r_stdlib.c in Sources */,
+				8A1FFA5F2979574500790C3D /* rsa.c in Sources */,
+				8A1FFA602979574500790C3D /* utf8wchar.cpp in Sources */,
+				8A1FFA12297956EE00790C3D /* crypt_aes.c in Sources */,
+				8A1FFA13297956EE00790C3D /* rijndael-alg-fst.c in Sources */,
+				8A1FFA14297956EE00790C3D /* rijndael-api-fst.c in Sources */,
+				8A1FFA15297956EE00790C3D /* androidwcs.cpp in Sources */,
+				8A1FFA0B297956A700790C3D /* IFJSON.cpp in Sources */,
+				8A1FFA16297956EE00790C3D /* IFAES.cpp in Sources */,
+				8A1FFA17297956EE00790C3D /* IFAlloc.cpp in Sources */,
+				8A1FFA18297956EE00790C3D /* IFAnyBasic.cpp in Sources */,
+				8A1FFA19297956EE00790C3D /* IFArray.cpp in Sources */,
+				8A1FFA1A297956EE00790C3D /* IFAsyncTaskMgr.cpp in Sources */,
+				8A1FFA1B297956EE00790C3D /* IFAttribute.cpp in Sources */,
+				8A1FFA1C297956EE00790C3D /* IFAttributeMgr.cpp in Sources */,
+				8A1FFA1D297956EE00790C3D /* IFAttributeSet.cpp in Sources */,
+				8A1FFA1E297956EE00790C3D /* IFCommonLib.cpp in Sources */,
+				8A1FFA1F297956EE00790C3D /* IFDateTime.cpp in Sources */,
+				8A1FFA20297956EE00790C3D /* IFFIFOStream.cpp in Sources */,
+				8A1FFA21297956EE00790C3D /* IFFileInfo.cpp in Sources */,
+				8A1FFA22297956EE00790C3D /* IFFilePackage.cpp in Sources */,
+				8A1FFA23297956EE00790C3D /* IFFileProvider.cpp in Sources */,
+				8A1FFA24297956EE00790C3D /* IFFileStream.cpp in Sources */,
+				8A1FFA25297956EE00790C3D /* IFFileSystem.cpp in Sources */,
+				8A1FFA26297956EE00790C3D /* IFFunctor.cpp in Sources */,
+				8A1FFA27297956EE00790C3D /* IFGlobalObject.cpp in Sources */,
+				8A1FFB1B29795E3300790C3D /* IFFileLogStream.cpp in Sources */,
+				8A1FFA28297956EE00790C3D /* IFGUID.cpp in Sources */,
+				8A1FFA29297956EE00790C3D /* IFHttpDownloader.cpp in Sources */,
+				8A1FFA2A297956EE00790C3D /* IFIDAllocator.cpp in Sources */,
+				8A1FFA2B297956EE00790C3D /* IFImageCodecMgr.cpp in Sources */,
+				8A1FFA2C297956EE00790C3D /* IFList.cpp in Sources */,
+				8A1FFA2D297956EE00790C3D /* IFLogSystem.cpp in Sources */,
+				8A1FFA2E297956EE00790C3D /* IFMap.cpp in Sources */,
+				8A1FFA2F297956EE00790C3D /* IFMath.cpp in Sources */,
+				8A1FFA30297956EE00790C3D /* IFMD5.cpp in Sources */,
+				8A1FFA31297956EE00790C3D /* IFMemPool.cpp in Sources */,
+				8A1FFA08297956A700790C3D /* IFRedis.cpp in Sources */,
+				8A1FFA09297956A700790C3D /* IFCoroutine.cpp in Sources */,
+				8A1FFA0A297956A700790C3D /* IFCompress.cpp in Sources */,
+				8A1FF9F52979569100790C3D /* ioapi.c in Sources */,
+				8A1FF9F62979569100790C3D /* adler32.c in Sources */,
+				8A1FF9F72979569100790C3D /* compress.c in Sources */,
+				8A1FF9F82979569100790C3D /* crc32.c in Sources */,
+				8A1FF9F92979569100790C3D /* deflate.c in Sources */,
+				8A1FF9FA2979569100790C3D /* infback.c in Sources */,
+				8A1FF9FB2979569100790C3D /* inffast.c in Sources */,
+				8A1FF9FC2979569100790C3D /* inflate.c in Sources */,
+				8A1FF9FD2979569100790C3D /* inftrees.c in Sources */,
+				8A1FF9FE2979569100790C3D /* minigzip.c in Sources */,
+				8A1FF9FF2979569100790C3D /* mztools.c in Sources */,
+				8A1FFA002979569100790C3D /* trees.c in Sources */,
+				8A1FFA012979569100790C3D /* uncompr.c in Sources */,
+				8A1FFA022979569100790C3D /* unzip.c in Sources */,
+				8A1FFA032979569100790C3D /* zip.c in Sources */,
+				8A1FFA042979569100790C3D /* zutil.c in Sources */,
+				8A1FF9EC2979568900790C3D /* IFNumArray.cpp in Sources */,
+				8A1FF9ED2979568900790C3D /* IFNumParse.cpp in Sources */,
+				8A1FF9EE2979568900790C3D /* IFSHA.cpp in Sources */,
+				8A1FF9EF2979568900790C3D /* IFZipFileProvider.cpp in Sources */,
+				8A1FF9F02979568900790C3D /* IFThreadSyncObj.cpp in Sources */,
+				8A1FF9F12979568900790C3D /* IFAStar.cpp in Sources */,
+				8A1FF9E82979568000790C3D /* IFFFT.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -995,6 +1276,7 @@
 				A43BD35E1965492300CB8867 /* IFJSON.cpp in Sources */,
 				A49D30271907A83600BC5A3F /* r_stdlib.c in Sources */,
 				A49D2FFA1907A83600BC5A3F /* IFMemStream.cpp in Sources */,
+				6396519C2575084700E490BC /* IFNumArray.cpp in Sources */,
 				A49D301A1907A83600BC5A3F /* IFWeakPtr.cpp in Sources */,
 				A49D2FF31907A83600BC5A3F /* IFImageCodecMgr.cpp in Sources */,
 				A49D30141907A83600BC5A3F /* IFSuperAttrMgr.cpp in Sources */,
@@ -1009,10 +1291,10 @@
 				A49D301E1907A83600BC5A3F /* md2c.c in Sources */,
 				8A07751523F3E61900CC1FF3 /* IFNumParse.cpp in Sources */,
 				A49D30281907A83600BC5A3F /* rsa.c in Sources */,
-				A43BD35B195D272000CB8867 /* IFJSON.cpp in Sources */,
 				8A2F34651937704B00C65AC4 /* IFRandom.cpp in Sources */,
 				A49D2FE41907A83600BC5A3F /* IFAttributeMgr.cpp in Sources */,
 				A49D2FEE1907A83600BC5A3F /* IFFunctor.cpp in Sources */,
+				8A1FFB1929795E3300790C3D /* IFFileLogStream.cpp in Sources */,
 				A49D2FEC1907A83600BC5A3F /* IFFileStream.cpp in Sources */,
 				A49D300C1907A83600BC5A3F /* IFRefPtr.cpp in Sources */,
 				A49D2FEB1907A83600BC5A3F /* IFFileProvider.cpp in Sources */,
@@ -1054,6 +1336,7 @@
 				A49D2FFF1907A83600BC5A3F /* IFNetCore.cpp in Sources */,
 				8A4E925220D71C3700BD93BF /* IFZipFileProvider.cpp in Sources */,
 				A49D2FE81907A83600BC5A3F /* IFFIFOStream.cpp in Sources */,
+				63F0E9E82576568000BF9F93 /* IFSystemAPIIOS.mm in Sources */,
 				A49D30251907A83600BC5A3F /* r_keygen.c in Sources */,
 				A49D30201907A83600BC5A3F /* nn.c in Sources */,
 				A4C7EE7B1A3163F100237415 /* compress.c in Sources */,
@@ -1074,6 +1357,7 @@
 				A4BF699F1A19D8F50001C966 /* IFCompress.cpp in Sources */,
 				A49D2FE51907A83600BC5A3F /* IFAttributeSet.cpp in Sources */,
 				A4C7EE7F1A3163F100237415 /* deflate.c in Sources */,
+				639653BC25761E5F00E490BC /* IFRemoteLogStream.cpp in Sources */,
 				A49D2FDF1907A83600BC5A3F /* IFAlloc.cpp in Sources */,
 				A49D30261907A83600BC5A3F /* r_random.c in Sources */,
 				A49D30051907A83600BC5A3F /* ifobj.cpp in Sources */,
@@ -1087,7 +1371,6 @@
 		07C4A40F1919237100229F4A /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = x86_64;
 				DSTROOT = /tmp/IFCommonLib.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1112,7 +1395,7 @@
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "IFCommonLib-mac";
-				SDKROOT = iphoneos;
+				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SYMROOT = ../../../Bin;
@@ -1124,7 +1407,6 @@
 		07C4A4101919237100229F4A /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = x86_64;
 				DSTROOT = /tmp/IFCommonLib.dst;
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
@@ -1137,6 +1419,7 @@
 					./rsa,
 					./zlib,
 				);
+				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
 					"$(OTHER_CFLAGS)",
 					"-DMAC",
@@ -1149,7 +1432,7 @@
 				);
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_NAME = "IFCommonLib-mac";
-				SDKROOT = iphoneos;
+				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SUPPORTED_PLATFORMS = macosx;
 				SYMROOT = ../../../Bin;
@@ -1158,25 +1441,86 @@
 			};
 			name = Release;
 		};
+		8A1FF9E22979563B00790C3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		8A1FF9E32979563B00790C3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
 		A49D2F0E1907A6C300BC5A3F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
@@ -1189,10 +1533,16 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Debug;
 		};
@@ -1200,31 +1550,52 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
 				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					../../Public/3rd/include,
+					./aes,
+					./rsa,
+					./zlib,
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				SDKROOT = iphoneos;
 				VALIDATE_PRODUCT = YES;
-				VALID_ARCHS = "i386 x86_64";
 			};
 			name = Release;
 		};
@@ -1255,7 +1626,6 @@
 				SKIP_INSTALL = YES;
 				SYMROOT = ../../../Bin;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s arm64";
 			};
 			name = Debug;
 		};
@@ -1287,7 +1657,6 @@
 				SKIP_INSTALL = YES;
 				SYMROOT = ../../../Bin;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				VALID_ARCHS = "armv7 armv7s arm64";
 			};
 			name = Release;
 		};
@@ -1299,6 +1668,15 @@
 			buildConfigurations = (
 				07C4A40F1919237100229F4A /* Debug */,
 				07C4A4101919237100229F4A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8A1FF9E42979563B00790C3D /* Build configuration list for PBXNativeTarget "IFCommonLib-mac-static" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A1FF9E22979563B00790C3D /* Debug */,
+				8A1FF9E32979563B00790C3D /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

@@ -29,10 +29,11 @@ THE SOFTWARE.
 #include <ppltasks.h>
 #endif
 #else
+
 #ifndef ANDROID
 #include<signal.h>
-#include<unistd.h>
-#else
+#endif
+#ifndef IFPLATFORM_EMBED_NOSYS
 #include <unistd.h>
 #endif
 #endif
@@ -41,21 +42,25 @@ THE SOFTWARE.
 #include <pthread.h>
 #endif
 
-
-IFThread::IFThread(void):
-	IFRefObj(true),
-#ifndef LINUX
-
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
-	m_pThread(NULL),
-#else
-	m_hThread(NULL),
+#ifdef IFPLATFORM_FREE_RTOS
+#include "freertos/task.h"
+#define pthread_kill(a,b)
 #endif
+
+
+IFThread::IFThread(void)
+	:IFRefObj(true)
+	, m_bNeedExit(false)
+	,m_bRunning(false)
+	
+#if defined(IFTHREAD_USE_PTHREAD)
+	, m_threadid(0)
+#elif defined(IFTHREAD_USE_STD_THREAD)
+	, m_pThread(NULL)
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
-	m_threadid(0),
+	, m_hThread(NULL)
 #endif
-	m_bRunning(false),
-	m_bNeedExit(false)
 {
 	m_spSyncObj = IFNew IFThreadSyncObj();
 }
@@ -63,24 +68,26 @@ IFThread::IFThread(void):
 
 IFThread::~IFThread(void)
 {
-#ifndef LINUX
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
-	
+#if defined(IFTHREAD_USE_PTHREAD)
+
+#elif defined(IFTHREAD_USE_STD_THREAD)
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	if (m_hThread)
 	{
 		CloseHandle(m_hThread);
 	}
 #endif
-#endif
+
+
 }
 
+static thread_local int s_thread_id = 0;
 
-
-bool IFThread::start( IFFunctor<void()>* pFunctor )
+bool IFThread::start(IFRefPtr<IFFunctor<void()>> pFunctor )
 {
 	m_bNeedExit = false;
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 	if (m_threadid)
 	{
 		terminate();
@@ -92,7 +99,7 @@ bool IFThread::start( IFFunctor<void()>* pFunctor )
 
 
 #else
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#ifdef IFTHREAD_USE_STD_THREAD
 	if (m_pThread)
 	{
 		terminate();
@@ -101,6 +108,7 @@ bool IFThread::start( IFFunctor<void()>* pFunctor )
 	m_spFunctor = pFunctor;
 	addRef();
 	m_pThread = new std::thread(&IFThread::run, this);
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	if (m_bRunning)
 		return false;
@@ -121,7 +129,7 @@ bool IFThread::start( IFFunctor<void()>* pFunctor )
 
 bool IFThread::terminate()
 {
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 
 	if (m_threadid)
 	{
@@ -135,14 +143,14 @@ bool IFThread::terminate()
 #else
 
 
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#ifdef IFTHREAD_USE_STD_THREAD
 	if(m_pThread)
 	{
 		//std::terminate();
 		delete m_pThread;
 	}
 	m_pThread = NULL;
-
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	TerminateThread(m_hThread,0);
 #endif
@@ -155,7 +163,7 @@ bool IFThread::isRunning()
 {
 	return m_bRunning;
 }
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 void* IFThread::run(void* p)
 {	
 	IFLOG(IFLL_TRACE, "thread begin\r\n");
@@ -168,11 +176,21 @@ void* IFThread::run(void* p)
 	return NULL;
 
 }
+#elif defined(IFTHREAD_USE_STD_THREAD)
+void IFThread::run()
+
+{
+	m_bRunning = true;
+	(*m_spFunctor)();
+	m_bRunning = false;
+	decRef();
+}
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
+
 #else
-#ifndef IFTHREAD_SUPPORT_STD_THREAD
 DWORD IFThread::run(LPVOID p)
 {
-
+	s_thread_id = (int)p;
 	IFRefPtr<IFThread> pThread = *(IFRefPtr<IFThread>*)p;
 	pThread->m_bRunning = true;
 	(*pThread->m_spFunctor)();
@@ -183,26 +201,24 @@ DWORD IFThread::run(LPVOID p)
 
 	return 0;
 }
-#else
-void IFThread::run()
 
-{
-	m_bRunning = true;
-	(*m_spFunctor)();
-	m_bRunning = false;
-	decRef();
-}
-#endif
 #endif
 
 void IFThread::sleep( IFUI32 ms )
 {
-#ifdef LINUX
-	::usleep(ms*1000);
+#ifdef IFTHREAD_USE_PTHREAD
+#	ifdef IFPLATFORM_FREE_RTOS
+	if (ms < 10)
+		ms = 10;
+	vTaskDelay(ms / portTICK_PERIOD_MS);
+#	else
+	::usleep(ms * 1000);
+#	endif
 #else
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#ifdef IFTHREAD_USE_STD_THREAD
 	std::chrono::milliseconds dura( ms );
 	std::this_thread::sleep_for(dura);
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	::Sleep(ms);
 #endif
@@ -211,13 +227,14 @@ void IFThread::sleep( IFUI32 ms )
 
 bool IFThread::waitExit()
 {
-#ifdef LINUX
+#ifdef IFTHREAD_USE_PTHREAD
 	//::usleep(ms*1000);
 	void* val;
 	pthread_join(m_threadid, &val);
 #else
-#ifdef IFTHREAD_SUPPORT_STD_THREAD
+#ifdef IFTHREAD_USE_STD_THREAD
 	m_pThread->join();
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
 #else
 	WaitForSingleObject(m_hThread,INFINITE);
 #endif
@@ -227,11 +244,19 @@ bool IFThread::waitExit()
 
 int IFThread::getCurrentThreadID()
 {
-#if defined(LINUX) || defined(IFPLATFORM_WEB)
+#ifdef IFTHREAD_USE_PTHREAD
+
+#ifdef IFPLATFORM_FREE_RTOS
+	return s_thread_id;
+#else
 	return pthread_self();
+#endif
+	
 #elif defined(MAC)
     pthread_t p = pthread_self();
     return p->__sig;
+#elif defined(IFTHREAD_USE_EMBED_THREAD)
+	return 0;
 #else
 
 	return ::GetCurrentThreadId();

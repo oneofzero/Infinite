@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_NET_CORE_EPOLL_H__
+#define __IF_NET_CORE_EPOLL_H__
 #include "IFNetCore.h"
 
 class IFNetCoreEPOLL : public IFNetCore
@@ -35,6 +37,7 @@ protected:
 
 	virtual bool startListen(int nPort, bool enableSSL = false, bool packagemode = false);
 	virtual bool stopListen(int nPort);
+	virtual bool isListening(int nPort) override;
 
 	virtual bool onServiceStart();
 	virtual bool onServiceStop();
@@ -43,13 +46,14 @@ private:
 
     IFRefPtr<IFThread> m_spWorkThread;
 	void workThread();
-
+	
 	bool m_bExitWorkThread;
 	int m_nEpoll;
 	struct ListenSocketInfo
 	{
 		int nPort;
 		bool bEnableSSL;
+		bool bPackagemode;
 	};
 	IFHashMap<SOCKET, ListenSocketInfo> m_ListenScoket;
 	friend class IFNetEPOLLConnection;
@@ -89,3 +93,5 @@ protected:
 
 	friend class IFNetCoreEPOLL;
 };
+
+#endif //__IF_NET_CORE_EPOLL_H__

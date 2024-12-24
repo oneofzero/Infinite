@@ -21,7 +21,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
-#if (defined(WIN32) && !defined(IFCOMMON_STATIC) )
+#ifndef __IF_COMMON_LIB_API_H__
+#define __IF_COMMON_LIB_API_H__
+#if (defined(WIN32) && !defined(IFCOMMON_STATIC) ) || defined(IFCOMMONLIB_EXPORTS)
 #	ifdef IFCOMMONLIB_EXPORTS
 #		define  IFCOMMON_API __declspec(dllexport)
 #		define  IFCOMMON_TEMPLATE_API //__declspec(dllexport)
@@ -75,3 +77,4 @@ THE SOFTWARE.
 #define IFCXX11_SUPPORT 1
 #endif
 #endif
+#endif //__IF_COMMON_LIB_API_H__

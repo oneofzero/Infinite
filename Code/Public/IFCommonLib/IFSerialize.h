@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_SERIALIZE_H__
+#define __IF_SERIALIZE_H__
 #include "IFMap.h"
 #include "IFList.h"
 #include "IFArray.h"
@@ -396,7 +398,7 @@ inline IFStream& operator >> (IFStream& stream, IFList<V>& ls)
 }
 
 template<typename V>
-inline IFStream& operator << (IFStream& stream, const IFRBTree<V>& ls)
+inline IFStream& operator << (IFStream& stream, const IFSet<V>& ls)
 {
 	stream << ls.size();
 	for (auto& p:ls)
@@ -408,7 +410,7 @@ inline IFStream& operator << (IFStream& stream, const IFRBTree<V>& ls)
 }
 
 template<typename V>
-inline IFStream& operator >> (IFStream& stream, IFRBTree<V>& ls)
+inline IFStream& operator >> (IFStream& stream, IFSet<V>& ls)
 {
 	int nSize;
 	stream >> nSize;
@@ -421,3 +423,4 @@ inline IFStream& operator >> (IFStream& stream, IFRBTree<V>& ls)
 	}
 	return stream;
 }
+#endif //__IF_SERIALIZE_H__

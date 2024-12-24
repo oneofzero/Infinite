@@ -23,7 +23,7 @@ THE SOFTWARE.
 #include "stdafx.h"
 #include "IFFixNumber.h"
 #include "IFUtility.h"
-
+#include "IFNumParse.h"
 
 const IFFixNumber IFFixNumber::N_0(0);
 
@@ -37,45 +37,32 @@ const IFFixVec2 IFFIXVEC2_AXIS_UNIT_Y(0,1);
 
 const IFFixVec2 IFFIXVEC2_ZERO(0,0);
 
+
 IFCOMMON_API void IFFixNumber::loadFromString( const IFString& s )
 {
 	StringList sl;
-	USplitStrings(&sl,s.c_str(), ".");
-	if (sl.size()>1)
+	double df;
+	float f;
+	int i;
+	IFI64 l;
+	auto p = s.c_str();
+	switch (IFNumParse::parse(p, f, df, i, l))
 	{
-		if (sl[1].size()>4)
-			sl[1].erase(4, sl[1].size()-4);
-		else while (sl[1].size()<4)
-		{
-			sl[1].push_back('0');
-		}
-		int nBig = sl[0].toInt32();
-		int nSmall = sl[1].toInt32();
-		if (nBig<0)
-			nSmall=-nSmall;
-		*this = IFFixNumber(nBig, nSmall);
-	}
-	else
-	{
-		*this = IFFixNumber(sl[0].toInt32());
+	case 1:		FromFloat1(f);		break;
+	case 2:		FromFloat1((float)df);		break;
+	case 3:		FromInt(i);		break;
+	case 4:		FromInt64(l);		break;
 	}
 }
 IFString IFFixNumber::toString() const
 {
-	int b = int(nNum/PRECISION);
-	int s = int(nNum - b*PRECISION);
+	int b = int(nNum>>PRECISION);
 	
-	if (s%10==0)
-		s/=10;
-	if (s%10==0)
-		s/=10;
-	if (s%10==0)
-		s/=10;
 
 	IFString ss;
-	if (s)
-		ss.format("%d.%d", b, s);
+	if (nNum&((1<< PRECISION) -1))
+		ss.format("%g", (double)nNum/(double)(1<< PRECISION));
 	else
-		ss.format("%d",b);
+		ss.format("%d", nNum >> PRECISION);
 	return ss;
 }

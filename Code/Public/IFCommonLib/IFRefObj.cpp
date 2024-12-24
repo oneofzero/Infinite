@@ -26,13 +26,14 @@ THE SOFTWARE.
 #include "IFList.h"
 #include "IFHashMap.h"
 #include "IFAtomicOperation.h"
+#include "IFString.h"
 #if defined(_DEBUG) && (defined(IFPLATFORM_WINDOWS) || defined(IFPLATFORM_LINUX))
 #define DUMP_REF_STACK
 #endif
 IF_DEFINERTTI(IFRefObj, IFObj);
 
 extern IFCSLock g_WeakPtrListLock;
-extern IFMap<void*,IFRBTree<void*> > g_WeakPtrList;
+extern IFMap<void*, IFSet<void*> > g_WeakPtrList;
 #if defined(DUMP_REF_STACK)
 #include "IFStackDumper.h"
 #include "IFStream.h"
@@ -51,9 +52,7 @@ IFRefObj::IFRefObj(bool bThreadSafe /*= false*/)
 	, m_bThreadSafe(bThreadSafe)
 {
 	//HoldPtr = this;
-#ifdef IFREFOBJDEBUG
-	m_nOperateCount = 0;
-#endif
+
 
 #ifndef NOREFOBJCOUNTER
 	ATOMIC_INC_INT64(&ms_nInstanceCount);
@@ -158,11 +157,11 @@ void IFRefObj::release()
 	if (g_WeakPtrList.size())
 	{
 		IFCSLockHelper lh(g_WeakPtrListLock);
-		IFMap<void*,IFRBTree<void*> >::iterator it = g_WeakPtrList.find(this);
+		auto it = g_WeakPtrList.find(this);
 		if(it!=g_WeakPtrList.end())
 		{
-			IFRBTree<void*>& ptrList = it->second;
-			IFRBTree<void*>::iterator wkPtr = ptrList.begin();
+			auto& ptrList = it->second;
+			auto wkPtr = ptrList.begin();
 			while(wkPtr!=ptrList.end())
 			{
 				void* pWKPtr = *wkPtr;
@@ -181,7 +180,38 @@ void IFRefObj::release()
 }
 
 IFUI64 IFRefObj::ms_nInstanceCount = 0;
+#ifdef IFREFOBJDEBUG
+void IFRefObj::addRef(void* pHolder)
+{
+	//m_nOperateCount++;
+	m_nRefCount++;
+	RefPtrHolderList::iterator it = m_HolderList.find(pHolder);
+	assert(it == m_HolderList.end());
+	m_HolderList[pHolder] = new IFStackDumper(IFStackDumper::Dump());
+}
 
+void IFRefObj::decRef(void* pHolder)
+{
+	//m_nOperateCount++;
+	m_nRefCount--;
+	RefPtrHolderList::iterator it = m_HolderList.find(pHolder);
+	assert(it != m_HolderList.end());
+	delete ((IFStackDumper*)it->second);
+	m_HolderList.erase(it);
+	if (m_nRefCount == 0)
+		release();
+}
+
+void IFRefObj::dumpRefInfo(IFString& s)
+{
+	for (auto& kv : m_HolderList)
+	{
+		s += IFString().format("%p:\r\n", kv.first);
+		s += ((IFStackDumper*)kv.second)->toString();
+		s += "\r\n";
+	}
+}
+#endif
 //IFRefObj::IFRefObj(bool bThreadSafe)
 //
 //

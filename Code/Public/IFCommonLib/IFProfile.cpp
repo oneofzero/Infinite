@@ -29,17 +29,20 @@ THE SOFTWARE.
 #endif
 #include "IFThread.h"
 
-
+thread_local IFProfileMgr::ThreadProfileInfo* s_profileinfo = NULL;
 IFProfileMgr::ThreadProfileInfo* IFProfileMgr::getCurrentThreadProfileInfo()
 {
-	IFUI32 nThreadID = IFThread::getCurrentThreadID();
-	ThreadProfileInfo* tpi = _threadprofiles[nThreadID];
-	if (!tpi)
+	if (!s_profileinfo)
 	{
-		tpi = new ThreadProfileInfo();
-		_threadprofiles[nThreadID] = tpi;
+
+		s_profileinfo = new ThreadProfileInfo();
+#ifndef IFTHREAD_NOT_ENABLE
+
+		IFCSLockHelper lh(m_lock);
+		_threadprofiles.insert( makeIFPair((IFUI32)IFThread::getCurrentThreadID(), s_profileinfo));
+#endif
 	}
-	return tpi;
+	return s_profileinfo;
 }
 
 
@@ -61,7 +64,7 @@ IFProfileMgr::IFProfileMgr()
 void IFProfileMgr::dumpProfileInfo(IFString& sinfo)
 {
 	
-
+	IFCSLockHelper lh(m_lock);
 	for (auto& info:_threadprofiles)
 	{
 		if (info.second)
@@ -88,9 +91,12 @@ void IFProfileMgr::dumpProfileInfo(IFString& sinfo)
 
 void IFProfileMgr::resetProfileInfo()
 {
-	ThreadProfileInfo* tpi = getCurrentThreadProfileInfo();
+	IFCSLockHelper lh(m_lock);
+	for(auto& pr: _threadprofiles)
+		pr.second->_profileRoot._subInfos.clear();
+	//ThreadProfileInfo* tpi = getCurrentThreadProfileInfo();
 
-	tpi->_profileRoot._subInfos.clear();
+	//tpi->_profileRoot._subInfos.clear();
 }
 
 IFProfileMgr::~IFProfileMgr()

@@ -1,4 +1,6 @@
-#pragma once
+﻿#pragma once
+#ifndef __IF_COROUTINE_H__
+#define __IF_COROUTINE_H__
 #include "IFFunctor.h"
 #include "IFRefObj.h"
 #include "IFCommonLib_API.h"
@@ -65,3 +67,4 @@ IFCOMMON_API void IFCoroutineInit();
 IFCOMMON_API void IFCoroutineShutdown();
 
 
+#endif //__IF_COROUTINE_H__

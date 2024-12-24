@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_RSA_H__
+#define __IF_RSA_H__
 #include "IFRefPtr.h"
 #include "ifsingleton.h"
 #include "IFCommonLib_API.h"
@@ -44,3 +46,5 @@ private:
 	~IFRSA(void);
 };
 
+
+#endif //__IF_RSA_H__

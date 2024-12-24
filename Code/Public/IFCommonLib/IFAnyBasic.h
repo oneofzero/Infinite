@@ -21,6 +21,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 #pragma once
+#ifndef __IF_ANY_BASIC_H__
+#define __IF_ANY_BASIC_H__
 #include "IFBaseTypeDefine.h"
 #include "IFString.h"
 #include "IFFixNumber.h"
@@ -29,6 +31,7 @@ THE SOFTWARE.
 
 class IFCOMMON_API IFAnyBasic : public IFMemObj
 {
+	IF_DECLARERTTI_STATIC;
 public:
 	enum TYPE
 	{
@@ -193,7 +196,7 @@ public:
 	{
 		setNil();
 		pMemStream = pMS;
-		pMemStream->addRef();
+		pMemStream->addRef(IFREFPTRDEBUGINFO);
 		nType = T_MEMSTREAM;
 	}
 
@@ -272,7 +275,7 @@ public:
 
 	void deserialize(IFStream* pStream);
 
-	const IFStringW toString() const;
+	const IFString toString() const;
 
 	IFI32 toInt() const;
 	float toFloat() const;
@@ -330,3 +333,4 @@ inline IFStream& operator >> (IFStream& stream, IFAnyBasic& o)
 	o.deserialize(&stream);
 	return stream;
 }
+#endif //IFPH_IF_ANY_BASIC_H

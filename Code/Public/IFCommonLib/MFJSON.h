@@ -1,19 +1,20 @@
 #pragma once
-#include "IFTypes.h"
 #include <vector>
 #include <map>
 #include <unordered_set>
 #include <unordered_map>
+#include <string>
 #include <assert.h>
 #include <string.h>
 #include <math.h>
+//#include <windows.h>
 
 namespace MFJSON
 {
 
 
-	//typedef long long IFI64;
-	//typedef int IFI32;
+	typedef long long IFI64;
+	typedef int IFI32;
 
 #pragma pack(push)
 #pragma pack(4)
@@ -27,6 +28,11 @@ namespace MFJSON
 		{
 			return nBuf == -1;
 		}
+		void setEmpty()
+		{
+			nBuf = -1;
+		}
+
 		static const String& EMPTY()
 		{
 			static String empty = { -1,0 };
@@ -216,10 +222,7 @@ namespace MFJSON
 		{
 
 		}
-		~Node()
-		{
 
-		}
 		const char* parse(Doc& doc, const char*& sUTF8);
 
 		const char* parseNumber(Doc& doc, const char*& sUTF8);
@@ -433,32 +436,28 @@ namespace MFJSON
 				s += len;
 
 			} while (len);
-			//return;
-			//do
-			////{
-			//	int nSubWritePos = m_write_pos%StringBlock::BLOCK_SIZE;
-			//	int nWriteIdx = m_write_pos / StringBlock::BLOCK_SIZE;
-			//	int nCanWriteSize;
-			//	if (nWriteIdx>=m_buff.size())
-			//	{
-			//		m_buff.push_back(new StringBlock());
-			//		nCanWriteSize = StringBlock::BLOCK_SIZE;
-			//	}
-			//	else
-			//	{
-			//		nCanWriteSize = StringBlock::BLOCK_SIZE - nSubWritePos;
-			//	}
-			//	int nWriteSize = len < nCanWriteSize ? len : nCanWriteSize;
-			//	char* pdst = m_buff[nWriteIdx]->get(nSubWritePos);
-			//	for (int i = 0; i < nWriteSize; i ++ )
-			//	{
-			//		pdst[i] = s[i];
-			//	}
-			//	//memcpy(m_buff[nWriteIdx]->get(nSubWritePos), s, nWriteSize);
-			//	s += nWriteSize;
-			//	len -= nWriteSize;
-			//	m_write_pos += nWriteSize;
-			////} while (len);
+			
+		}
+		inline void append(const char c)
+		{
+			m_size += 1;
+			char* lastblock;
+			
+			int nleftsize = StringBlock::BLOCK_SIZE - m_write_pos;
+			if (nleftsize == 0)
+			{
+				m_buff.push_back(new char[StringBlock::BLOCK_SIZE]);
+				m_write_pos = 0;
+				nleftsize = StringBlock::BLOCK_SIZE;
+				lastblock = m_buff.back();
+			}
+			else
+			{
+				lastblock = m_buff.back();
+
+			}
+			lastblock[m_write_pos] = c;//
+			m_write_pos++;
 
 		}
 
@@ -562,7 +561,7 @@ namespace MFJSON
 
 		inline bool isNull() const
 		{
-			return m_node || m_node->m_Type == NT_NULL;
+			return !m_node || m_node->m_Type == NT_NULL;
 		}
 
 		inline bool isInt() const
@@ -600,6 +599,12 @@ namespace MFJSON
 		inline bool isMap() const
 		{
 			return m_node && m_node->m_Type == NT_MAP;
+		}
+
+		inline bool getBool() const
+		{
+			return (m_node && m_node->m_Type == NT_BOOL) && m_node->m_b;
+
 		}
 
 		inline double getDouble() const
@@ -707,11 +712,11 @@ namespace MFJSON
 		Accessor getArrayValue(int i) const;
 
 
-		Accessor operator[](const char* s)
+		Accessor operator[](const char* s) const
 		{
 			return getMapValue(s);
 		}
-		Accessor operator[](int idx)
+		Accessor operator[](int idx) const
 		{
 			return getArrayValue(idx);
 		}
@@ -926,7 +931,7 @@ private:
 	public:
 		Doc()
 			:			
-			m_array_block_stack_idx(-1), m_map_block_stack_idx(-1), m_root_accessor(*this,&m_Root)
+			m_array_block_stack_idx(-1), m_map_block_stack_idx(-1), m_root_accessor(*this,&m_Root), m_pErrorPtr(NULL)
 			//short_string_pool_intance(ShortStringPool::Instance())
 			
 		{
@@ -964,13 +969,43 @@ private:
 
 		bool load(const char* sUTF8)
 		{
-			if (auto err = m_Root.parse(*this, sUTF8))
+			if (m_pErrorPtr = m_Root.parse(*this, sUTF8))
 			{
 				return false;
 			}
 			return true;
 		}
+		std::string errorDesc(const char* sUTF8)
+		{
+			if (m_pErrorPtr)
+			{
+				auto p = sUTF8;
+				int nLine = 1;
+				int nCol = 1;
+				while (*p && p != m_pErrorPtr)
+				{
+					if (*p == '\r')
+					{
+						if (*(p + 1) == '\n')
+							p++;
+						nLine++;
+						nCol = 0;
+					}
+					else if (*p == '\n')
+					{
+						nLine++;
+						nCol = 0;
+					}
+					nCol++;
+					p++;
 
+				}
+				char buf[64];
+				snprintf(buf, sizeof(buf), "Error@Line:%d Col:%d", nLine, nCol);
+				return buf;
+			}
+			return "";
+		}
 		Accessor operator[](const char* s)
 		{
 			return m_root_accessor.getMapValue(s);
@@ -992,10 +1027,10 @@ private:
 		}
 
 		template<typename T>
-		bool load(const char* sUTF8, T& o)
-		{
-			const char* perr=  parse_generic(*this, sUTF8, o);
-			if (perr)
+		bool loadTo(const char* sUTF8, T& o)
+		{			
+			m_pErrorPtr =  parse_generic(*this, sUTF8, o);
+			if (m_pErrorPtr)
 				return false;
 			else
 				return true;
@@ -1176,6 +1211,8 @@ private:
 		Accessor m_root_accessor;
 		std::vector<char*> m_long_string_list;
 		StringBuilder m_string_builder;
+
+		const char* m_pErrorPtr;
 
 		Node m_Root;
 		Node m_tempNode;
@@ -1560,14 +1597,14 @@ private:
 
 
 
-	static const float power10[] =
-	{
-		1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17,1e18,1e19,1e20,1e21,1e22,1e23,1e24,1e25,1e26,1e27,1e28,1e29,1e30,1e31,1e32,1e33,1e34,1e35,1e36,
-	};
-	static const float power10_inv[] =
-	{
-		1,1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11,1e-12,1e-13,1e-14,1e-15,1e-16,1e-17,1e-18,1e-19,1e-20,1e-21,1e-22,1e-23,1e-24,1e-25,1e-26,1e-27,1e-28,1e-29,1e-30,1e-31,1e-32,1e-33,1e-34,1e-35,1e-36,
-	};
+	//static const float power10[] =
+	//{
+	//	1,1e1,1e2,1e3,1e4,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e14,1e15,1e16,1e17,1e18,1e19,1e20,1e21,1e22,1e23,1e24,1e25,1e26,1e27,1e28,1e29,1e30,1e31,1e32,1e33,1e34,1e35,1e36,
+	//};
+	//static const float power10_inv[] =
+	//{
+	//	1,1e-1,1e-2,1e-3,1e-4,1e-5,1e-6,1e-7,1e-8,1e-9,1e-10,1e-11,1e-12,1e-13,1e-14,1e-15,1e-16,1e-17,1e-18,1e-19,1e-20,1e-21,1e-22,1e-23,1e-24,1e-25,1e-26,1e-27,1e-28,1e-29,1e-30,1e-31,1e-32,1e-33,1e-34,1e-35,1e-36,
+	//};
 
 	inline char* float2bufnon0(float f, char* buf)
 	{
@@ -1927,7 +1964,28 @@ private:
 		case NT_STRING:
 		{
 			m_doc.m_string_builder.append("\"", 1);
-			m_doc.m_string_builder.append(getString(), (int)strlen(getString()));
+			auto *p = getString();
+			while (*p)
+			{
+				if (*p == '\t')
+					m_doc.m_string_builder.append("\\t", 2);
+				else if (*p == '\"')
+					m_doc.m_string_builder.append("\\\"", 2);
+				else if (*p == '\b')
+					m_doc.m_string_builder.append("\\b", 2);
+				else if (*p == '\f')
+					m_doc.m_string_builder.append("\\f", 2);
+				else if (*p == '\n')
+					m_doc.m_string_builder.append("\\n", 2);
+				else if (*p == '\r')
+					m_doc.m_string_builder.append("\\r", 2);
+				else if (*p == '\\')
+					m_doc.m_string_builder.append("\\\\", 2);
+				else
+					m_doc.m_string_builder.append(*p);
+				p++;
+			}
+			//m_doc.m_string_builder.append(getString(), (int)strlen(getString()));
 			m_doc.m_string_builder.append("\"", 1);
 
 		}
@@ -2207,8 +2265,30 @@ private:
 		m_Type = NT_ARRAY;
 		m_array = doc.array_begin();
 		SKIP_SPACE(sUTF8);
+
+		if (*sUTF8 == ']')
+		{
+			sUTF8++;
+			SKIP_SPACE(sUTF8);
+			m_array.nLen = doc.array_end();
+
+			return NULL;
+		}
+
 		while (true)
 		{
+
+			auto& ary = doc.array_push();
+			//m_array.nLen++;
+			SKIP_SPACE(sUTF8);
+			if (const char* err = ary.parse(doc, sUTF8))
+			{
+				m_array.nLen = doc.array_end();
+
+				return err;
+			}
+			SKIP_SPACE(sUTF8);
+			
 			if (*sUTF8 == ',')
 			{
 				sUTF8++;
@@ -2230,18 +2310,8 @@ private:
 
 				return NULL;
 			}
-
-	
-			auto& ary = doc.array_push();
-			m_array.nLen++;
-			SKIP_SPACE(sUTF8);
-			if (const char* err = ary.parse(doc, sUTF8))
-			{
-				m_array.nLen = doc.array_end();
-
-				return err;
-			}
-			SKIP_SPACE(sUTF8);
+			else
+				return sUTF8;
 
 		}
 
@@ -2272,7 +2342,7 @@ private:
 		char b = readHexChar(s+1);
 		char c = readHexChar(s+2);
 		char d = readHexChar(s+3);
-		return a << 12 | b << 8 || c << 4 | d;
+		return a << 12 | b << 8 | c << 4 | d;
 	}
 
 	inline char* parseConverString(char* ptr2, const char* ptr)
@@ -2366,7 +2436,7 @@ private:
 		const char* ptr = str;
 
 		int len = statestrlen(ptr);
-		int rawlen = ptr - str;
+		int rawlen = (int)(ptr - str);
 		if (len >= SHORT_STRING_LEN)
 			return str;
 		if (rawlen==len)
@@ -2376,7 +2446,7 @@ private:
 		else
 		{
 			char shortbuf[SHORT_STRING_LEN];
-			len = parseConverString(shortbuf, str)-shortbuf;
+			len =(int)(parseConverString(shortbuf, str)-shortbuf);
 
 			ss = short_string_pool_intance.addShortString(shortbuf, len);
 		}
@@ -2398,23 +2468,24 @@ private:
 		while (*ptr != '\"' && *ptr && ++len)
 			if (*ptr++ == '\\') ptr++; /* Skip escaped quotes. */
 									   //IFString sValue;
-		int rawlen = ptr - str;
+		int rawlen = (int)(ptr - str);
 
 		char shortbuf[SHORT_STRING_LEN];
 		if (len > SHORT_STRING_LEN)
 		{
 			
-			out = new char[len];
+			out = new char[len+1];
 			ls = addLongString(out);
 		}
 		else if (len < 8 && l8s)
 		{
 			out = (char*)l8s;
+
 		}
 		else
 		{
 			out = shortbuf;
-
+			
 		}
 		if (rawlen == len)
 		{
@@ -2424,7 +2495,7 @@ private:
 		{
 			auto pEnd = parseConverString(out, str);
 			*pEnd = 0;
-			len = pEnd - out;
+			len = (int)(pEnd - out);
 		}
 
 	
@@ -2438,6 +2509,7 @@ private:
 		else if (out == (char*)l8s)
 		{
 			ls = 0;
+			ss.setEmpty();
 		}
 		else
 		{
@@ -2457,6 +2529,7 @@ private:
 		String ss;
 		int ls;
 		IFI64 l8s=0;
+
 		if (auto err = doc.parseString(str, ss, ls,&l8s))
 			return err;
 		m_Type = NT_STRING;
@@ -2467,12 +2540,12 @@ private:
 			m_ls.nidx = ls;
 			m_ls.nlen = (int)l8s;
 		}
-		else if (l8s)
+		else if(l8s||ss.isEmpty())
 		{
 			m_Flag.flag = NF_L8_STRING;
 			m_int64 = l8s;
 		}
-		else 
+		else
 		{
 			m_Flag.flag = NF_SHORT_STRING;
 			m_ss = ss;
@@ -2503,8 +2576,10 @@ private:
 		}
 		IFI64 decimal = 0;
 		double decimal_w = 1;
+		bool forcefloat = false;
 		if (*sUTF8 == '.')
 		{
+			forcefloat = true;
 			++sUTF8;
 			while (*sUTF8 >= '0'&&*sUTF8 <= '9')
 			{
@@ -2538,7 +2613,7 @@ private:
 				E = -E;
 		}
 
-		if (decimal || E)
+		if (decimal || E || forcefloat)
 		{
 			double db = (double)d;
 			db += double(decimal) / decimal_w;
@@ -2640,9 +2715,19 @@ private:
 		acc.set(i);
 	}
 	template<>
+	inline void accessor_generic_setter(Accessor& acc, const bool& b)
+	{
+		acc.set(b);
+	}
+
+	template<>
 	inline void accessor_generic_setter(Accessor& acc, const float& f)
 	{
 		acc.set(f);
+	}
+	inline void accessor_generic_getter(Accessor& acc, bool& val)
+	{
+		val = acc.getBool();
 	}
 
 	inline void accessor_generic_getter(Accessor& acc, int& val)
@@ -2689,6 +2774,7 @@ private:
 		}
 	}
 
+
 	const char* parse_skip(Doc& doc, const char*& sUTF8);
 
 	template<typename T>
@@ -2705,16 +2791,20 @@ private:
 		}
 
 		virtual const char*  set(Doc& doc, T& o, const char*& sUTF8) = 0;
-		virtual void get(Accessor& acc, const T& o, const String& sKeyName) = 0;
+		virtual void get(Accessor& acc, const T& o) = 0;
+		virtual void set(Accessor& acc, T& o) = 0;
+
+		const char* m_sMemberName;
 	};
 
 	template<typename T, typename MEMT>
 	class MemberAccessorImp : public MemberAccessor<T>
 	{
 	public:
-		MemberAccessorImp(MEMT T::*ptr)
+		MemberAccessorImp(const char* memberName, MEMT T::*ptr)
 			:member_ptr(ptr)
 		{
+			MemberAccessor<T>::m_sMemberName = memberName;
 			//m_executer.insert(std::make_pair<std::string, SetterGetterExecuter<Value>*>("crit", &Value::crit));
 		}
 		virtual const char* set(Doc& doc, T& o, const char*& sUTF8)
@@ -2723,9 +2813,15 @@ private:
 
 		}
 
-		virtual void get(Accessor& acc, const T& o, const String& sKeyName)
+		virtual void set(Accessor& acc, T& o)
 		{
-			acc.mapPush(sKeyName).set(o.*member_ptr);
+			acc.get(o.*member_ptr);
+			//o.*member_ptr = acc;
+		}
+
+		virtual void get(Accessor& acc, const T& o)
+		{
+			acc.mapPush(MemberAccessor<T>::m_sMemberName).set(o.*member_ptr);
 		}
 
 		MEMT T::*member_ptr;
@@ -2747,7 +2843,7 @@ private:
 			if (a.nBuf < 0)
 			{
 				pa = m_names[-a.nBuf - 1].c_str();
-				alen = m_names[-a.nBuf - 1].length();
+				alen = (int)m_names[-a.nBuf - 1].length();
 			}
 			else
 				pa = m_pool->getString(a.nBuf, alen);
@@ -2757,7 +2853,7 @@ private:
 			if (b.nBuf < 0)
 			{
 				pb = m_names[-b.nBuf - 1].c_str();
-				blen = m_names[-b.nBuf - 1].length();
+				blen = (int)m_names[-b.nBuf - 1].length();
 			}
 			else
 				pb = m_pool->getString(b.nBuf, blen);
@@ -2779,7 +2875,7 @@ private:
 		inline bool operator()(const String& a, const String& b) const
 		{
 			//return a.nHash == b.nHash;
-			if ((a.nBuf == lastabuf || a.nBuf == lastbbuf) && (b.nBuf == lastabuf || b.nBuf == lastabuf))
+			if ((a.nBuf == lastabuf || a.nBuf == lastbbuf) && (b.nBuf == lastabuf || b.nBuf == lastbbuf))
 				return lastresult;
 			else
 				return cmp(a, b);
@@ -2797,9 +2893,31 @@ private:
 		return s.nHash;
 	}
 
+	class NullClass
+	{
+
+	};
 
 	template<typename T>
+	inline SetterGetter<T>* GetGetterSetter()
+	{
+		return &SetterGetter<T>::getInstance();
+	}
+	
+	//template<>
+	//inline SetterGetter<NullClass>* GetGetterSetter<NullClass>()
+	//{
+	//	return NULL;
+	//}
+
+
+	template<typename T, typename... SuperT>
 	class SetterGetterBase
+	{
+
+	};
+	template<typename T>
+	class SetterGetterBase<T>
 	{
 	protected:
 		std::unordered_map<String, MemberAccessor<T>*,StringHash, FullStringEqual> m_executer;
@@ -2816,7 +2934,7 @@ private:
 			m_names.push_back(sName);
 			s.nBuf = -(int)m_names.size();
 			s.nHash = rs_hash(sName, len);
-			m_executer.insert(std::make_pair(s, new MemberAccessorImp<T, MEMT>(p)));
+			m_executer.insert(std::make_pair(s, new MemberAccessorImp<T, MEMT>(sName,p)));
 
 		}
 	public:
@@ -2839,6 +2957,9 @@ private:
 			static SetterGetter<T> instance;
 			return instance;
 		}
+
+
+
 		static const char* set(Doc& doc, T& o, const char*& sUTF8, const String& nkey)
 		{
 			auto& instance = getInstance();
@@ -2853,16 +2974,79 @@ private:
 				return parse_skip(doc, sUTF8);
 			}
 		}
+
+		static void fillMember(Accessor& acc, const T& o)
+		{
+			auto& instance = getInstance();
+			for (auto& kv : instance.m_executer)
+			{
+				kv.second->get(acc, o);
+			}
+		}
+
 		static void get(Accessor& acc, const T& o)
 		{
 			auto& instance = getInstance();
 			acc.mapBegin();
-			for (auto& kv:instance.m_executer)
+			fillMember(acc, o);
+			acc.mapEnd();
+		}
+
+		static void set(Accessor& acc, T& o)
+		{
+			auto& instance = getInstance();
+			for (auto& kv : instance.m_executer)
 			{
-				kv.second->get(acc, o, kv.first);
+				auto subacc = acc[kv.second->m_sMemberName];
+				if(!subacc.isNull())
+					kv.second->set(subacc, o);
+			}		
+		}
+	};
+
+	template<typename T, typename SuperT>
+	class SetterGetterBase<T,SuperT> : public SetterGetterBase<T>
+	{
+	public:
+		static const char* set(Doc& doc, T& o, const char*& sUTF8, const String& nkey)
+		{
+			auto& instance = SetterGetterBase<T>::getInstance();
+			instance.m_pool = &doc.getStringPool();
+			auto it = instance.m_executer.find(nkey);
+			if (it != instance.m_executer.end())
+			{
+				return it->second->set(doc, o, sUTF8);
 			}
+			else
+			{
+				return SetterGetter<SuperT>::getInstance().set(doc, o, sUTF8, nkey);
+			}
+			
+		}
+
+		
+
+		static void get(Accessor& acc, const T& o)
+		{
+			acc.mapBegin();
+
+			SetterGetter<SuperT>::getInstance().fillMember(acc, o);
+			SetterGetterBase<T>::fillMember(acc, o);
+			
 			acc.mapEnd();
 
+		}
+
+		static void set(Accessor& acc, T& o)
+		{
+			SetterGetter<SuperT>::getInstance().set(acc, o);
+			auto& instance = SetterGetterBase<T>::getInstance();
+			for (auto& kv : instance.m_executer)
+			{
+				auto subacc = acc[kv.second->m_sMemberName];
+				if (!subacc.isNull())
+					kv.second->set(subacc, o);
+			}
 		}
 	};
 
@@ -2874,21 +3058,140 @@ private:
 	
 
 
-#define MFJSON_ACCESSOR_VALUE_BEGIN(TYPE) \
+#define MFJSON_ACCESSOR_VALUE_BEGIN(TYPE,...) \
 namespace MFJSON\
 	{\
 		template<>\
-		class SetterGetter<TYPE> : public SetterGetterBase<TYPE>\
+		class SetterGetter<TYPE> : public SetterGetterBase<TYPE, ##__VA_ARGS__ >\
 		{\
 		public:\
 			typedef TYPE OBJ_TYPE;\
 			SetterGetter()\
 			{\
 
+
+
 #define MFJSON_ACCESSOR_VALUE_END() 	}\
 	};}
 
 
+
+	template<typename T>
+	class EnumGetterSetterBase
+	{
+	public:
+		bool m_bUseStringValue;
+			
+
+		void set(Accessor& acc, const T& st)
+		{
+			if (!m_bUseStringValue)
+			{
+				acc.set((int)st);
+				return;
+			}
+			auto it = m_ValKeyMap.find(st);
+			if (it == m_ValKeyMap.end())
+				return;
+			acc.set(it->second);
+		}
+		void get(Accessor& acc, T& val)
+		{
+			if (!m_bUseStringValue)
+			{
+				val = (T)acc.getInt();
+				return;
+			}
+			auto it = m_KeyValMap.find(acc.getString());
+			if (it == m_KeyValMap.end())
+				return;
+			val = it->second;
+		}
+
+		const char* get(Doc& doc, const char*& sUTF8, T& val)
+		{
+			const char* pReturn;
+			if (m_bUseStringValue)
+			{
+				std::string sv;
+				pReturn = parse_generic(doc, sUTF8, sv);
+				auto it = m_KeyValMap.find(sv);
+				if (it != m_KeyValMap.end())
+				{
+					val = it->second;
+				}
+
+			}
+			else
+			{
+				int v;
+				pReturn = parse_generic(doc, sUTF8, v);
+				val = (T)v;
+			}
+
+			return pReturn;
+		}
+
+		void ToValKeyMap()
+		{
+			for (auto& kv : m_KeyValMap)
+			{
+				m_ValKeyMap.insert(std::make_pair(kv.second, kv.first.c_str()));
+			}
+		}
+
+		std::unordered_map<std::string, T> m_KeyValMap;
+		std::unordered_map<T, const char*> m_ValKeyMap;
+	};
+
+	template<typename T>
+	class EnumGetterSetter
+	{
+
+	};
+
+#define MFJSON_ACCESSOR_ENUM_BEGIN(TYPE) \
+namespace MFJSON\
+{\
+	template<>\
+	class EnumGetterSetter<TYPE> : public EnumGetterSetterBase<TYPE>\
+	{\
+	typedef TYPE ENUM_TYPE;\
+	public:\
+		EnumGetterSetter();\
+		static EnumGetterSetter<TYPE>& getInstance()\
+	{\
+		static EnumGetterSetter<TYPE> ins;\
+		return ins;\
+	}\
+	};\
+	inline void accessor_generic_setter(Accessor& acc, const TYPE& st)\
+	{\
+		EnumGetterSetter<TYPE>::getInstance().set(acc, st);\
+	}\
+	inline void accessor_generic_getter(Accessor& acc, TYPE& val)\
+	{\
+		EnumGetterSetter<TYPE>::getInstance().get(acc, val);\
+	}\
+	\
+	inline const char* parse_generic(Doc& doc, const char*& sUTF8, TYPE& val)\
+	{\
+		return EnumGetterSetter<TYPE>::getInstance().get(doc, sUTF8, val);\
+	}\
+	\
+	inline EnumGetterSetter<TYPE>::EnumGetterSetter()\
+	{\
+		EnumGetterSetterBase<TYPE>::m_bUseStringValue = true;
+
+#define MFJSON_ACCESSOR_ENUM(val) m_KeyValMap.insert(std::make_pair(#val, ENUM_TYPE::val));
+
+		
+#define MFJSON_ACCESSOR_ENUM_END() \
+		ToValKeyMap();\
+	}\
+}
+
+	
 	//template<typename T>
 	//const char*  object_value_setter_getter(Accessor* pAcc, MFJSON::Doc* pDoc, T* o, const T* co, const char*& sUTF8, const char* sKeyName);
 
@@ -2902,10 +3205,16 @@ namespace MFJSON\
 	template<class T>
 	void accessor_generic_setter(Accessor& acc, const T& val)
 	{
-		const char* sutf8hodler = NULL;
+		//const char* sutf8hodler = NULL;
 		SetterGetter<T>::get(acc, val);
 		//object_value_setter_getter(&acc, NULL, NULL,&val, sutf8hodler, NULL);
 	}
+	template<typename T>
+	inline void accessor_generic_getter(Accessor& acc, T& val)
+	{
+		SetterGetter<T>::set(acc, val);
+	}
+
 	
 	template<>
 	inline const char* parse_generic(Doc& doc, const char*& sUTF8, int& o)
@@ -2943,6 +3252,32 @@ namespace MFJSON\
 				o = Accessor(doc, &nd).getFloat();
 				return NULL;
 			}
+		}
+		else
+			return sUTF8;
+
+	}
+
+	template<>
+	inline const char* parse_generic(Doc& doc, const char*& sUTF8, bool& o)
+	{
+		SKIP_SPACE(sUTF8);
+		if (*sUTF8 == 't' || *sUTF8 == 'f')
+		{
+			if (*(int*)sUTF8 == cvalue_true)
+			{
+				o = true;
+				sUTF8 += 4;
+				return nullptr;
+			}
+			else if (*(int*)sUTF8 == cvalue_false && *(sUTF8 + 4) == 'e')
+			{
+				o = false;
+				sUTF8 += 5;
+				return nullptr;
+			}
+			else
+				return sUTF8;
 		}
 		else
 			return sUTF8;

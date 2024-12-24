@@ -113,34 +113,7 @@ void IFServerFrame::procNewConnection( IFNetCore* pCore, IFNetConnection* pConne
 }
 
 void IFServerFrame::procDataReceive( IFNetConnection* pConnection,const void* pBuf, IFUI32 nSize )
-{/*
-	IFRefPtr<IFMemStream> spStream = IFNew IFMemStream(pBuf, nSize);
-	int nMsgID = spStream->readI32();
-	IFNet_Message* spMessage = IFNetMsgFactory::getSingleton().createMsg(nMsgID);
-	if(spMessage)
-	{
-		try
-		{
-			spMessage->deserialize(spStream);
-
-		}
-		catch(IFStreamReadException& )
-		{
-			char buf[32]={0};
-
-			pConnection->sendPack(IFNew IFMemStream((const void*)buf,32));
-			IFLOG(IFLL_WARNING, "无法解析的错误消息\r\n");
-		}
-		spMessage->process(pConnection);
-
-		delete spMessage;
-	}
-	else
-	{
-
-		IFLOG(IFLL_WARNING, "无法解析的错误消息\r\n");
-	}
-	*/
+{
 }
 
 void IFServerFrame::requestExit()
@@ -174,7 +147,7 @@ IFTimer* IFServerFrame::getTimer()
 	return m_spTimer;
 }
 
-void IFServerFrame::checkTimeOut()
+void IFServerFrame::checkTimeOut(int deltaTime)
 {
 	IFUI32 curTime = IFNativeSystemAPI::getTickCount();
 	auto ckTime = [=](IFNetConnection* pConnection)->bool
