@@ -179,6 +179,19 @@ public:
 		m_nMask = o.m_nMask;
 	}
 
+#ifdef IFCXX11_SUPPORT
+	IFHashTable(const std::initializer_list<T>& elements)
+		:m_pFirst(NULL), m_pLast(NULL), m_nSize(0)
+	{
+		reserve((int)elements.size());
+		for (auto& e : elements)
+		{
+			insert(e);
+		}
+	}
+
+#endif
+
 	~IFHashTable(void)
 	{
 		clear();

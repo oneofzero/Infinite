@@ -94,6 +94,16 @@ public:
 	{
 
 	}
+
+#ifdef IFCXX11_SUPPORT
+	IFHashMap(const std::initializer_list<IFHashPair<TKey, TVal>>& elements)
+		: SuperClass(elements)
+	{
+
+	}
+
+#endif
+
 	~IFHashMap(void)
 	{
 
