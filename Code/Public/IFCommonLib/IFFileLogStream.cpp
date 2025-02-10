@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "IFFileLogStream.h"
 #include "IFFileSystem.h"
 
@@ -25,6 +25,7 @@ IFUI32 IFFileLogStream::write(const void* pSourceData, IFUI32 nSize)
 {
 	
 	m_sLogQueue.push(makeIFPair(IFDateTime::now(), IFString( (const char*)pSourceData, nSize)));
+	m_spWrtieLogThread->getSyncObj()->notify();
 	return nSize;
 	//return m_spCurStrem->write(pSourceData, nSize);
 }
@@ -35,6 +36,7 @@ void IFFileLogStream::writeLogThread()
 	{
 		IFPair<IFDateTime, IFString> loginfo;
 		bool bHaveLog = false;
+		m_spWrtieLogThread->getSyncObj()->wait(10000);
 		while (m_sLogQueue.pop(loginfo))
 		{
 			auto getCurLogFileName = [=]()
@@ -77,7 +79,6 @@ void IFFileLogStream::writeLogThread()
 		}
 		if (bHaveLog)
 			m_spCurStrem->flush();
-		IFThread::sleep(10);
 	}
 }
 

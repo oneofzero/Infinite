@@ -88,7 +88,7 @@ void IFAsyncTaskMgr::workThread(int threadIdx)
 {
 	while (!m_WorkThreadList[threadIdx]->isNeedExit())
 	{
-		m_spWaitTaskSignal->wait(100);
+		m_spWaitTaskSignal->wait(100000);
 		IFRefPtr<IFAsyncTask> spTask;
 		while (m_waitQueue.pop(spTask))
 		{
@@ -123,7 +123,10 @@ void IFAsyncTaskMgr::process()
 
 void IFAsyncTaskMgr::Create()
 {
-	IFNew IFAsyncTaskMgr(IFNativeSystemAPI::getProcessorCount());
+	int processornum = IFNativeSystemAPI::getProcessorCount();
+	if (processornum > 1)
+		processornum /= 2;
+	IFNew IFAsyncTaskMgr(processornum);
 }
 
 void IFAsyncTaskMgr::Destroy()

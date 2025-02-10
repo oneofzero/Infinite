@@ -5,7 +5,7 @@
 
 
 template<typename T>
-static inline IFString IFStringCSFormatToString(T v, const IFString& fmt);
+static inline IFString IFStringCSFormatToString(const T& v, const IFString& fmt);
 static inline IFString IFStringCSFormatToString(const char* v, const IFString& fmt)
 {
 	return v;
@@ -25,14 +25,14 @@ public:
 	
 
 	template< typename T>
-	static IFString GetFmtParamN(int idx, const IFString& fmt, T p)
+	static IFString GetFmtParamN(int idx, const IFString& fmt, const T& p)
 	{
 		assert(idx == 0);
 		return IFStringCSFormatToString(p, fmt);
 	}
 
 	template< typename T, typename... TN>
-	static IFString GetFmtParamN(int idx, const IFString& fmt, T p, TN... tn)
+	static IFString GetFmtParamN(int idx, const IFString& fmt, const T& p, const TN&... tn)
 	{
 		if (idx == 0)
 			return IFStringCSFormatToString(p, fmt);
@@ -43,7 +43,7 @@ public:
 
 
 	template<typename... T>
-	static IFString GetFmtParam(int idx, const IFString& fmt, T... p)
+	static IFString GetFmtParam(int idx, const IFString& fmt, const T&... p)
 	{
 		return GetFmtParamN(idx, fmt, p...);
 	}
@@ -92,7 +92,7 @@ public:
 	}
 
 	template<typename... T>
-	static IFString Format(const IFString& fmt, T... param)
+	static IFString Format(const IFString& fmt, const T&... param)
 	{
 
 		auto pFun = [&](int idx, const IFString& fmt)->IFString

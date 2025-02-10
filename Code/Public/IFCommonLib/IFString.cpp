@@ -796,7 +796,7 @@ IFString IFString::sub(int index, int size) const
 	if (index > (int)length())
 		return IFString::Empty;
 	size = IFMin(size, (int)length() - index);
-	return IFString(c_str()+index, size);
+	return IFString(c_str()+index, size, getEncoding());
 }
 
 IFI32 IFString::toInt32( int nRadix /*= 10*/ ) const

@@ -170,7 +170,7 @@ inline unsigned short one_unicode_to_gbk(unsigned short unicode)
 inline void wchar_gbk(const IFStringW& wide, IFString& gbk)
 {
 	gbk.clear();
-	const WCHAR* ws = wide.c_str();
+	auto ws = wide.c_str();
 	for (;*ws; ws ++)
 	{
 		if (*ws < 0xff)
@@ -204,11 +204,11 @@ inline void gbk_wchar(const IFString& gbk, IFStringW& wide)
 			
 			s ++;
 			int idx = (n-0x81) * 0xbf + (*(s)-0x40);
-			wide.push_back((WCHAR)gbk_to_unicode_table[idx]);
+			wide.push_back((IFWCHAR)gbk_to_unicode_table[idx]);
 		}
 		else
 		{
-			wide.push_back((WCHAR)(n));
+			wide.push_back((IFWCHAR)(n));
 		}
 	}
 }

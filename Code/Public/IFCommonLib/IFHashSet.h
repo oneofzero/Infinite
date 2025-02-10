@@ -214,11 +214,11 @@ public:
 			return end();
 		IFUI32 nHash = IFHashFunc(o);
 
-		IFUI32 hidx = nHash&m_nMask;
+		IFUI32 hidx = nHash%m_nMask;
 		
 		for (auto pNode = m_Buckets[hidx]; pNode;pNode = pNode->m_pNext )
 		{
-			if ((pNode->m_nHash&m_nMask) == hidx)
+			if ((pNode->m_nHash%m_nMask) == hidx)
 			{
 				if (pNode->m_nHash == nHash && IFHashEqCmpFun((const KeyType&)pNode->m_Val , o))
 					return iterator(pNode);
@@ -236,11 +236,11 @@ public:
 
 		//IFUI32 nHash = IFHashFunc(o);
 
-		IFUI32 hidx = nHash&m_nMask;
+		IFUI32 hidx = nHash%m_nMask;
 
 		for (auto pNode = m_Buckets[hidx]; pNode; pNode = pNode->m_pNext)
 		{
-			if ((pNode->m_nHash&m_nMask) == hidx)
+			if ((pNode->m_nHash%m_nMask) == hidx)
 			{
 				if (pNode->m_nHash == nHash &&  cmper(pNode->m_Val))
 					return iterator(pNode);
@@ -260,7 +260,7 @@ public:
 	iterator erase(iterator it)
 	{
 
-		IFUI32 idx = it.m_pNode->m_nHash&m_nMask;
+		IFUI32 idx = it.m_pNode->m_nHash%m_nMask;
 		
 		auto pBucketNode = m_Buckets[idx];
 		auto pRemoveNode = it.m_pNode;
@@ -291,7 +291,7 @@ public:
 
 		if (pRemoveNode == pBucketNode)
 		{
-			if (pRemoveNode->m_pNext && (pRemoveNode->m_pNext->m_nHash&m_nMask) == idx)
+			if (pRemoveNode->m_pNext && (pRemoveNode->m_pNext->m_nHash%m_nMask) == idx)
 				m_Buckets[idx] = pRemoveNode->m_pNext;
 			else
 				m_Buckets[idx] = NULL;
@@ -311,16 +311,7 @@ public:
 	iterator insert(const T& o, IFUI32 nHash)
 	{
 		m_nSize++;
-		int nbucketssize = m_nSize / maxConflict;
-		if (nbucketssize < 16)
-			nbucketssize = 16;
-		if (nbucketssize > m_Buckets.size())
-		{
-			if (m_Buckets.size() == 0)
-				reserve(16);
-			else
-				reserve(m_Buckets.size() * 2);
-		}
+		reserve(m_nSize);
 		auto p = IFNew HashNode(nHash,o);
 		putToBuckets(p);
 		return iterator(p);
@@ -342,24 +333,15 @@ public:
 
 	void reserve(int nSize)
 	{
-		if (nSize <= m_Buckets.size())
-			return;
-		m_Buckets.resize(nSize);
-		m_nMask = nSize - 1;
-		for (int i = 0; i < nSize; i ++ )
+		int nbucketssize = nSize / maxConflict;
+		if (nbucketssize < 16)
+			nbucketssize = 16;
+		if (nbucketssize > m_Buckets.size())
 		{
-			m_Buckets[i] = NULL;
-		}
-		auto p = m_pFirst;
-		m_pFirst = NULL;
-		m_pLast = NULL;
-		while (p)
-		{
-			auto next = p->m_pNext;
-			p->m_pNext = NULL;
-			p->m_pPrev = NULL;
-			putToBuckets(p);
-			p = next;
+			if(nbucketssize > m_Buckets.size()*2)
+				reserveBuckets(nbucketssize);
+			else
+				reserveBuckets(m_Buckets.size() * 2);
 		}
 	}
 
@@ -379,7 +361,28 @@ public:
 	}
 
 private:
-
+	void reserveBuckets(int nSize)
+	{
+		if (nSize <= m_Buckets.size())
+			return;
+		m_Buckets.resize(nSize);
+		m_nMask = nSize - 1;
+		for (int i = 0; i < nSize; i++)
+		{
+			m_Buckets[i] = NULL;
+		}
+		auto p = m_pFirst;
+		m_pFirst = NULL;
+		m_pLast = NULL;
+		while (p)
+		{
+			auto next = p->m_pNext;
+			p->m_pNext = NULL;
+			p->m_pPrev = NULL;
+			putToBuckets(p);
+			p = next;
+		}
+	}
 	//HashNode* getNode(int nhashIdx, int narridx)
 	//{
 	//	return (*(*m_pHashList)[nhashIdx])[narridx];
@@ -387,7 +390,7 @@ private:
 
 	void putToBuckets(HashNode* p)
 	{
-		auto idx = p->m_nHash&m_nMask;
+		auto idx = p->m_nHash%m_nMask;
 		auto pNode = m_Buckets[idx];
 		if (!pNode)
 		{

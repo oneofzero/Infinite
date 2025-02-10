@@ -7,6 +7,7 @@ return
 	
 	base = function(proj)
 			proj:RemoveSrc("IFComPort;CrashDump;IFAPKFileProvider;IFCoroutine;IFNetCoreIOCP;IFNetCoreSelect;gzio.c;gzlib.c;gzread.c;gzwrite.c;iowin32.c;minigzip.c;aes.c;example.c;gzclose.c");
+			proj:RemoveSrc("IFWIN32FileStream.cpp")
 			proj:AddIncludePath("./aes;./zlib;./rsa;../3rd/include");
 		
 	end,

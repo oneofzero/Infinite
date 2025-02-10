@@ -637,7 +637,7 @@ bool IFFileSystem::isFileExist(const IFString& _sFilePath)
 #else
 	struct stat info;
 	if (stat(sFilePath.c_str(), &info) == 0)
-		return S_ISREG(info.st_mode) == 0;
+		return S_ISREG(info.st_mode);
 	else
 		return false;
 #endif

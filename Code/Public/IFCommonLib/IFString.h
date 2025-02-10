@@ -32,7 +32,7 @@ class IFMemStream;
 #define LOCAL_CHAR_ENCODING IFString::EC_ANSI
 #else
 #define LOCAL_CHAR_ENCODING IFString::EC_UTF8
-#define IF_STRING_NO_ANSI
+//#define IF_STRING_NO_ANSI
 #endif
 #define IFSTRING_STANDALONE
 

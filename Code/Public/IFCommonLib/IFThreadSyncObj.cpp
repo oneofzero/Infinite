@@ -7,6 +7,7 @@
 #endif
 
 IFThreadSyncObj::IFThreadSyncObj()
+	:m_nSetCount(0)
 {
 #ifdef WIN32
 	m_Event = CreateEvent(NULL, FALSE, FALSE, NULL);
@@ -36,7 +37,19 @@ IFThreadSyncObj::IFThreadSyncObj()
 bool IFThreadSyncObj::wait(IFUI32 dwTimeout)
 {
 #ifdef WIN32
-	return WAIT_OBJECT_0 == WaitForSingleObject(m_Event, dwTimeout);
+
+	bool ok = true;
+	if (m_nSetCount <= 0)
+	{
+		ok = WAIT_OBJECT_0 == WaitForSingleObject(m_Event, dwTimeout);
+	}
+
+	if (m_nSetCount>0)
+	{
+		auto n = m_nSetCount - 1;
+		ATOMIC_CAS_INT32(&m_nSetCount, n, n);
+	}
+	return ok;
 
 #else
 #	ifdef IFTHREAD_USE_PTHREAD
@@ -98,6 +111,7 @@ IFThreadSyncObj::~IFThreadSyncObj()
 {
 #ifdef WIN32
 	CloseHandle(m_Event);
+	m_Event = NULL;
 #else
 #	ifdef IFTHREAD_USE_PTHREAD
 	pthread_cond_destroy(&m_Event);

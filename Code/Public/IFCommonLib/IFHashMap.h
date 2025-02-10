@@ -33,7 +33,7 @@ inline IFUI32 IFHashFunc(const IFPair<K,V>& v)
 }
 
 template<typename K,typename V>
-inline IFUI32 IFHashEqCmpFun(const IFPair<K,V>& a, const IFPair<K,V>& b)
+inline bool IFHashEqCmpFun(const IFPair<K,V>& a, const IFPair<K,V>& b)
 {
 	return a.first == b.first;
 }

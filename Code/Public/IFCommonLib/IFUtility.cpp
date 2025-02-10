@@ -122,7 +122,7 @@ IFString UGetFilePathName(const IFString& sFullFileName )
 		return IFString::Empty;
 	}
 
-	return IFString(&sFullFileName[0], i);
+	return IFString(&sFullFileName[0], i, sFullFileName.getEncoding());
 }
 
 IFString UGetFileName(const IFString& sFullFileName)
